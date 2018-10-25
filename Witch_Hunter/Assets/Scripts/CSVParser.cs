@@ -61,7 +61,7 @@ public class CSVParser : MonoBehaviour {
             M[j].Attack = Convert.ToInt32(data[x, 2]);
             M[j].defence = Convert.ToInt32(data[x, 3]);
             M[j].HP = Convert.ToInt32(data[x, 4]);
-            print("NAME:" + M[j].name+","+"LEVEL"+ M[j].level+","+"ATTACK:"+ M[j].Attack);
+           // print("NAME:" + M[j].name+","+"LEVEL"+ M[j].level+","+"ATTACK:"+ M[j].Attack);
             if (j < CellLength - i)
             {
                 j++;
@@ -72,19 +72,7 @@ public class CSVParser : MonoBehaviour {
             }
             
         }
-        /*for (int x = 0; x < CellLength-i; x++)
-        {
-            print(x + "," + 0);
-          
-            if (i != CellLength)
-            {
-                i++;
-            }
-            else
-            {
-                break;
-            }
-        }*/
+       
     }
 }
 
