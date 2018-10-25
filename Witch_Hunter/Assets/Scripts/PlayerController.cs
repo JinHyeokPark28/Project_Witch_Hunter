@@ -61,9 +61,7 @@ public class PlayerController : MonoBehaviour {
             //보물상자
 
             //세이브포인트
-
-
-
+            
         }
 
         //무기 변경
@@ -184,6 +182,7 @@ public class PlayerController : MonoBehaviour {
             //바닥에 부딪히면
             CanJump = true;
         }
+        
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
@@ -227,6 +226,26 @@ public class PlayerController : MonoBehaviour {
         {
             touched = true;
             FlashActive = true;
+        }
+        
+    }
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "NPC")
+        {
+            print("NPC");
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == false)
+                {
+                    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(true);
+                }
+                else
+                {
+                    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(false);
+                }
+
+            }
         }
     }
     #endregion
