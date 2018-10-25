@@ -50,6 +50,7 @@ public class PlayerController : MonoBehaviour {
         PlayerMove();
         InfoMapManager();
         NumberKeyManager();
+        TouchEnemy();
         //공격,세이브,상호작용키
         if (Input.GetKeyDown(KeyCode.A))
         {
@@ -84,22 +85,7 @@ public class PlayerController : MonoBehaviour {
 
             }
         }
-        #region 다쳤을 때
-        if (FlashActive == true) {
-            HowLongFlash += Time.deltaTime;
-            if (touched == true)
-            {
-                touched = false;
-                StartCoroutine(Flash());
-            }
-            if (HowLongFlash >= HurtFlashTime)
-            {
-                StopCoroutine(Flash());
-                FlashActive = false;
-                HowLongFlash = 0;
-            }
-        }
-        #endregion
+        
      }
 
     #region 플레이어 움직임
@@ -244,5 +230,26 @@ public class PlayerController : MonoBehaviour {
         }
     }
     #endregion
-    
+    #region 다쳤을 때
+    void TouchEnemy()
+    {
+       
+        if (FlashActive == true)
+        {
+            HowLongFlash += Time.deltaTime;
+            if (touched == true)
+            {
+                touched = false;
+                StartCoroutine(Flash());
+            }
+            if (HowLongFlash >= HurtFlashTime)
+            {
+                StopCoroutine(Flash());
+                FlashActive = false;
+                HowLongFlash = 0;
+            }
+        }
+    }
+    #endregion
+
 }
