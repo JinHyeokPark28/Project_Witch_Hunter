@@ -6,7 +6,8 @@ public class EnemyChaser : MonoBehaviour {
     private Animator anim;
     public bool Chasing;
     public float Speed;
-    public int Direct=1;
+    public int Direct = 1;
+
     // Use this for initialization
     void Start()
     {

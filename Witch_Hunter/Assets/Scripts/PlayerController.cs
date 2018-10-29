@@ -72,6 +72,7 @@ public class PlayerController : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
+			// 스프라이트 애니메이션 넣기
             transform.Translate(Vector2.left * Speed * Time.deltaTime);
         }
         else if (Input.GetKey(KeyCode.RightArrow))
@@ -121,9 +122,9 @@ public class PlayerController : MonoBehaviour {
             CanJump = false;
         }
     }
-    #endregion
-    #region 숫자키관리
-    void NumberKeyManager()
+	#endregion
+	#region 숫자키관리(아이템 사용키)
+	void NumberKeyManager()
     {
         //숫자 키 
         if (Input.GetKeyDown(KeyCode.Alpha1))
