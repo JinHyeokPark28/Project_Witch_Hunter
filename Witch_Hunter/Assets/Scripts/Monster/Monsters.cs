@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Monster : Ab_Monster
+public class Monsters : Ab_Monster
 {
 	#region Private Variable
 	private int RangerMode = 0;                 // 정찰 모드 변수 0 : left, 1 : right, 2 : Idle
@@ -31,7 +31,6 @@ public class Monster : Ab_Monster
 	#endregion
 
 	#region Public Variable
-	public Text Money;
 	#endregion
 
 	#region Private Method
@@ -39,8 +38,6 @@ public class Monster : Ab_Monster
 	{
 		m_Monster.Add("Ghost");
 		StartCoroutine("ReconCheck");
-
-		GameObject Chase = GameObject.Find("Chase");
 
 		_Rigid = GetComponent<Rigidbody2D>();
 	}
@@ -113,12 +110,15 @@ public class Monster : Ab_Monster
 		{
 			_isMonstate = 1;
 			_InAttack = false;
-			Item();
 		}
 	}
 	#endregion
 
 	#region Public Method
+
+
+	#region 몬스터 관리
+
 	public override void Recon()
 	{
 
@@ -180,27 +180,18 @@ public class Monster : Ab_Monster
 			moveVelocity = Vector3.zero;
 		}
 	}
-
-	public override void Item()
-	{
-
-		int m_Money = Random.Range(0, 21);
-
-		Money.text = GetThousandCommaText(m_Money).ToString();
-	}
-
-
-	#region 몬스터 관리
-
-	#endregion
-
 	public override void Hp()
 	{
+		//CSV 에서 HP 받아오기
 	}
 
 	public override void Damage()
 	{
+		// 플레이어가 맞으면 플레이어 HP 받아오고
+		// CSV -> 플레이어 / 방어력 || 몬스터 / 공격력 빼서
+		// HP 빼주기
 	}
+	#endregion
 }
 #endregion
 
