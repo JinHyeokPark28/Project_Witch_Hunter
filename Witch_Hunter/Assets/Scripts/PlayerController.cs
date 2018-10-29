@@ -19,14 +19,7 @@ public class PlayerController : MonoBehaviour {
     //true이면 플레이어의 스프라이트가 깜빡거린다
     public bool touched;
     //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
-    public bool InfoScreenOn;
-    //true면 정보창 켜짐
-    public bool MapOn;
-    //true면 지도 켜짐
-    public bool GamePause;
-    //false면 게임 진행, true면 게임 멈춤
-
-
+    
     // Use this for initialization
     #endregion
     void Start() {
@@ -48,18 +41,15 @@ public class PlayerController : MonoBehaviour {
         UpAttack = false;
         DownState = false;
         PlayerMove();
-       
+        
         NumberKeyManager();
         TouchEnemy();
         //공격,세이브,상호작용키
         if (Input.GetKeyDown(KeyCode.A))
         {
             //기본은 공격(else로 처리)
-
             //npc만났을 경우
-
             //보물상자
-
             //세이브포인트
             
         }
@@ -73,15 +63,6 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.S))
         {
 
-        }
-
-        //결정 엔터키
-        else if (Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            if (InfoScreenOn == true)
-            {
-
-            }
         }
         
      }
@@ -117,62 +98,10 @@ public class PlayerController : MonoBehaviour {
             {
             }
         }
-        if (InfoScreenOn == true)
-        {
-            Time.timeScale = 0;
-            GameObject.Find("Canvas").transform.Find("InfoBackGround").gameObject.SetActive(true);
-        }
-        else if (InfoScreenOn == false)
-        {
-            Time.timeScale = 1;
-            GameObject.Find("Canvas").transform.Find("InfoBackGround").gameObject.SetActive(false);
-        }
+       
     }
     #endregion
-    #region 지도 켜고 끄기
-    void InfoMapManager()
-    {
-        //MoveObjMgr로 지도창 관리 
-        if (CanJump == true)
-        {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                if (MapOn == true)
-                {
-                    MapOn = false;
-                }
-                else
-                {
-
-                    MapOn = true;
-                }
-            }
-          
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (InfoScreenOn == false)
-                {
-
-                    InfoScreenOn = true;
-                }
-                else
-                {
-                    InfoScreenOn = false;
-                }
-            }
-
-        }
-        if (MapOn == true)
-        {
-            GameObject.Find("Canvas").transform.Find("Map").gameObject.SetActive(true);
-
-        }
-        else if (MapOn == false)
-        {
-            GameObject.Find("Canvas").transform.Find("Map").gameObject.SetActive(false);
-        }
-    }
-    #endregion
+    
     #region CanJump관리
     private void OnCollisionStay2D(Collision2D collision)
     {
