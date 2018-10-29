@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour {
         UpAttack = false;
         DownState = false;
         PlayerMove();
-        InfoMapManager();
+       
         NumberKeyManager();
         TouchEnemy();
         //공격,세이브,상호작용키
