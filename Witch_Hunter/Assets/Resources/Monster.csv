@@ -1,0 +1,11 @@
+Level,name,Attack,Defence,HP
+1,Slime,10,3,50
+2,Wolf,20,6,100
+3,Bat,30,9,200
+4,Rat Legion,40,12,300
+5,Goblin,50,15,500
+6,Goblin Wizard,60,18,700
+7,Goblin Archer,70,21,900
+8,Skull Archer,80,24,1100
+9,Skull Warrior,90,27,1500
+10,Minotaurs,100,30,1700
