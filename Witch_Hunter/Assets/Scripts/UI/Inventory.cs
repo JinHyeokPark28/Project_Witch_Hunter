@@ -32,7 +32,8 @@ public class Inventory : MonoBehaviour
 	private bool itemActivated;         // 아이템 활성화시 true;
 	private bool stopKeyInput;          // 키입력 제한(아이템 사용시 키입력 방지)
 	private bool prevenExec;            // 중복실행 제한
-
+	private string _use = "사용";
+	private string _cancel = "취소";
 
 	private WaitForSeconds waitTime = new WaitForSeconds(0.01f);
 	#endregion
@@ -176,7 +177,7 @@ public class Inventory : MonoBehaviour
 							if (selectedTab == 0)
 							{
 
-								StartCoroutine(OOCCoroutine("장착", "취소"));
+								StartCoroutine(OOCCoroutine(_use, _cancel));
 
 							}
 							else if (selectedTab == 1)
@@ -372,7 +373,7 @@ public class Inventory : MonoBehaviour
 		stopKeyInput = true;
 
 		go_OOC.SetActive(true);
-		theOOC.ShowTwoChoice(_up, _down);
+		theOOC.ShowTwoChoice("사용", "취소");
 		yield return new WaitUntil(() => !theOOC.activated);
 		if (theOOC.GetResult())
 		{
@@ -384,6 +385,7 @@ public class Inventory : MonoBehaviour
 					{
 
 						//아이템 습득 코드 적기
+						theDatabase.UseItem(inventoryItemList[i].itemID);
 
 						if (inventoryItemList[i].itemCount > 1)
 							inventoryItemList[i].itemCount--;

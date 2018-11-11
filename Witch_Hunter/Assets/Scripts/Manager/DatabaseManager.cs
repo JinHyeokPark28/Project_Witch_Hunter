@@ -27,5 +27,20 @@ public class DatabaseManager : MonoBehaviour {
 		itemList.Add(new Item(20101, "수습기사의 권총", "공격력 +15", "수습 기사 서약식때 받을수 있는 총", Item.ItemType.Equip));
 		itemList.Add(new Item(20201, "수습기사의 갑옷", "방어력 +10", "수습 기사 서약식때 받을수 있는 갑옷", Item.ItemType.Equip));
 	}
-
+	public void UseItem(int _itemID){
+		switch(_itemID)
+		{
+			case 10001:
+				break;
+			case 10002:
+				break;
+			case 20001:
+				
+				break;
+			case 20101:
+				break;
+			case 20201:
+				break;
+		}
+	}
 }

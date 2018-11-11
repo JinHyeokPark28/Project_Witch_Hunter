@@ -9,11 +9,8 @@ public class ItemPickup : MonoBehaviour {
 
 	private void OnTriggerStay2D(Collider2D other)
 	{
-		if(Input.GetKeyDown(KeyCode.A))
-		{
-			Inventory.instance.GetAnItem(itemID, _count);
-			Destroy(this.gameObject);
-		}
+		Inventory.instance.GetAnItem(itemID, _count);
+		Destroy(this.gameObject);
 	}
 }
 

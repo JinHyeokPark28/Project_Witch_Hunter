@@ -53,7 +53,7 @@ public class MonsterManager_Plus : MonoBehaviour
                 data[i, j] = TextArray[i].Split(',')[j];
             }
         }
-        MakingMonster(1);
+        
         Stage = -1;
         //스테이지는 1부터 시작하기 때문에 강제로 모든 씬 초기화 하기 위해 -1로 잡아줌
         if (Stage != SceneManager.GetActiveScene().buildIndex)
@@ -64,9 +64,33 @@ public class MonsterManager_Plus : MonoBehaviour
         {
             getSceneNumber = true;
         }
+        if (GameObject.FindGameObjectsWithTag("Enemy").Length != 0)
+        {
+            for (int j = 0; j < GameObject.FindGameObjectsWithTag("Enemy").Length; j++)
+            {
+                if (GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>() != null)
+                {
+                    int x = GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().index;
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().Name = data[x, 1];
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[x, 3]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[x, 2]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[x, 4]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[x, 5]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[x, 6]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[x, 7]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[x, 8]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[x, 10]);
+                    GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().GetInfo = true;
+
+                }
+            }
+        }
+        MakingMonster(1);
     }
     public void Update()
     {
+        //미리 생성된 몬스터들에게 파싱
+       
         if (Stage != SceneManager.GetActiveScene().buildIndex)
         {
             getSceneNumber = false;
@@ -137,19 +161,43 @@ public class MonsterManager_Plus : MonoBehaviour
         int x = 0;
         for(int i = j; i < NormalMonsterList.Count+1; i++)
         {
-            if (NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() == null)
+            if (NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()== null)
             {
+
                 NormalMonsterList[x].AddComponent<MonstersAI_FIXED>();
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay= Convert.ToSingle(data[i, 8]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
+
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
+            }
+            else if(NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() != null)
+            {
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[i, 8]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
             }
             if (x < NormalMonsterList.Count)
             {
                 x++;
+            }
+            else if (x >= NormalMonsterList.Count)
+            {
+                break;
             }
         }
 

@@ -34,7 +34,6 @@ public class Equipment : MonoBehaviour
 
 				if(activated)
 				{
-
 				}
 				else
 				{
