@@ -22,33 +22,49 @@ public class MonstersAI_FIXED : MonoBehaviour
     #region 일반 몬스터 특별 속성
     public int _isMonstate = 0;                // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
     public bool Recon;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
+    public int Coin;
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
+    public bool isFlip = false; //플립 되었는지
     #endregion
 
     [SerializeField]
 	public GameObject Target;
-	#endregion
+    #endregion
+    #region 자식 오브젝트
+    public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
+    public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝트
+    #endregion
 
-	#region public Variable
-	public int Coin;
+    #region 컴포넌트 변수
+    public Rigidbody2D rigid;
+    public SpriteRenderer SR;
 	#endregion
 
 	#region Private Method
 	private void Start(){
+        rigid = this.gameObject.GetComponent<Rigidbody2D>();
+        SR = gameObject.GetComponent<SpriteRenderer>();
         Target = GameObject.FindGameObjectWithTag("Player");
 		_GameManager = GameManager.GetGameManager;
+        StartCoroutine(Moving());
 	}
     //정찰 모드 상태일때만
     IEnumerator Moving()
     {
         while (_isMonstate == 0)
         {
-            
-            transform.Translate(Vector2.left * NormalSpeed * Time.deltaTime);
+            //time.deltaTime으로 해서 더 느려짐
+           rigid.velocity = Vector2.left* NormalSpeed * Time.deltaTime;
+            FlipImage();
+            isFlip = false;
             yield return new WaitForSeconds(2);
-            transform.Translate(Vector2.right * NormalSpeed * Time.deltaTime);
+            rigid.velocity = Vector2.right * NormalSpeed * Time.deltaTime;
+            FlipImage();
+            isFlip = false;
             yield return new WaitForSeconds(2);
+            // transform.Translate(Vector2.left * 1f * Time.deltaTime);  업데이트에서는 매 프레임마다 명령문이 실행되니까 매 프레임마다 
+            //Transform.translate은 transform.position이랑 다를게 없음. 그저 매 프레임마다 실행되다 보니 자연스럽게 움직이는 것처럼 보이는 것뿐
         }
     }
 	private void Update(){
@@ -68,7 +84,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                         print("monster0");
                         //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
                         _isMonstate = 0;
-                        StartCoroutine(Moving());
+                       
                         break;
                     case 1: //일반(원거리=사격형)
                         break;
@@ -141,10 +157,28 @@ public class MonstersAI_FIXED : MonoBehaviour
 		// 공격 받았을 때 데미지 처리.
 	}
 
-	#endregion 
-
-	#region 고정형 타입 
-     public void NotMovingMonsterAttack()
+    #endregion
+    #region 이미지 플립
+    public void FlipImage()
+    {
+        if (isFlip == false)
+        {
+            //초기 이미지 상태
+            if (SR.flipX == true)
+            {
+                SR.flipX = false;
+                isFlip = true;
+            }
+            else
+            {
+                isFlip = true;
+                SR.flipX = true;
+            }
+        }
+    }
+    #endregion
+    #region 고정형 타입 
+    public void NotMovingMonsterAttack()
     {
         //고정형 원거리 몬스터 공격 타입
     }

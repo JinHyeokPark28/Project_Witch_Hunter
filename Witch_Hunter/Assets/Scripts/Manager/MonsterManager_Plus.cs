@@ -70,6 +70,8 @@ public class MonsterManager_Plus : MonoBehaviour
             {
                 if (GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>() != null)
                 {
+                    //AddComponent로 해서 에러났음 inputstringERror도 add로 해서 그랬음
+                    //기존에 존재하는 몬스터가 가진 스크립트에 값을 넣어주는 것
                     int x = GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().index;
                     GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().Name = data[x, 1];
                     GameObject.FindGameObjectsWithTag("Enemy")[j].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[x, 3]);
