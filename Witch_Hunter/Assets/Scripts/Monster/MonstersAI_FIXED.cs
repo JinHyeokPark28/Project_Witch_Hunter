@@ -26,8 +26,9 @@ public class MonstersAI_FIXED : MonoBehaviour
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
     public bool isFlip = false; //플립 되었는지
+    public bool isLeft; //왼쪽으로 가는 중이면 true
     #endregion
-
+    //몬스터 기본 스프라이트 형태:왼쪽 바라봄
     [SerializeField]
 	public GameObject Target;
     #endregion
@@ -54,15 +55,18 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         while (_isMonstate == 0)
         {
+            //기본 왼쪽 형태
             //time.deltaTime으로 해서 더 느려짐
+            isLeft = true;
            rigid.velocity = Vector2.left* NormalSpeed * Time.deltaTime;
+            yield return new WaitForSeconds(2);
+            isLeft = false;
             FlipImage();
             isFlip = false;
-            yield return new WaitForSeconds(2);
             rigid.velocity = Vector2.right * NormalSpeed * Time.deltaTime;
+            yield return new WaitForSeconds(2);
             FlipImage();
             isFlip = false;
-            yield return new WaitForSeconds(2);
             // transform.Translate(Vector2.left * 1f * Time.deltaTime);  업데이트에서는 매 프레임마다 명령문이 실행되니까 매 프레임마다 
             //Transform.translate은 transform.position이랑 다를게 없음. 그저 매 프레임마다 실행되다 보니 자연스럽게 움직이는 것처럼 보이는 것뿐
         }
