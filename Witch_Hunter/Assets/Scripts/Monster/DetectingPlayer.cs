@@ -18,15 +18,7 @@ public class DetectingPlayer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (ParentMonster.GetComponent<MonstersAI_FIXED>().isLeft == false)
-        {
-            transform.localPosition = new Vector2(-PosX, transform.localPosition.y);
-        }
-        else
-        {
-            transform.localPosition = new Vector2(PosX, transform.localPosition.y);
-
-        }
+        //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

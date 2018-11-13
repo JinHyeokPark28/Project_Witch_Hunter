@@ -13,7 +13,7 @@ public class MonstersAI_FIXED : MonoBehaviour
     public int index;   //몬스터 인덱스
     public bool _CheckMode;		// true면 공격
     public float NormalSpeed = 2f;      //정찰 모드 시 속도
-	public float _AttackSpeed = 4f;                         // 공격 속도(추적 모드때 속도)
+	public float _AttackSpeed = 4f;      // 공격 속도(때릴 때 속도)
 	public float _CheckTime = 0;    //공격 쿨타임 재는 시간
 	public float _CheckDelay = 2;   //쿨타임 한계시간
     public bool isDead; //죽으면 true(죽으면 코인줌)->마녀 죽으면 다시 리젠 못함
@@ -25,8 +25,8 @@ public class MonstersAI_FIXED : MonoBehaviour
     public int Coin;
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
-    public bool isFlip = false; //플립 되었는지
-    public bool isLeft; //왼쪽으로 가는 중이면 true
+    public bool isLeft=true; //왼쪽으로 가는 중이면 true
+    public bool CorStart;
     #endregion
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
     [SerializeField]
@@ -42,58 +42,88 @@ public class MonstersAI_FIXED : MonoBehaviour
     public SpriteRenderer SR;
 	#endregion
 
-	#region Private Method
+	
 	private void Start(){
         rigid = this.gameObject.GetComponent<Rigidbody2D>();
         SR = gameObject.GetComponent<SpriteRenderer>();
         Target = GameObject.FindGameObjectWithTag("Player");
 		_GameManager = GameManager.GetGameManager;
-        StartCoroutine(Moving());
-	}
+     
+        //몬스터 초기 _isMonState 값 줘야함
+    }
     //정찰 모드 상태일때만
+    #region 근접, 이동가능!(Recon=true) 몬스터의 이동 함수
     IEnumerator Moving()
     {
-        while (_isMonstate == 0)
-        {
-            //기본 왼쪽 형태
-            //time.deltaTime으로 해서 더 느려짐
-            isLeft = true;
-           rigid.velocity = Vector2.left* NormalSpeed * Time.deltaTime;
-            yield return new WaitForSeconds(2);
-            isLeft = false;
-            FlipImage();
-            isFlip = false;
-            rigid.velocity = Vector2.right * NormalSpeed * Time.deltaTime;
-            yield return new WaitForSeconds(2);
-            FlipImage();
-            isFlip = false;
-            // transform.Translate(Vector2.left * 1f * Time.deltaTime);  업데이트에서는 매 프레임마다 명령문이 실행되니까 매 프레임마다 
-            //Transform.translate은 transform.position이랑 다를게 없음. 그저 매 프레임마다 실행되다 보니 자연스럽게 움직이는 것처럼 보이는 것뿐
-        }
+            while (_isMonstate == 0)
+            {
+                print("State:" + _isMonstate);
+                //  isMonstate 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
+                //기본 왼쪽 형태
+                //time.deltaTime으로 해서 더 느려짐
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                isLeft = true;
+                rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
+                yield return new WaitForSeconds(3);
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                isLeft = false;
+                rigid.velocity = Vector2.right * NormalSpeed * Time.deltaTime;
+                yield return new WaitForSeconds(3);
+                // transform.Translate(Vector2.left * 1f * Time.deltaTime);  업데이트에서는 매 프레임마다 명령문이 실행되니까 매 프레임마다 
+                //Transform.translate은 transform.position이랑 다를게 없음. 그저 매 프레임마다 실행되다 보니 자연스럽게 움직이는 것처럼 보이는 것뿐
+            }
+            while (_isMonstate == 1)
+            {
+                //  isMonstate 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
+                print("State:" + _isMonstate);
+            }
+            while (_isMonstate == 2)
+            {
+                //  Check();    //시간 간격에 맞춰 공격하는 함수
+            }
     }
-	private void Update(){
+    #endregion
+    private void Update(){
         if (GetInfo == true)
         {
-
             if (Recon == false)
             {
                 NotMovingMonsterAttack();
+                if (_isMonstate == 1)
+                {
+                   
+                }
+                switch (MonsterType) {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                }
             }
             else if(Recon==true)
             {
-                //고정형 아니면
+                
+                //getinfo==true로 조건 문 안주니 바로 시작해버림(getinfo로 안받은 상태에서)
+                //고정형이 아니라면
                 switch (MonsterType)
                 {
                     case 0: //일반(근접)
-                        print("monster0");
+                        if (CorStart == false)
+                        {
+                            StartCoroutine(Moving());
+                            CorStart = true;    //한번만 코루틴 시랭하도록
+                        }
                         //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
-                        _isMonstate = 0;
-                       
                         break;
                     case 1: //일반(원거리=사격형)
                         break;
                     case 2: //강화형(hp두배)->그냥 csv에 알아서 저장된것 불러오도록
-                        
+                        break;
+                    case 3: //자폭
                         break;
                 }
             }
@@ -106,6 +136,7 @@ public class MonstersAI_FIXED : MonoBehaviour
     }
 	private void Check()
 	{
+        //시간 간격에 맞춰 공격하는 함수
 		if (Time.time - _CheckTime > _CheckDelay)
 		{
 			_CheckTime = Time.time;
@@ -161,25 +192,9 @@ public class MonstersAI_FIXED : MonoBehaviour
 		// 공격 받았을 때 데미지 처리.
 	}
 
-    #endregion
+
     #region 이미지 플립
-    public void FlipImage()
-    {
-        if (isFlip == false)
-        {
-            //초기 이미지 상태
-            if (SR.flipX == true)
-            {
-                SR.flipX = false;
-                isFlip = true;
-            }
-            else
-            {
-                isFlip = true;
-                SR.flipX = true;
-            }
-        }
-    }
+    
     #endregion
     #region 고정형 타입 
     public void NotMovingMonsterAttack()

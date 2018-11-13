@@ -14,12 +14,12 @@ public class PlayerFollower : MonoBehaviour {
     void Start () {
         Player = GameObject.FindGameObjectWithTag("Player");
         boundBox = GameObject.FindGameObjectWithTag("Bounds").GetComponent<BoxCollider2D>();
-        print("BoundMAx:" + boundBox.bounds.max);
-        print("BoundMin:" + boundBox.bounds.min);
-        print("CAMERAHalfSIze:" + GetComponent<Camera>().orthographicSize);
-        print("CAmeraCenter:" + transform.position);
+        //print("BoundMAx:" + boundBox.bounds.max);
+        //print("BoundMin:" + boundBox.bounds.min);
+        //print("CAMERAHalfSIze:" + GetComponent<Camera>().orthographicSize);
+        //print("CAmeraCenter:" + transform.position);
         ScreenWidth = GetComponent<Camera>().orthographicSize / Screen.height * Screen.width;
-        print("ScreenWidth:" + ScreenWidth);
+        //print("ScreenWidth:" + ScreenWidth);
     }
 
     // Update is called once per frame

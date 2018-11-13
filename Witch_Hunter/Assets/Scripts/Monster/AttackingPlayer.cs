@@ -22,17 +22,10 @@ public class AttackingPlayer : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         //몬스터가 오른쪽으로 몸 돌리면 공격 범위도 위치가 달라짐
-        if (ParentMonster.GetComponent<MonstersAI_FIXED>().isLeft == false)
-        {
-            transform.localPosition = new Vector2(-PosX, transform.localPosition.y);
-        }
-        else
-        {
-            transform.localPosition = new Vector2(PosX, transform.localPosition.y);
+        //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
 
-        }
     }
-   
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         //코드 꼬일수도 있음->정찰범위,공격범위 겹치는 부분에서 계속 실시간으로 monState값이 바뀔수도?->방지 필요
