@@ -125,10 +125,7 @@ public class MonstersAI : MonoBehaviour
 	#endregion
 
 
-	private string GetThousandCommaText(int data)                           // 돈 천단위 콤마;
-	{
-		return string.Format("{0:#,###}", data);
-	}
+	
 	private void OnTriggerEnter2D(Collider2D col)
 	{
 		if (col.transform.tag == "Player") {

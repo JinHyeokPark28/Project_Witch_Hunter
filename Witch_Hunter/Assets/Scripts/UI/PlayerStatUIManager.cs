@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+//보물 상자도 여기 들어가있음
 public class PlayerStatUIManager : MonoBehaviour {
     //HP&coin이 가지는 스크립트!!!->각 변수에 해당하는 스크립트 잘 처리하기
     public Slider Healthy;
@@ -40,4 +41,5 @@ public class PlayerStatUIManager : MonoBehaviour {
         }
 
 	}
+    
 }

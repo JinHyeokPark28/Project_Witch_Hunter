@@ -161,6 +161,11 @@ public class PlayerController : MonoBehaviour {
     #region 적과 접촉
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //보물상자와 부딪히는 경우(보물상자 여는 경우)
+        if (collision.gameObject.transform.tag == "TreasureBox")
+        {
+            Destroy(GameObject.FindGameObjectWithTag("TreasureBox"));
+        }
         if (collision.gameObject.tag == "Enemy")
         {
             //여기서 꼬였음!!!

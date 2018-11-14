@@ -165,7 +165,7 @@ public class MonsterManager_Plus : MonoBehaviour
         {
             if (NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()== null)
             {
-
+                //스크립트 컴포넌트가 없다면
                 NormalMonsterList[x].AddComponent<MonstersAI_FIXED>();
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
@@ -182,6 +182,7 @@ public class MonsterManager_Plus : MonoBehaviour
             }
             else if(NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() != null)
             {
+                //스크립트 컴포넌트가 있다면
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
