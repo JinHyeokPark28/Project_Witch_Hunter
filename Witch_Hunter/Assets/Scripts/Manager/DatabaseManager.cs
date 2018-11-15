@@ -4,43 +4,44 @@ using UnityEngine;
 
 public class DatabaseManager : MonoBehaviour {
 
-	static public DatabaseManager _DatabaseManager;
 
+	#region Private Variable
+	#endregion
+
+	#region Public Variable
+	static public DatabaseManager instance;
+	#endregion
+
+	#region Private Method
 	private void Awake()
 	{
-		if(_DatabaseManager != null)
+		if(instance != null)
 		{
 			Destroy(this.gameObject);
 		}
 		else
 		{
 			DontDestroyOnLoad(this.gameObject);
-			_DatabaseManager = this;
+			instance = this;
 		}
 	}
-	public List<Item> itemList = new List<Item>();
+
 	private void Start()
 	{
-		itemList.Add(new Item(10001, "빨간 포션", "30%의 체력을 회복", "체력을 어느정도 천천히 채워주는 물약", Item.ItemType.Use));
-		itemList.Add(new Item(10002, "하얀 포션", "체력 즉시 회복", "체력을 단숨에 채워주는 물약", Item.ItemType.Use));
-		itemList.Add(new Item(20001, "수습기사의 장검", "공격력 +10", "수습 기사 서약식때 받을수 있는 검", Item.ItemType.Equip));
-		itemList.Add(new Item(20101, "수습기사의 권총", "공격력 +15", "수습 기사 서약식때 받을수 있는 총", Item.ItemType.Equip));
-		itemList.Add(new Item(20201, "수습기사의 갑옷", "방어력 +10", "수습 기사 서약식때 받을수 있는 갑옷", Item.ItemType.Equip));
+		itemList.Add(new Item(10001, "체력 회복제", "체력을 30%를 서서히 채워준다.", Item.ItemType.Use));
 	}
-	public void UseItem(int _itemID){
+	#endregion
+	#region Public Method
+	public void UseItem(int _itemID)
+	{
 		switch(_itemID)
 		{
 			case 10001:
 				break;
 			case 10002:
 				break;
-			case 20001:
-				
-				break;
-			case 20101:
-				break;
-			case 20201:
-				break;
 		}
 	}
+	public List<Item> itemList = new List<Item>();
+	#endregion
 }

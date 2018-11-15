@@ -21,12 +21,16 @@ public class MonstersAI_FIXED : MonoBehaviour
     public bool IsBoss; //몬스터 마녀인지 아닌지->나중에 삭제 가능성
     #region 일반 몬스터 특별 속성
     public int _isMonstate = 0;                // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
+    //고정형:0=경비모드,1:공격모드
     public bool Recon;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
     public int Coin;
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
     public bool isLeft = true; //왼쪽으로 가는 중이면 true
-    public bool CorStart;
+    public float HurtTime;  //무적인 시간(Time.deltaTime으로 더해주고, 만약이게 0보다 작으면 Hurt=false
+    public float WholeHurtTime = 0.5f;  //무적인 시간 전체
+    public bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
+    //공격받아도 일시적으로 무적 상태이다
     #endregion
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
     [SerializeField]
@@ -50,15 +54,20 @@ public class MonstersAI_FIXED : MonoBehaviour
         SR = gameObject.GetComponent<SpriteRenderer>();
         Target = GameObject.FindGameObjectWithTag("Player");
         _GameManager = GameManager.GetGameManager;
-
+        HurtTime = WholeHurtTime;
         //몬스터 초기 _isMonState 값 줘야함
     }
     //정찰 모드 상태일때만
-    
 
 
-    private void Update(){
+
+    private void Update() {
         MovingTime -= Time.deltaTime;
+        if (Hurt == true)
+        {
+            HurtTime -= Time.deltaTime;
+        }
+        GetHurt();
         if (MovingTime < 0f)
         {
             MovingTime = 3f;
@@ -71,13 +80,20 @@ public class MonstersAI_FIXED : MonoBehaviour
             #region 고정형 몬스터인 경우
             if (Recon == false)
             {
-                NotMovingMonsterAttack();
-                if (_isMonstate == 1)
-                {
-                   
-                }
+
                 switch (MonsterType) {
                     case 0:
+                        {
+                            if (_isMonstate == 0)
+                            {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
+                                Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
+                            }
+                            else if (_isMonstate == 1)
+                            {
+                                //플레이어 발견모드(이때 조준&&공격)
+
+                            }
+                        }
                         break;
                     case 1:
                         break;
@@ -89,16 +105,16 @@ public class MonstersAI_FIXED : MonoBehaviour
             }
             #endregion
             #region 움직일수 있는 몬스터 경우
-            else if (Recon==true)
+            else if (Recon == true)
             {
                 //getinfo==true로 조건 문 안주니 바로 시작해버림(getinfo로 안받은 상태에서)
                 //고정형이 아니라면
                 switch (MonsterType)
                 {
                     case 0: //일반(근접)
-                        if(_isMonstate == 0)   //정찰모드
+                        if (_isMonstate == 0)   //정찰모드
                         {
-                           Moving();
+                            Moving();
                         }
                         //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
                         else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
@@ -111,9 +127,22 @@ public class MonstersAI_FIXED : MonoBehaviour
                         }
                         break;
                     case 1: //일반(원거리=사격형)
-                        
+
                         break;
                     case 2: //강화형(hp두배)->그냥 csv에 알아서 저장된것 불러오도록
+                        if (_isMonstate == 0)   //정찰모드
+                        {
+                            Moving();
+                        }
+                        //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
+                        else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
+                        {
+                            Chasing();
+                        }
+                        else if (_isMonstate == 2)  //공격 모드. 
+                        {
+                            Attack();
+                        }
                         break;
                     case 3: //자폭
                         break;
@@ -172,7 +201,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                 //플레이어가 몬스터 왼편에 있을 때
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
             }
-            else if(Target.transform.position.x > transform.position.x)
+            else if (Target.transform.position.x > transform.position.x)
             {
                 transform.Translate(Vector3.right * NormalSpeed * Time.deltaTime);
             }
@@ -182,16 +211,17 @@ public class MonstersAI_FIXED : MonoBehaviour
     #endregion
     #region 공격 타이밍 체크하는 함수
     private void Check()
-	{
+    {
         if (Time.time - _CheckTime > _CheckDelay)
-		{
-			_CheckTime = Time.time;
-			Attack();
-		}
-	}
+        {
+            _CheckTime = Time.time;
+            Attack();
+        }
+    }
     #endregion
 
-    private void Attack(){
+    #region 공격함수
+    private void Attack() {
         switch (Recon) {
             case false:
                 //고정형인 경우!!!
@@ -208,23 +238,77 @@ public class MonstersAI_FIXED : MonoBehaviour
                     _GameManager.m_GetGold(Coin);
                 }
                 break;
-            case true:
+            case true:  //움직일 수 있는 몬스터의 경우
                 break;
-          
         }
-
-		
-		
-	}
-	private void OnTriggerEnter2D(Collider2D col)
-	{
-		if(col.transform.tag == "Player"){
-			_CheckMode = true;
-		}
+    }
+    #endregion
+    #region 고정형이 좌우 살피는 함수
+    void Watching()
+    {
+        if (_isMonstate == 0)
+        {
+            if (isLeft == true)
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+            }
+        }
+    }
+    #endregion
+    #region 몬스터가 다칠때 깜빡이는 함수
+    void GetHurt()
+    {
+        if (Hurt == true)
+        {
+            //그냥 여기서 if문으로 다 써버리니까 조건 중복되서 들어감
+            HurtTime-= Time.deltaTime;
+            if (HurtTime > WholeHurtTime * 0.75f)
+            {
+                //처음 맞았을 때
+                SR.color = new Color32(255, 255, 255, 0);
+                //그냥 color32쓰고 싶으면 따로 spriteRendere.Color32쓰는게 아니라 걍 Sr.color=new color(아니면 Color32)하면 됨
+            }
+           else if (HurtTime > WholeHurtTime * 0.5f)
+            {
+                SR.color = new Color32(255, 255, 255, 255);
+            }
+            else if (HurtTime > WholeHurtTime * 0.25f)
+            {
+                SR.color = new Color32(255, 255, 255, 5);
+            }
+            else if (HurtTime <WholeHurtTime * 0.25f)
+            {
+                SR.color = new Color32(255, 255, 255, 255);
+            }
+            else if (HurtTime <= 0f)
+            {
+                HurtTime = WholeHurtTime;
+                Hurt = false;
+            }
+        }
+    }
+    #endregion
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.transform.tag == "Player") {
+            _CheckMode = true;  //true면 공격
+        }
+        if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))
+        {   //칼이나 총알에 맞으면
+            if (Hurt == false)  //안맞은 상태라면
+            {
+                Hurt = true;
+            }
+        }
 	}
 	private void OnTriggerStay2D(Collider2D col)
 	{
 		if (_CheckMode == true) Check();
+        //check():공격 타이밍 체크하는 함수
 		if (_CheckMode == false) return;
 	}
 	private void OnTriggerExit2D(Collider2D col)
@@ -237,14 +321,13 @@ public class MonstersAI_FIXED : MonoBehaviour
 	{
 		// 공격 받았을 때 데미지 처리.
 	}
-
-
-    #region 이미지 플립
-    
-    #endregion
-    #region 고정형 타입 
+    #region 고정형 원거리 몬스터가 플레이어 발견&공격하는 함수
     public void NotMovingMonsterAttack()
     {
+        if (_isMonstate == 1)
+        {
+
+        }
         //고정형 원거리 몬스터 공격 타입
     }
 	#endregion

@@ -9,12 +9,15 @@ public class PlayerSettingController : MonoBehaviour
     public bool OptionScreen;
     public bool MapOn;
 	public bool StateOn;
+	public bool InvenOn;
     //true면 지도 켜짐
     // Use this for initialization
     void Start()
     {
         Player = GameObject.FindGameObjectWithTag("Player");
-    }
+		InvenOn = GameObject.Find("Canvas").transform.Find("Inventory").gameObject.activeInHierarchy == false;
+
+	}
     // Update is called once per frame
     void Update()
     {
@@ -26,7 +29,7 @@ public class PlayerSettingController : MonoBehaviour
         {
 
         }
-        if (MapOn == true&&OptionScreen==false && StateOn == false && GameObject.Find("Canvas").transform.Find("Inventory").gameObject.activeInHierarchy == true)
+        if (MapOn == true&&OptionScreen==false && StateOn == false && GameObject.Find("Canvas").transform.Find("Inventory_UI").gameObject.activeInHierarchy == true)
         {
             
         }
@@ -34,7 +37,7 @@ public class PlayerSettingController : MonoBehaviour
        // {
 	   //
        // }
-        else if(MapOn==false&& OptionScreen == false && StateOn == false && GameObject.Find("Canvas").transform.Find("Inventory").gameObject.activeInHierarchy == false)
+        else if(MapOn==false&& OptionScreen == false && StateOn == false || GameObject.Find("Canvas").transform.Find("Inventory_UI").gameObject.activeInHierarchy == false)
         {
 			
         }
@@ -82,15 +85,18 @@ public class PlayerSettingController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape) && Player.GetComponent<PlayerController>().CanJump == true&&MapOn==false&&StateOn==false)
         {
-            if (OptionScreen == false && MapOn == false && StateOn == false)
+			if (OptionScreen == false && MapOn == false && StateOn == false || InvenOn == false)
             {
                 Debug.Log("Stop");
                 OptionScreen = true;
+				InvenOn = true;
             }
             else
-            {
-                OptionScreen = false;
-            }
+			{
+				OptionScreen = false;
+					if (InvenOn == true)
+					OptionScreen = false;
+			}
             //지면에 붙어있을 때 esc키를 누르면->정보창 뜨도록
         }
         if (OptionScreen == true && MapOn==false&&StateOn==false)
