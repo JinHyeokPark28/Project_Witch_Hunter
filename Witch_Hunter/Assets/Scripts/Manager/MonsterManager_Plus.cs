@@ -117,7 +117,6 @@ public class MonsterManager_Plus : MonoBehaviour
             {
                 case 0:
                     RandomNum=UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                    print("RanNum:" + RandomNum);
                     print("Scene:" + Stage);
                     for(int i = 0; i < RespawnPoint.Count; i++)
                     {
@@ -126,7 +125,6 @@ public class MonsterManager_Plus : MonoBehaviour
                     break;
                 case 1:
                     RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                    print("RanNum:" + RandomNum);
                     print("Scene:" + Stage);
                     for (int i = 0; i < RespawnPoint.Count; i++)
                     {
@@ -136,7 +134,6 @@ public class MonsterManager_Plus : MonoBehaviour
                     break;
                 case 2:
                     RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                    print("RanNum:" + RandomNum);
                     print("Scene:" + Stage);
                     for (int i = 0; i < RespawnPoint.Count; i++)
                     {

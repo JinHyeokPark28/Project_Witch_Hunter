@@ -25,7 +25,6 @@ public class DatabaseManager : MonoBehaviour {
 			instance = this;
 		}
 	}
-
 	private void Start()
 	{
 		itemList.Add(new Item(10001, "체력 회복제", "체력을 30%를 서서히 채워준다.", Item.ItemType.Use));

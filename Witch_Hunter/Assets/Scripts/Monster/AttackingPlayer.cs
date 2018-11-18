@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//몬스터에 붙은 AttackingArea에 붙은 스크립트
-//플레이어와 이 오브젝트와 접촉하면 부모오브젝트 monster에 신호 보냄(공격모드로 전환하라고)
+//움직임 가능한 몬스터에 붙은 AttackingArea에 붙은 스크립트
+//플레이어와 이 오브젝트와 접촉하면 부모오브젝트 monster에 신호 보냄(공격모드로 전환하라고)(isMonState=2)
+//고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
+
 public class AttackingPlayer : MonoBehaviour {
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
 
@@ -23,7 +25,15 @@ public class AttackingPlayer : MonoBehaviour {
     void Update () {
         //몬스터가 오른쪽으로 몸 돌리면 공격 범위도 위치가 달라짐
         //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
-
+        if (ParentMonster.GetComponent<MonstersAI_FIXED>().GetInfo == true)
+        {
+            if (ParentMonster.GetComponent<MonstersAI_FIXED>().Recon == false)
+            {
+                //고정형인 경우 AttackingPlayer부분 불필요
+                Destroy(this.gameObject);
+            }
+        }
+        
     }
 
     private void OnTriggerStay2D(Collider2D collision)

@@ -189,7 +189,7 @@ public class PlayerController : MonoBehaviour {
     private void OnTriggerStay2D(Collider2D collision)
     {
         //키 습득
-       
+
         //Rigidbody2d기본은 멈추면 작동안해서 Sleeping모드로 들어감. 그래서 오브젝트가 움직이지 않으면 Rigidbody2d에 관련된 스크립트,함수들도 작동안함->해결법:rigidbody의 SleepingMode를 NeverSleep로 켜줘야함
         if (collision.gameObject.tag == "NPC")
         {
@@ -200,11 +200,17 @@ public class PlayerController : MonoBehaviour {
                 {
                     GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(true);
                 }
-                else if(GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == true)
+                else if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == true)
                 {
                     GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(false);
                 }
-
+            }
+        }
+        else if (collision.gameObject.tag == "PlayerSavePoint")
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                Save();
             }
         }
     }
@@ -247,6 +253,14 @@ public class PlayerController : MonoBehaviour {
         {
 
         }
+    }
+    #endregion
+    #region 저장하는 함수
+    void Save()
+    {
+        //아이템은 맨 마지막에 1이상이면 넣도록
+        //DBManager에서 다 저장되있어서 따로 csv할 필요 없음
+        //위치(position,씬넘버),보스 죽었는지 안죽었는지, 골드,죽인 몬스터 수,플레이 타임, 인벤토리 창, 장비창
     }
     #endregion
 
