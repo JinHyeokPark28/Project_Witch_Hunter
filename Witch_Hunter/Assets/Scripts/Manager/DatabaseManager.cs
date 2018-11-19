@@ -27,11 +27,36 @@ public class DatabaseManager : MonoBehaviour {
 	}
 	private void Start()
 	{
-		itemList.Add(new Item(10001, "체력 회복제", "체력을 30%를 서서히 채워준다.", Item.ItemType.Use));
+		itemList.Add(new Item(10001, "붉은 포션", "체력을 30%를 서서히 채워준다.", Item.ItemType.Use, 0));
+		itemList.Add(new Item(10002, "노란 포션", "체력을 즉시 회복한다.", Item.ItemType.Use, 0));
+		itemList.Add(new Item(10003, "보라 포션", "체력을 30% 채우고 최대 체력을 10 높인다.", Item.ItemType.Use,0));
+		itemList.Add(new Item(10004, "백색 포션", "체력을 즉시 회복하고 최대 체력을 10 높인다.", Item.ItemType.Use,0));
+		itemList.Add(new Item(10101, "푸른 가루", "붉은 포션의 조합아이템", Item.ItemType.ETC,0));
+		itemList.Add(new Item(10102, "초록 가루", "붉은 포션의 조합아이템", Item.ItemType.ETC,0));
+		itemList.Add(new Item(20001, "롱 소드", "기사단의 기본 무기", Item.ItemType.Equip , 10));
+		itemList.Add(new Item(20101, "제식 갑옷", "기사단의 기본 방어 장비", Item.ItemType.Equip,5));
+		itemList.Add(new Item(20201, "권총", "기사단 기본 총기", Item.ItemType.Equip,20));
+
 	}
 	#endregion
 	#region Public Method
-	public void UseItem(int _itemID)
+	public void UseStat()
+	{
+		int _itemStat = 0;
+		switch (_itemStat)
+		{
+			case 0:
+				_itemStat = 10;
+				break;
+			case 1:
+				_itemStat = 5;
+				break;
+			case 2:
+				_itemStat = 20;
+				break;
+		}
+	}
+	public void UseItem(int _itemID)									//아이템 사용
 	{
 		switch(_itemID)
 		{
@@ -39,6 +64,21 @@ public class DatabaseManager : MonoBehaviour {
 				break;
 			case 10002:
 				break;
+			case 10003:
+				break;
+			case 10004:
+				break;
+			case 10101:
+				break;
+			case 10102:
+				break;
+			case 20001:
+				break;
+			case 20101:
+				break;
+			case 20201:
+				break;
+
 		}
 	}
 	public List<Item> itemList = new List<Item>();

@@ -12,6 +12,7 @@ public class Item{
 	public int itemCount;           // 소지 개수
 	public Sprite itemIcon;         // 아이템의 아이콘
 	public ItemType itemType;       // 아이템 타입
+	public int ItemStat;
 	#endregion
 
 	#region Public Method
@@ -19,13 +20,14 @@ public class Item{
 	{
 		Use, Equip, ETC
 	}
-	public Item(int _itemID, string _itemName, string _itemDes, ItemType _itemType, int _itemCount = 1)
+	public Item(int _itemID,   string _itemName, string _itemDes, ItemType _itemType, int _itemStat, int _itemCount = 1)
 	{
 		itemID = _itemID;
 		itemName = _itemName;
 		itemDescription = _itemDes;
 		itemType = _itemType;
 		itemCount = _itemCount;
+		ItemStat = _itemStat;
 		itemIcon = Resources.Load("ItemIcon/" + itemID.ToString(), typeof(Sprite)) as Sprite;
 	}
 	#endregion

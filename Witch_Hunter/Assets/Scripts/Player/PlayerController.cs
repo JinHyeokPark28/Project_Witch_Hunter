@@ -22,13 +22,14 @@ public class PlayerController : MonoBehaviour {
     public bool touched;
     //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
     public bool GunShot;
-    //false 면 칼로 공격
-  
-   
+	//false 면 칼로 공격
+	private Animator _Anim;
+    private GameObject CollidedTreasureBox;
     // Use this for initialization
     #endregion
     void Start() {
-
+		_Anim = GetComponent<Animator>();
+       
     }
     IEnumerator Flash()
     {
@@ -81,20 +82,21 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
 			// 스프라이트 애니메이션 넣기
-            transform.Translate(Vector2.left * Speed * Time.deltaTime);
+			_Anim.SetBool("IsRun", true);
+            transform.Translate(Vector2.right * Speed * Time.deltaTime);
+			transform.rotation = Quaternion.Euler(0, 180, 0);
+
         }
         else if (Input.GetKey(KeyCode.RightArrow))
-        {
-            transform.Translate(Vector2.right * Speed * Time.deltaTime);
-        }
-        if (DownState == false && Input.GetKey(KeyCode.UpArrow))
-        {
-            UpAttack = true;
-        }
-        else if (UpAttack == false && Input.GetKey(KeyCode.DownArrow))
-        {
-            DownState = true;
-        }
+		{
+			_Anim.SetBool("IsRun", true);
+			transform.Translate(Vector2.right * Speed * Time.deltaTime);
+			transform.rotation = Quaternion.Euler(0, 0, 0);
+		}
+		else
+		{
+			_Anim.SetBool("IsRun", false);
+		}
         //점프키
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -138,21 +140,21 @@ public class PlayerController : MonoBehaviour {
         //숫자 키 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            print("1");
+            //print("1");
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            print("2");
+           // print("2");
 
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            print("3");
+           // print("3");
 
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            print("4");
+          //  print("4");
 
         }
 
@@ -161,11 +163,6 @@ public class PlayerController : MonoBehaviour {
     #region 적과 접촉
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //보물상자와 부딪히는 경우(보물상자 여는 경우)
-        if (collision.gameObject.transform.tag == "TreasureBox")
-        {
-            Destroy(GameObject.FindGameObjectWithTag("TreasureBox"));
-        }
         if (collision.gameObject.tag == "Enemy")
         {
             //여기서 꼬였음!!!
@@ -180,9 +177,13 @@ public class PlayerController : MonoBehaviour {
                 FlashActive = true;
             }
         }
-        if (collision.gameObject.name == "NPCSymbol")
+        if (GameObject.Find("NPCSymbol") != null)
         {
-            GameObject.Find("NPC").transform.Find("NPCText").gameObject.SetActive(true);
+
+            if (collision.gameObject.name == "NPCSymbol")
+            {
+                GameObject.Find("NPC").transform.Find("NPCText").gameObject.SetActive(true);
+            }
         }
       
     }
@@ -190,19 +191,37 @@ public class PlayerController : MonoBehaviour {
     {
         //키 습득
 
+        //콜라이더 함수와 getkeydown같이 놓으면 나중에 위험
+        //보물상자와 부딪히는 경우(보물상자 여는 경우)
+        if (collision.gameObject.transform.tag == "TreasureBox")
+        {
+            CollidedTreasureBox = collision.gameObject;
+            print("CollidedTreasure");
+            OpeningTreasureBox();
+        }
         //Rigidbody2d기본은 멈추면 작동안해서 Sleeping모드로 들어감. 그래서 오브젝트가 움직이지 않으면 Rigidbody2d에 관련된 스크립트,함수들도 작동안함->해결법:rigidbody의 SleepingMode를 NeverSleep로 켜줘야함
         if (collision.gameObject.tag == "NPC")
         {
             print("NPC");
+           
             if (Input.GetKeyDown(KeyCode.A))
             {
-                if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == false)
+                if(collision.gameObject.name== "WoundedSoldier")
                 {
-                    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(true);
+                    //병사와 만났을 경우
+                    print("SOLDIER");
                 }
-                else if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == true)
+                else
                 {
-                    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(false);
+
+                    //if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == false)
+                    //{
+                    //    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(true);
+                    //}
+                    // if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == true)
+                    //{
+                    //    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(false);
+                    //}
                 }
             }
         }
@@ -227,7 +246,6 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.D))
         {
             GunShot=! GunShot;
-            print("gunshot:" + GunShot);
         }
     }
     #region 다쳤을 때
@@ -252,6 +270,20 @@ public class PlayerController : MonoBehaviour {
         else
         {
 
+        }
+    }
+    #endregion
+    #region 보물상자 열 때
+    //콜라이더 함수에서 보물상자와 충돌 했을 때 처리하는 함수
+    //만약 얘도 에러나면 update 쪽에서 A키 눌렸을 때 true인 bool함수 만들어서 하기!!
+    void OpeningTreasureBox()
+    {
+        print("dd");
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+             print("AA");
+            Destroy(CollidedTreasureBox);
+            CollidedTreasureBox = null;
         }
     }
     #endregion

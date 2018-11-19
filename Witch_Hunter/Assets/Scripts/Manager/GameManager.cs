@@ -7,15 +7,14 @@ public class GameManager : MonoBehaviour {
 	#region Private Variable
 	private static GameManager _GameManager = null;
 
+	
+
 	public Text Gold;                                           // 골드 텍스트
-
-
 	#endregion
 
 	#region Public Variable
+	public bool _CheckGold = false;
 	public bool _isDead = false;
-
-	public int Player_HP = 100;                                // 플레이어 HP
 
 	public int m_Gold = 0;										// 몬스터 골드 드랍
 
@@ -30,9 +29,6 @@ public class GameManager : MonoBehaviour {
 			Destroy(gameObject);
 
 		DontDestroyOnLoad(gameObject);
-	}
-	private void Start()
-	{
 	}
 	private void Update()
 	{
@@ -49,25 +45,23 @@ public class GameManager : MonoBehaviour {
 	public static GameManager GetGameManager{
 		get{ return _GameManager; }
 	}
-	public void PlayerHP(){
-		
 
-	}
-	public void m_GetGold(int value){                                    // 몬스터한테 얻는 돈
-
-
+	public void m_GetGold(int value)                          // 몬스터한테 얻는 돈
+	{
 		m_Gold += value;
 
-		Gold.text = "G" + m_Gold.ToString("N0");
-		if (_isDead == true)
+
+		if (_CheckGold == true)
 		{
-			GameObject.Find("HP & Coin").gameObject.transform.Find("Coin").gameObject.SetActive(true);			
+			GameObject.Find("Canvas").gameObject.transform.Find("Coin").gameObject.SetActive(true);
 		}
-		else
+		if (_CheckGold == false)
 		{
-			GameObject.Find("HP & Coin").gameObject.transform.Find("Coin").gameObject.SetActive(false);
-		
+			GameObject.Find("Canvas").gameObject.transform.Find("Coin").gameObject.SetActive(false);
 		}
+		Gold.text = "G" + value.ToString("N0");
+
+		print("_CheckGold + " + value);
 	}
 	/*public void w_GetGold(int value){                                    // 마녀에게서 얻는 돈
 	

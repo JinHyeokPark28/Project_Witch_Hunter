@@ -116,27 +116,27 @@ public class MonsterManager_Plus : MonoBehaviour
             switch (Stage)
             {
                 case 0:
-                    RandomNum=UnityEngine.Random.Range(0, NormalMonsterList.Count);
                     print("Scene:" + Stage);
                     for(int i = 0; i < RespawnPoint.Count; i++)
                     {
+                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
                         Instantiate(NormalMonsterList[RandomNum],new Vector3(RespawnPoint[i].x,RespawnPoint[i].y+3,transform.position.z),transform.rotation);
                             }
                     break;
                 case 1:
-                    RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
                     print("Scene:" + Stage);
                     for (int i = 0; i < RespawnPoint.Count; i++)
                     {
+                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
                         Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
                     }
 
                     break;
                 case 2:
-                    RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
                     print("Scene:" + Stage);
                     for (int i = 0; i < RespawnPoint.Count; i++)
                     {
+                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
                         Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
                     }
                     break;

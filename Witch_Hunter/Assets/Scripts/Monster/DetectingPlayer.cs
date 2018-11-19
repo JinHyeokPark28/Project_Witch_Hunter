@@ -41,7 +41,7 @@ public class DetectingPlayer : MonoBehaviour {
         //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
         #region 몬스터 상태 전환(플레이어가 발견 영역에서 빠져나간뒤 추적 하는 동안 시간 초과
         //플레이어가 이 발견 영역&&공격 영역&&몬스터 콜라이더 영역에 충돌하지 않은 상태여야 한다->쫓는 상태이긴 함
-        while (ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate == 1 && PlayerExit == true)
+        if(ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate == 1 && PlayerExit == true)
         {
             //조건 만족할 !동안!에만 지속되어야 한다->if로는 왔다갔다함
             //한번 이어지면 끝까지 이어져야 한다. 중간에 조건 불만족하면 exitTime=0으로 되어야함
@@ -60,6 +60,10 @@ public class DetectingPlayer : MonoBehaviour {
                 }
             }
             
+        }
+        else
+        {
+            TimeCheck = false;
         }
         /*if ((PlayerExit == false) || (ParentState == 2))
         {

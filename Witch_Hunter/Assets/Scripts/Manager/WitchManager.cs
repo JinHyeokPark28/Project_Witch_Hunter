@@ -66,7 +66,7 @@ public class WitchManager : MonoBehaviour
             {
                 Witch = null;
             }
-            if (GameObject.FindGameObjectWithTag("Witch") != null)
+            if (GameObject.FindGameObjectWithTag("Witch") != null&&GameObject.FindGameObjectWithTag("Witch").GetComponent<WitchClass>().getInfo==false)
             {
                 Witch = GameObject.FindGameObjectWithTag("Witch");
                 ReadingWitch(Witch.GetComponent<WitchClass>().index);

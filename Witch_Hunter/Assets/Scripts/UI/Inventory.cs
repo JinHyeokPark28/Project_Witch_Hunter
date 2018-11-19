@@ -11,6 +11,7 @@ public class Inventory : MonoBehaviour
 	private InventorySlot[] slots;      // 인벤토리 슬롯
 	private OKOrCancel theOOC;
 	private DatabaseManager theDatabase;
+	private Equipment theEquip;
 
 	private List<Item> inventoryItemList;   // 플레이어가 소지한 아이템 리스트
 	private List<Item> inventoryTabList;    // 선택한 탭에 따라 다르게 보여질 아이템 리스트
@@ -34,6 +35,7 @@ public class Inventory : MonoBehaviour
 
 	public Transform Slots;                 // 슬롯 부모객체
 
+	public GameObject Go_Equip;				// 장비창 활성화 및 비활성화.
 	public GameObject Go_OOC;				// 선택지 활성화 및 비활성화
 	public GameObject Go;                   // 인벤토리 활성화 및 비활성화
 	public GameObject[] selectedTabImages;  // 아이템 위에 있을때 깜박거릴 패널
@@ -47,6 +49,7 @@ public class Inventory : MonoBehaviour
 		inventoryItemList = new List<Item>();
 		inventoryTabList = new List<Item>();
 		slots = Slots.GetComponentsInChildren<InventorySlot>();
+		theEquip = FindObjectOfType<Equipment>();
 	}
 
 	private void Update()
@@ -73,6 +76,7 @@ public class Inventory : MonoBehaviour
 					Go.SetActive(false);
 					tabActivated = false;
 					itemActivated = false;
+					OpenEquip(false);
 
 				}
 			}
@@ -106,12 +110,13 @@ public class Inventory : MonoBehaviour
 						tabActivated = false;
 						preventExec = true;
 						ShowItem();
+						OpenEquip(true);
 					}
 				}
 
 				else if (itemActivated)
 				{
-					if (Input.GetKeyDown(KeyCode.DownArrow))
+					if (Input.GetKeyDown(KeyCode.RightArrow))
 					{
 						if (selectedItem < inventoryTabList.Count - 1)
 							selectedItem += 2;
@@ -119,7 +124,7 @@ public class Inventory : MonoBehaviour
 							selectedItem %= 2;
 						SelectedItem();
 					}
-					else if (Input.GetKeyDown(KeyCode.UpArrow))
+					else if (Input.GetKeyDown(KeyCode.LeftArrow))
 					{
 						if (selectedItem > 1)
 							selectedItem -= 2;
@@ -127,7 +132,7 @@ public class Inventory : MonoBehaviour
 							selectedItem = inventoryTabList.Count - 1 - selectedItem;
 						SelectedItem();
 					}
-					else if (Input.GetKeyDown(KeyCode.RightArrow))
+					else if (Input.GetKeyDown(KeyCode.DownArrow))
 					{
 						if (selectedItem < inventoryTabList.Count - 1)
 							selectedItem++;
@@ -136,7 +141,7 @@ public class Inventory : MonoBehaviour
 						SelectedItem();
 
 					}
-					else if (Input.GetKeyDown(KeyCode.LeftArrow))
+					else if (Input.GetKeyDown(KeyCode.UpArrow))
 					{
 						if (selectedItem > 0)
 							selectedItem--;
@@ -148,10 +153,8 @@ public class Inventory : MonoBehaviour
 					{
 						if (selectedTab == 0)
 						{
-							stopKeyInput = true;
 							// 물약 및 무기 착용
-							StartCoroutine(OOCCoroutine());
-							transform.Find("Equipment_UI").gameObject.SetActive(true);
+							StartCoroutine(OOCCoroutine("사용", "취소"));
 						}
 						else if(selectedTab == 1)
 						{
@@ -159,17 +162,19 @@ public class Inventory : MonoBehaviour
 						}
 						else
 						{
-							transform.Find("Equipment_UI").gameObject.SetActive(false);
+
 						}
 					}
 					else if (Input.GetKeyDown(KeyCode.Escape))
 					{
 						StopAllCoroutines();
 						itemActivated = false;
-						tabActivated = true ;
+						tabActivated = true;
+						OpenEquip(false);
 						ShowTab();
 					}
-				}			// 아이템 활성화시 키입력 처리
+				}           // 아이템 활성화시 키입력 처리
+
 				if (Input.GetKeyUp(KeyCode.Return))	// 키 입력 중복 처리
 					preventExec = false;
 
@@ -179,7 +184,11 @@ public class Inventory : MonoBehaviour
 	}
 	#endregion
 	#region Public Method
-	public void ShowItem()								// 아이템 활설화(inventoryTabList에 조건에 맞는 아이템들만 넣어주고, 인벤토리 슬롯에 출력)
+	public void EquipToInventory(Item _item)
+	{
+		inventoryItemList.Add(_item);
+	}
+	public void ShowItem()								// 아이템 활성화(inventoryTabList에 조건에 맞는 아이템들만 넣어주고, 인벤토리 슬롯에 출력)
 	{
 		inventoryTabList.Clear();
 		RemoveSlot();
@@ -243,27 +252,48 @@ public class Inventory : MonoBehaviour
 		StartCoroutine(SelectedTabEffectCoroutine());
 
 	}
-	IEnumerator OOCCoroutine()
+	IEnumerator OOCCoroutine(string _up, string _down)						// 사용 할지 말지 팝업창
 	{
+
+		stopKeyInput = true;
+
 		Go_OOC.SetActive(true);
-		theOOC.ShowTwoChoice("사용", "취소");
+		theOOC.ShowTwoChoice(_up, _down);
 		yield return new WaitUntil(() => !theOOC.activated);
 		if (theOOC.GetResult())
 		{
-			for (int i = 0; i < inventoryItemList.Count; i++)
+			for (int i = 0; i < inventoryItemList.Count; i++)				// 인벤토리 안에 있는 아이템 개수 불러오기
 			{
-				if (inventoryItemList[i].itemID == inventoryTabList[selectedItem].itemID)
+				if (inventoryItemList[i].itemID == inventoryTabList[selectedItem].itemID)		// 아이템리스트의 아이디와 인벤토리 탭안의 아이템 아이디 검사
 				{
-					theDatabase.UseItem(inventoryItemList[i].itemID);
-
-					if (inventoryItemList[i].itemCount > 1)
-						inventoryItemList[i].itemCount--;
-					else
-						inventoryItemList.RemoveAt(i);
-
-					ShowItem();
-					break;
-				}
+					if(selectedTab == 0)
+					{
+						theDatabase.UseItem(inventoryItemList[i].itemID);           // 데이터베이스 아이템리스트에 있는 아이템을 검사하기
+						if(inventoryItemList[i].itemType == Item.ItemType.Use)
+						{
+							if (inventoryItemList[i].itemCount > 1)
+							{                     // 아이템이 1개보다 많으면 삭제
+								inventoryItemList[i].itemCount--;
+								ShowItem();
+							}
+							else
+							{
+								inventoryItemList.RemoveAt(i);                          // 아이템이 없으면 공란 생성
+							}
+							ShowItem();                                                 // 인벤토리 탭 활성화
+							break;
+						}
+						else if(inventoryItemList[i].itemType == Item.ItemType.Equip)
+						{
+								theEquip.EquipItem(inventoryItemList[i]);               // 장비한 아이템 삭제
+								inventoryItemList.RemoveAt(i);
+								ShowItem();
+								break;
+							
+						}
+						
+					}
+				} 
 			}
 		}
 		stopKeyInput = false;
@@ -345,6 +375,9 @@ public class Inventory : MonoBehaviour
 				
 		}
 		Debug.LogError("데이터베이스에 해당되는 ID를 가진 아이템이 존재하지 않습니다.");	//데이터베이스에 ID 없음
+	}
+	public void OpenEquip(bool check){
+		Go_Equip.SetActive(check);
 	}
 	#endregion
 }

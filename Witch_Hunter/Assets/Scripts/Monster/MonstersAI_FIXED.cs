@@ -75,7 +75,8 @@ public class MonstersAI_FIXED : MonoBehaviour
             {
                 MovingTime = 3f;
                 isLeft = !isLeft;   //계속 반대값 주기
-                
+                print("Moving");
+                print("isLeft" + isLeft);
             }
         }
         if (GetInfo == true)
@@ -94,7 +95,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                             }
                             else if (_isMonstate == 1)
                             {
-                                Attack();
+                                NotMovingMonsterAttack();
                                 //플레이어 발견모드(이때 조준&&공격)
                             }
                         }
@@ -107,7 +108,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                             }
                             else if (_isMonstate == 1)
                             {
-                                Attack();
+                                NotMovingMonsterAttack();
                                 //플레이어 발견모드(이때 조준&&공격)
 
                             }
@@ -121,7 +122,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                             }
                             else if (_isMonstate == 1)
                             {
-                                Attack();
+                                NotMovingMonsterAttack();
                                 //플레이어 발견모드(이때 조준&&공격)
 
                             }
@@ -176,7 +177,6 @@ public class MonstersAI_FIXED : MonoBehaviour
                         else if (_isMonstate == 2)  //공격 모드. 
                         {
                             Check();
-                            //check()함수에서 공격함수 Attack() 불러옴
                         }
                         break;
                     case 3: //자폭&원거리 공격형&움직임 가능
@@ -207,6 +207,7 @@ public class MonstersAI_FIXED : MonoBehaviour
         {
             if (isLeft == true)
             {
+                print("State:" + _isMonstate);
                 //  isMonstate 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
                 //기본 왼쪽 형태
                 //time.deltaTime으로 해서 더 느려짐
@@ -237,24 +238,18 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (_isMonstate == 1)
         {
+            print("STATE:1");
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Target.transform.position.x < transform.position.x)
             {
                 //플레이어가 몬스터 왼편에 있을 때
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
-                transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             else if (Target.transform.position.x > transform.position.x)
             {
-                //오일러로 180도 돌려서 당연히 오른쪽->180도->왼쪽으로 가게 되는것
-                transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
-                transform.rotation = Quaternion.Euler(0, 180, 0);
+                transform.Translate(Vector3.right * NormalSpeed * Time.deltaTime);
             }
-            else
-            {
-
-            }
-            //print("Chasing");
+            print("Chasing");
         }
     }
     #endregion
@@ -269,36 +264,12 @@ public class MonstersAI_FIXED : MonoBehaviour
     }
     #endregion
 
-    #region 몬스터가 공격하는 함수
+    #region 이동가능한 몬스터가 공격하는 함수
     void Attack()
     {
         if (Recon == true)
         {
 
-            if (_isMonstate == 1)   //만약 발견&공격이면
-            {
-               
-            }
-        }
-        else
-        {
-            if (_isMonstate == 1)   //만약 발견&공격이면
-            {
-                //플레이어붙인 태그를 자동으로 찾게 되어있음
-                //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
-                //플레이어 계속 바라보는 상태
-                if (Target.transform.position.x < transform.position.x)
-                {
-                    //플레이어가 몬스터 왼편에 있을 때
-                    transform.rotation = Quaternion.Euler(0, 0, 0);
-                }
-                if (Target.transform.position.x > transform.position.x)
-                {
-                    
-                    transform.rotation = Quaternion.Euler(0, 180, 0);
-                }
-            }
-            //이동 불가능인 몬스터가 공격하는 함수
         }
     }
     #endregion
@@ -355,7 +326,10 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (col.transform.tag == "Player") {
             _CheckMode = true;  //true면 공격
-        }
+			_GameManager._CheckGold = true;
+			int coin = Random.Range(0, 21);
+			_GameManager.m_GetGold(coin);
+		}
         if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))
         {   //칼이나 총알에 맞으면
             if (Hurt == false)  //안맞은 상태라면
@@ -369,17 +343,40 @@ public class MonstersAI_FIXED : MonoBehaviour
 		if (_CheckMode == true) Check();
         //check():공격 타이밍 체크하는 함수
 		if (_CheckMode == false) return;
+
 	}
 	private void OnTriggerExit2D(Collider2D col)
 	{
 		if(col.transform.tag == "Player"){
 			_CheckMode = false;
+			// 공격 받았을 때 데미지 처리.
+			_GameManager._CheckGold = false;
+			int coin = Random.Range(0, 21);
+			_GameManager.m_GetGold(coin);	
 		}
 	}
 	private void OnCollisionStay2D(Collision2D other)
 	{
-		// 공격 받았을 때 데미지 처리.
 	}
-    
+    #region 고정형 원거리 몬스터가 플레이어 발견&공격하는 함수
+    public void NotMovingMonsterAttack()
+    {
+        if (_isMonstate == 1)   //만약 발견&공격이면
+        {
+            //플레이어붙인 태그를 자동으로 찾게 되어있음
+            //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
+            if (Target.transform.position.x < transform.position.x)
+            {
+                //플레이어가 몬스터 왼편에 있을 때
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
+           if (Target.transform.position.x > transform.position.x)
+            {
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+            }
+        }
+        //고정형 원거리 몬스터 공격 타입
+    }
+	#endregion
 
 }

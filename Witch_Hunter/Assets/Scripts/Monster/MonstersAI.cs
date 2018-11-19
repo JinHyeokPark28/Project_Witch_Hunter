@@ -89,6 +89,13 @@ public class MonstersAI : MonoBehaviour
 	}
 	private void Attack()
 	{
+		//switch(MonID)
+		//{
+		//	case 101:
+		//
+		//		break;
+		//
+		//}
 		if (transform.tag.Equals("Ghost"))
 		{
 			if (Target.transform.position.x > transform.position.x)
