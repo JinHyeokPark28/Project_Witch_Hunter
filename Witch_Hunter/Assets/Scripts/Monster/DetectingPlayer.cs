@@ -12,7 +12,6 @@ public class DetectingPlayer : MonoBehaviour {
     public float ExitTime = 0;  //플레이어가 추적 영역 빠져나간 시간
     public float WaitTime = 5;  //플레이어가 기다릴 시간
     public bool PlayerExit = true;    //플레이어와 접촉하면 false 빠져나가면 true
-    public bool TimeCheck = true;  //더이상 시간 체크할 필요 없다면 false
 	// Use this for initialization
 	void Start () {
         //자동으로 부모 오브젝트 찾게 해줌
@@ -43,27 +42,23 @@ public class DetectingPlayer : MonoBehaviour {
         //플레이어가 이 발견 영역&&공격 영역&&몬스터 콜라이더 영역에 충돌하지 않은 상태여야 한다->쫓는 상태이긴 함
         if(ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate == 1 && PlayerExit == true)
         {
+
+           // print("IN");    //들어옴
             //조건 만족할 !동안!에만 지속되어야 한다->if로는 왔다갔다함
             //한번 이어지면 끝까지 이어져야 한다. 중간에 조건 불만족하면 exitTime=0으로 되어야함
-            if (TimeCheck == true)
-            {
+            
                 //ExitTime은 if문이 맞을때 들어온다->계속 쌓임(조건 만족:더해짐->조건 안만족:안더해짐(그대로있음)->조건만족:더해짐)
                 ExitTime += Time.deltaTime;
-                if (ExitTime >= WaitTime) 
+                if (ExitTime >= WaitTime)
                 {
-                    print("YES"); 
                     //ParentState = 0;    //안됨:왜?->얜 그냥 _isMonState값 만을 받는 변수라서
                     ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 0;
-                    print("STATE:" + ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate);
-                    TimeCheck = false;
                     ExitTime = 0;
                 }
             }
-            
-        }
-        else
+        if (PlayerExit == false)
         {
-            TimeCheck = false;
+            ExitTime = 0;
         }
         /*if ((PlayerExit == false) || (ParentState == 2))
         {

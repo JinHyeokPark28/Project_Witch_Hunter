@@ -75,8 +75,6 @@ public class MonstersAI_FIXED : MonoBehaviour
             {
                 MovingTime = 3f;
                 isLeft = !isLeft;   //계속 반대값 주기
-                print("Moving");
-                print("isLeft" + isLeft);
             }
         }
         if (GetInfo == true)
@@ -154,6 +152,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                         //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
                         else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
                         {
+                            //여기서 플레이어 방향 못잡음
                             Chasing();
                         }
                         else if (_isMonstate == 2)  //공격 모드. 
@@ -207,7 +206,6 @@ public class MonstersAI_FIXED : MonoBehaviour
         {
             if (isLeft == true)
             {
-                print("State:" + _isMonstate);
                 //  isMonstate 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
                 //기본 왼쪽 형태
                 //time.deltaTime으로 해서 더 느려짐
@@ -238,18 +236,19 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (_isMonstate == 1)
         {
-            print("STATE:1");
+            print("TARGET" + Target.transform.position);
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Target.transform.position.x < transform.position.x)
             {
                 //플레이어가 몬스터 왼편에 있을 때
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             else if (Target.transform.position.x > transform.position.x)
             {
-                transform.Translate(Vector3.right * NormalSpeed * Time.deltaTime);
+                transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Euler(0, 180, 0);
             }
-            print("Chasing");
         }
     }
     #endregion
@@ -326,9 +325,9 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (col.transform.tag == "Player") {
             _CheckMode = true;  //true면 공격
-			_GameManager._CheckGold = true;
-			int coin = Random.Range(0, 21);
-			_GameManager.m_GetGold(coin);
+			//_GameManager._CheckGold = true;
+			//int coin = Random.Range(0, 21);
+			//_GameManager.m_GetGold(coin);
 		}
         if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))
         {   //칼이나 총알에 맞으면
@@ -350,9 +349,9 @@ public class MonstersAI_FIXED : MonoBehaviour
 		if(col.transform.tag == "Player"){
 			_CheckMode = false;
 			// 공격 받았을 때 데미지 처리.
-			_GameManager._CheckGold = false;
-			int coin = Random.Range(0, 21);
-			_GameManager.m_GetGold(coin);	
+			//_GameManager._CheckGold = false;
+			//int coin = Random.Range(0, 21);
+			//_GameManager.m_GetGold(coin);	
 		}
 	}
 	private void OnCollisionStay2D(Collision2D other)

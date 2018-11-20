@@ -13,8 +13,7 @@ public class WitchManager : MonoBehaviour
     //각 씬에서 씬 넘버 받아오면 true, 한씬 넘어가면 바로 false로 바뀜
     public bool CanGoFinal; //세 마녀를 다 쓰러뜨리면 true가 되어서 최종보스인 광기의 마녀를 만날수 있다;
     public int KillWitchNumber=0;    //특정 수 이상이면 최종 보스 만남 가능
-    private enum Contidion { BURN, FROZEN, KNOCKBACK };
-
+	public S_Witch _Witch;
     #region CSV 변수 목록
     public TextAsset WitchCSV;
     public string[] option;
@@ -87,13 +86,26 @@ public class WitchManager : MonoBehaviour
         {
             CanGoFinal = true;  //광기의 마녀 단계 해금
         }
-    }
-    public void GetOption(int index)
+	}
+	private enum Contidion 
+	{ 
+	BURN, FROZEN, KNOCKBACK 
+	
+	};
+	public enum S_Witch
+	{ 
+	ALCHEMIST, WIND, WATER, FIRE 
+	
+	};
+	public void GetOption(int index)
     {
         //첫 줄만 읽어오도록 하는 함수
         option = TextArray[index].Split(',');
     }
-   
+	public void CheckWitch(S_Witch witch)
+	{
+		_Witch = witch;
+	}
     public void ReadingWitch(int i)
     {
         if (Witch.GetComponent<WitchClass>() != null)

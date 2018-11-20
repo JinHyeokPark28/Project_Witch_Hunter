@@ -113,34 +113,14 @@ public class MonsterManager_Plus : MonoBehaviour
                 
                 print("RespawnPoint:" + RespawnPoint[i]);
             }
-            switch (Stage)
+            print("Scene:" + Stage);
+            for (int i = 0; i < RespawnPoint.Count; i++)
             {
-                case 0:
-                    print("Scene:" + Stage);
-                    for(int i = 0; i < RespawnPoint.Count; i++)
-                    {
-                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                        Instantiate(NormalMonsterList[RandomNum],new Vector3(RespawnPoint[i].x,RespawnPoint[i].y+3,transform.position.z),transform.rotation);
-                            }
-                    break;
-                case 1:
-                    print("Scene:" + Stage);
-                    for (int i = 0; i < RespawnPoint.Count; i++)
-                    {
-                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                        Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
-                    }
-
-                    break;
-                case 2:
-                    print("Scene:" + Stage);
-                    for (int i = 0; i < RespawnPoint.Count; i++)
-                    {
-                        RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                        Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
-                    }
-                    break;
+                RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
+                Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
             }
+            
+      
         }
 
     }
@@ -190,6 +170,7 @@ public class MonsterManager_Plus : MonoBehaviour
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[i, 8]);
                 NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
+                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
             }
             if (x < NormalMonsterList.Count)
             {

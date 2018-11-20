@@ -30,15 +30,6 @@ public class GameManager : MonoBehaviour {
 
 		DontDestroyOnLoad(gameObject);
 	}
-	private void Update()
-	{
-		if(Input.GetKeyDown(KeyCode.Mouse0)){
-			_isDead = true;
-		}
-		else if(Input.GetKeyDown(KeyCode.Mouse1)){
-			_isDead = false;
-		}
-	}
 	#endregion
 
 	#region Public Method

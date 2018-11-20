@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
     #region 변수 목록
-    
     public float Speed = 5;
     public float JumpSpeed;
     public bool CanJump;
@@ -22,12 +21,20 @@ public class PlayerController : MonoBehaviour {
     public bool touched;
     //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
     public bool GunShot;
-	//false 면 칼로 공격
+    //false 면 칼로 공격
+    public bool SceneChanged = false;   //SceneChanger로부터 true값 받으면 새로 포지션 찾기
 	private Animator _Anim;
     private GameObject CollidedTreasureBox;
     // Use this for initialization
     #endregion
+    //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
+    //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
+    //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
     void Start() {
+        if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
+        {
+            gameObject.transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
+        }
 		_Anim = GetComponent<Animator>();
        
     }
@@ -48,6 +55,16 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        DontDestroyOnLoad(this.gameObject);
+        if (SceneChanged == true)
+        {
+            //실제로 씬 바뀌었을 때 실행해야함
+            if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
+            {
+                transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
+                SceneChanged = false;
+            }
+        }
         UpAttack = false;
         DownState = false;
           PlayerMove();
@@ -198,7 +215,7 @@ public class PlayerController : MonoBehaviour {
             CollidedTreasureBox = collision.gameObject;
             print("CollidedTreasure");
             OpeningTreasureBox();
-        }
+        } 
         //Rigidbody2d기본은 멈추면 작동안해서 Sleeping모드로 들어감. 그래서 오브젝트가 움직이지 않으면 Rigidbody2d에 관련된 스크립트,함수들도 작동안함->해결법:rigidbody의 SleepingMode를 NeverSleep로 켜줘야함
         if (collision.gameObject.tag == "NPC")
         {
@@ -206,15 +223,12 @@ public class PlayerController : MonoBehaviour {
            
             if (Input.GetKeyDown(KeyCode.A))
             {
-                if(collision.gameObject.name== "WoundedSoldier")
-                {
-                    //병사와 만났을 경우
-                    print("SOLDIER");
-                }
-                else
-                {
-
-                    //if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == false)
+                //if(collision.gameObject.name== "WoundedSoldier")
+                //{
+                //    병사와 만났을 경우
+                //    print("SOLDIER");
+                //}
+                  //if (GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.activeInHierarchy == false)
                     //{
                     //    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(true);
                     //}
@@ -222,7 +236,6 @@ public class PlayerController : MonoBehaviour {
                     //{
                     //    GameObject.Find("Canvas").transform.Find("NPCImage").gameObject.SetActive(false);
                     //}
-                }
             }
         }
         else if (collision.gameObject.tag == "PlayerSavePoint")
