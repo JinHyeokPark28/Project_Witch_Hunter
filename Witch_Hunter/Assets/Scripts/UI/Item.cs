@@ -12,23 +12,32 @@ public class Item{
 	public int itemCount;           // 소지 개수
 	public Sprite itemIcon;         // 아이템의 아이콘
 	public ItemType itemType;       // 아이템 타입
-	public int ItemStat;
-	#endregion
 
-	#region Public Method
+	public int atk;
+	public int def;
+	public int recover_hp;
+	public int add_hp;
 	public enum ItemType
 	{
 		Use, Equip, ETC
 	}
-	public Item(int _itemID,   string _itemName, string _itemDes, ItemType _itemType, int _itemStat, int _itemCount = 1)
+	#endregion
+
+	#region Public Method
+	public Item(int _itemID, string _itemName, string _itemDes, ItemType _itemType,
+				int _atk = 0, int _def = 0, int _add_hp = 0, int _recover_hp = 0, int _itemCount = 1)
 	{
 		itemID = _itemID;
 		itemName = _itemName;
 		itemDescription = _itemDes;
 		itemType = _itemType;
 		itemCount = _itemCount;
-		ItemStat = _itemStat;
 		itemIcon = Resources.Load("ItemIcon/" + itemID.ToString(), typeof(Sprite)) as Sprite;
+
+		atk = _atk;
+		def = _def;
+		add_hp = _add_hp;
+		recover_hp = _recover_hp;
 	}
 	#endregion
 }

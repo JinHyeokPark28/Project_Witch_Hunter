@@ -51,6 +51,7 @@ public class AttackingPlayer : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Player")
         {
+            ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 1;
             //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음->됌
             if (ParentMonster.GetComponent<MonstersAI_FIXED>().SearchArea.GetComponent<BoxCollider2D>().enabled == false)
             {

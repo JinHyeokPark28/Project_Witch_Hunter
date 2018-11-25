@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class PlayerStateUI : MonoBehaviour {
 	#region Private Variable
 	private bool inputKey = true;
-	private PlayerStatUIManager _StatManager;
+	private PlayerStatManager _StatManager;
 	private Equipment theEquip;
 	private DatabaseManager theDatabase;
 	private GameManager theGame;
@@ -26,7 +26,7 @@ public class PlayerStateUI : MonoBehaviour {
 	private void Start()
 	{
 		theGame = FindObjectOfType<GameManager>();
-		_StatManager = FindObjectOfType<PlayerStatUIManager>();
+		_StatManager = FindObjectOfType<PlayerStatManager>();
 		theEquip = FindObjectOfType<Equipment>();
 		theDatabase = FindObjectOfType<DatabaseManager>();
 	}
@@ -68,16 +68,18 @@ public class PlayerStateUI : MonoBehaviour {
 	}
 	public void SwordDamage()
 	{
-		
+		text[1].text = _StatManager.atk.ToString();
 	}
 	public void GunDamage()
 	{
 
+		text[2].text = _StatManager.atk.ToString();
 	}
 	public void Armor()
 	{
-		
-		
+
+		text[3].text = _StatManager.def.ToString();
+
 	}
 	public void Gold()
 	{

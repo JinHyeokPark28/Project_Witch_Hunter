@@ -49,7 +49,7 @@ public class Inventory : MonoBehaviour
 		inventoryItemList = new List<Item>();
 		inventoryTabList = new List<Item>();
 		slots = Slots.GetComponentsInChildren<InventorySlot>();
-		theEquip = FindObjectOfType<Equipment>();
+		theEquip = FindObjectOfType<Equipment>(); 
 	}
 
 	private void Update()
@@ -110,7 +110,8 @@ public class Inventory : MonoBehaviour
 						tabActivated = false;
 						preventExec = true;
 						ShowItem();
-						OpenEquip(true);
+						if(selectedTab == 0)	OpenEquip(true);
+						if (selectedTab == 1) OpenEquip(false);
 					}
 				}
 
@@ -184,7 +185,7 @@ public class Inventory : MonoBehaviour
 	}
 	#endregion
 	#region Public Method
-	public void EquipToInventory(Item _item)
+	public void EquipToInventory(Item _item)			// 장비창에서 인벤토리로 옮김
 	{
 		inventoryItemList.Add(_item);
 	}
@@ -285,10 +286,10 @@ public class Inventory : MonoBehaviour
 						}
 						else if(inventoryItemList[i].itemType == Item.ItemType.Equip)
 						{
-								theEquip.EquipItem(inventoryItemList[i]);               // 장비한 아이템 삭제
-								inventoryItemList.RemoveAt(i);
-								ShowItem();
-								break;
+							theEquip.EquipItem(inventoryItemList[i]);					// 장비한 아이템 삭제
+							inventoryItemList.RemoveAt(i);
+							ShowItem();
+							break;
 							
 						}
 						
@@ -349,7 +350,7 @@ public class Inventory : MonoBehaviour
 	}
 	public void GetAnItem(int _itemID, int _count = 1)
 	{
-		for(int i = 0; i < theDatabase.itemList.Count; i++)						// 데이터베이스 아이템 검색
+		for (int i = 0; i < theDatabase.itemList.Count; i++)					// 데이터베이스 아이템 검색
 		{
 			if (_itemID == theDatabase.itemList[i].itemID)                      // 데이터베이스 아이템 발견
 			{

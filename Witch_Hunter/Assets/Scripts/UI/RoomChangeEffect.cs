@@ -14,6 +14,10 @@ public class RoomChangeEffect : MonoBehaviour {
         img = GameObject.Find("RoomChanger").transform.Find("Canvas").transform.Find("Black_Fade").GetComponent<Image>();
         Player = GameObject.FindGameObjectWithTag("Player");
         Fade = GameObject.Find("RoomChanger").GetComponent<Animator>();
+        
+        //씬 처음 돌입했을 때 시작해줘야 자연스러움
+        GameObject.Find("RoomChanger").transform.Find("Canvas").transform.Find("Black_Fade").gameObject.SetActive(true);
+        Fade.SetBool("FadeTurnOn", true);
     }
 
     // Update is called once per frame
@@ -22,7 +26,7 @@ public class RoomChangeEffect : MonoBehaviour {
         //유니티 오브젝트 비활성화 되도 거기에 붙은 컴포넌트는 비활성화된것이 아님!!
         if (img.enabled == false)
         {
-            Debug.Log("FALSE");
+            //Debug.Log("FALSE");
             //false가 되면서 img상태도 true로 바뀐것
             Fade.SetBool("FadeTurnOn", false);
             GameObject.Find("RoomChanger").transform.Find("Canvas").transform.Find("Black_Fade").gameObject.SetActive(false);
@@ -33,12 +37,12 @@ public class RoomChangeEffect : MonoBehaviour {
     //FadeIn.anim실행을 위해 Fadein.anim이 담긴 애니메이터 컨트롤러RoomChanger 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player")
-        {
-            Debug.Log("true");
-            GameObject.Find("RoomChanger").transform.Find("Canvas").transform.Find("Black_Fade").gameObject.SetActive(true);
-            Fade.SetBool("FadeTurnOn", true);
+        //if (collision.gameObject.tag == "Player")
+        //{
+        //    Debug.Log("true");
+        //    GameObject.Find("RoomChanger").transform.Find("Canvas").transform.Find("Black_Fade").gameObject.SetActive(true);
+        //    Fade.SetBool("FadeTurnOn", true);
 
-        }
+        //}
     }
 }

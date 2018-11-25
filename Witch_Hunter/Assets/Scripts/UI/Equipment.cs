@@ -6,11 +6,11 @@ using UnityEngine.UI;
 public class Equipment : MonoBehaviour {
 
 	#region Private Variable
-	private PlayerStateUI theState;
+	private PlayerStatManager thePlayerState;
 	private Inventory theInven;
 	private OKOrCancel theOOC;
 	private const int WEAPON = 0, GUN = 1, ARMOR = 2;
-
+	private const int S_DAM = 0, G_DAM = 1, DEF = 2;
 	private bool inputKey = true;
 	#endregion
 
@@ -27,7 +27,7 @@ public class Equipment : MonoBehaviour {
 	#region Private Method
 	private void Start()
 	{
-		theState = FindObjectOfType<PlayerStateUI>();
+		thePlayerState = FindObjectOfType<PlayerStatManager>();
 		theOOC = FindObjectOfType<OKOrCancel>();
 		theInven = FindObjectOfType<Inventory>();
 		text[0].text = "무기 1";
@@ -60,26 +60,21 @@ public class Equipment : MonoBehaviour {
 				ShowEquip();
 			}
 	}
+	private void EquipEffect(Item _item)
+	{
+		thePlayerState.atk += _item.atk;
+		thePlayerState.def += _item.def;
+		thePlayerState.recover_hp += _item.recover_hp;
+	}
+	private void TakeOffEffect(Item _item)
+	{
+		thePlayerState.atk -= _item.atk;
+		thePlayerState.def -= _item.def;
+		thePlayerState.recover_hp -= _item.recover_hp;
+	}
 	#endregion
 
 	#region Public Method
-	public void EquipDes(Item _item)
-	{
-		string temp = _item.itemID.ToString();
-		temp = temp.Substring(0, 3);
-		switch (temp)
-		{
-			case "200": //무기
-				theState.text[1].text = _item.ItemStat.ToString();
-				break;
-			case "201": //갑옷
-				theState.text[3].text = _item.ItemStat.ToString();
-				break;
-			case "202": // 총
-				theState.text[2].text = _item.ItemStat.ToString();
-				break;
-		}
-	}
 	public void EquipItem(Item _item)
 	{
 		string temp = _item.itemID.ToString();
@@ -115,6 +110,7 @@ public class Equipment : MonoBehaviour {
 			theInven.EquipToInventory(equipItemList[_count]);
 			equipItemList[_count] = _item;
 		}
+		EquipEffect(_item);
 	}
 	public void ClearEquip()
 	{
@@ -151,7 +147,8 @@ public class Equipment : MonoBehaviour {
 		if (theOOC.GetResult())
 		{
 			theInven.EquipToInventory(equipItemList[selectedSlot]);
-			equipItemList[selectedSlot] = new Item(0, "", "", Item.ItemType.Equip,0);
+			TakeOffEffect(equipItemList[selectedSlot]);
+			equipItemList[selectedSlot] = new Item(0, "", "", Item.ItemType.Equip);
 			ClearEquip();
 			ShowEquip();
 		}

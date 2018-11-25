@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
     #region 변수 목록
@@ -8,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     public float JumpSpeed;
     public bool CanJump;
     //true면 점프 가능, false면 점프 불가능
+    public bool IsAttacking;    //공격하고 있으면 true
     public bool UpAttack;
     //true면 위쪽으로 공격하고 있을 때(방향키 누르고 있을 때)
     public bool DownState;
@@ -21,18 +23,49 @@ public class PlayerController : MonoBehaviour {
     public bool touched;
     //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
     public bool GunShot;
-    //false 면 칼로 공격
-    public bool SceneChanged = false;   //SceneChanger로부터 true값 받으면 새로 포지션 찾기
+	//false 면 칼로 공격
+	public bool CheckNPC;       // true면 대화창 실행
+	public bool CheckEnemy;     // true면 공격 가능
+	public bool CheckChest;     // true면 상자 열기
+	public bool CheckSave;		// true면 세이브 하기
 	private Animator _Anim;
     private GameObject CollidedTreasureBox;
-    // Use this for initialization
+    private int SceneNum=-1;
+    public bool SceneStart = true;  //씬 전환시 true면 시작 포인트에서 플레이어 시작
+                                    //false면 backpoint에서 시작 ->씬 체인저 쪽에서 신호 줌
+    private static bool playerExists; //이미 플레이어가 존재하면 true
+                                      //선언된 함수 내에서만 접근이 가능하다.
+    /*정적(static)변수:
+    딱 1회만 초기화되고 프로그램 종료 시까지
+    메모리 공간에 존재한다.
+    출처: http://1924.tistory.com/30 */
+                                    //이 스크립트를 쓰는 모든 오브젝트는 같은 playerExists를 씀
+                                    // Use this for initialization
     #endregion
-    //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
-    //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
-    //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
-    void Start() {
+        //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
+        //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
+        //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
+
+        void Start()
+    {
+        if (!playerExists)
+        {
+            playerExists = true;
+            DontDestroyOnLoad(transform.gameObject);
+            //When loading a new level all objects in the scene are destroyed, then the objects in the new level are loaded
+            //그 이전 레벨 씬의 오브젝트들 안없어지도록 만듬
+            //근데 이것 하나만 쓰면 계속 오브젝트들 duplicate됌
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
         {
+            //처음 시작할 포인트 따로, 씬에서 되돌아올 포인트 따로 한 씬에 최소 2개 있어야함
+            //A<->B로 왔다갔다 하고, 처음 시작할 때 A에서 시작한다고 하면
+            //A에서 시작할 포인트 하나, B에서 시작할 포인트 하나, B에서 A로 갈때 다시 A에서 시작할 포인트 하나
             gameObject.transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
         }
 		_Anim = GetComponent<Animator>();
@@ -55,43 +88,90 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        DontDestroyOnLoad(this.gameObject);
-        if (SceneChanged == true)
+        if (SceneNum != SceneManager.GetActiveScene().buildIndex)
         {
             //실제로 씬 바뀌었을 때 실행해야함
-            if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
+            if (SceneStart == true)
             {
-                transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
-                SceneChanged = false;
+                //씬 전환되는데 씬 도입부에서 시작해야 한다면(다음 씬에 돌입)
+
+                if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
+                {
+                    print("PlayerPos:" + transform.position);
+                    print("PointPos:" + GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position);
+                    //그전 씬에 있던 포지션 잡아버림
+                    transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
+                }
+                if (Camera.main.GetComponent<PlayerFollower>().Player == null)
+                {
+                    Camera.main.GetComponent<PlayerFollower>().Player = this.gameObject;
+                }
             }
+            else
+            {
+                //씬 전환되는데 씬 마지막 부분에서 시작해야 한다면(이전 씬에 돌입)
+                if (GameObject.FindGameObjectWithTag("SceneBackPoint") != null)
+                {
+                    print("PlayerPos:" + transform.position);
+                    print("PointPos:" + GameObject.FindGameObjectWithTag("SceneBackPoint").transform.position);
+                    //그전 씬에 있던 포지션 잡아버림
+                    transform.position = GameObject.FindGameObjectWithTag("SceneBackPoint").transform.position;
+                }
+                if (Camera.main.GetComponent<PlayerFollower>().Player == null)
+                {
+                    Camera.main.GetComponent<PlayerFollower>().Player = this.gameObject;
+                }
+            }
+            SceneNum = SceneManager.GetActiveScene().buildIndex;
         }
+
+
         UpAttack = false;
         DownState = false;
-          PlayerMove();
-                ChangeWeapon();
-                NumberKeyManager();
-                TouchEnemy();
-                //공격,세이브,상호작용키
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    
-                    //기본은 공격(else로 처리)
-                    //npc만났을 경우
-                    //보물상자
-                    //세이브포인트
+        PlayerMove();
+        ChangeWeapon();
+        NumberKeyManager();
+        TouchEnemy();
+        //공격,세이브,상호작용키
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            print("Press A");
+            _Anim.SetBool("P_Attack", true);
+            _Anim.SetBool("IsRun", false);
+            IsAttacking = true;
+            if (CheckNPC == true)
+            {
+
+            }
+            //npc만났을 경우
+            else if (CheckChest == true)
+            {
+
+            }
+            //보물상자
+            else if (CheckSave == true)
+            {
+
+            }
+            //세이브포인트
+        }
+        //공격 애니메이션 끝났을 때 P_Attack=false로 만들어주기
+        if (IsAttacking == false)
+        {
+            _Anim.SetBool("P_Attack", false);
+            // print("isattack:" + IsAttacking);
             
-                }
+        }
+        //무기 변경:총<->칼
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            print("CHANGE_WEAPON");
+        }
 
-                //무기 변경:총<->칼
-                if (Input.GetKeyDown(KeyCode.D))
-                {
 
-                }
-       
-      
-        
 
-     }
+
+    }
 
     #region 플레이어 움직임
     void PlayerMove()
@@ -138,7 +218,6 @@ public class PlayerController : MonoBehaviour {
         {
             //바닥에 부딪히면
             CanJump = true;
-           // print("CANJUMP:" + CanJump);
         }
         
     }
@@ -183,7 +262,7 @@ public class PlayerController : MonoBehaviour {
         if (collision.gameObject.tag == "Enemy")
         {
             //여기서 꼬였음!!!
-            GameObject.Find("HP & Coin").GetComponent<PlayerStatUIManager>().HPMinus = true;
+            //GameObject.Find("HP & Coin").GetComponent<PlayerStatUIManager>().HPMinus = true;
             //hp가 깎이는건 touched=false일 때 깎임!!!!
             if (touched == true)
             {
@@ -201,6 +280,11 @@ public class PlayerController : MonoBehaviour {
             {
                 GameObject.Find("NPC").transform.Find("NPCText").gameObject.SetActive(true);
             }
+        }
+        if (collision.gameObject.tag == "WitchBullet")
+        {
+            //마녀가 발사하는or 리스폰하는 투사체에 맞는 경우
+            //체력감소
         }
       
     }

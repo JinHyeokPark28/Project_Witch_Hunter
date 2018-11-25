@@ -60,11 +60,15 @@ public class DetectingPlayer : MonoBehaviour {
         {
             ExitTime = 0;
         }
-        /*if ((PlayerExit == false) || (ParentState == 2))
+        if (ParentMonster.GetComponent<MonstersAI_FIXED>().GetInfo == true)
         {
-            //플레이어 다시 들어오면 exitTIme계산 안함
-            ExitTime = 0;
-        }*/
+            //마리오네트_S인경우 맵 전체를 살펴보기->이 오브젝트(특정 공간안에 플레이어 들어오면 플레이어 보는것(->노필요
+            //그냥 맵에 바로 플레이어 들어온 순간 바로 보도록->바로 공격자세 취하도록->베타 까지?
+            if (ParentMonster.GetComponent<MonstersAI_FIXED>().index == 2)
+            {
+                Destroy(this.gameObject);
+            }
+        }
         #endregion
     }
     private void OnTriggerEnter2D(Collider2D collision)

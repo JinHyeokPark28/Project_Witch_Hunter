@@ -40,7 +40,7 @@ public class Trap : MonoBehaviour
     {
         if (collision.gameObject.name == "Player")
         {
-            GameObject.Find("Player").GetComponent<PlayerStatUIManager>().NowHP -= Attack;
+            GameObject.Find("Player").GetComponent<PlayerStateUI>().NowHP -= Attack;
         }
     }
 }

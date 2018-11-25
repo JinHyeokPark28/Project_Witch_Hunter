@@ -23,6 +23,7 @@ public class MonstersAI_FIXED : MonoBehaviour
     public int _isMonstate = 0;                // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드
     //고정형:0=경비모드,1:공격모드
     public bool Recon;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
+    private Animator _Anim;
     public int Coin;
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
@@ -57,6 +58,7 @@ public class MonstersAI_FIXED : MonoBehaviour
         _GameManager = GameManager.GetGameManager;
         HurtTime = WholeHurtTime;
         //몬스터 초기 _isMonState 값 줘야함
+        _Anim = GetComponent<Animator>();
     }
     //정찰 모드 상태일때만
 
@@ -66,6 +68,8 @@ public class MonstersAI_FIXED : MonoBehaviour
         MovingTime -= Time.deltaTime;
         if (Hurt == true)
         {
+            print("HP:" + HP);
+            print("HURT_TIME:" + HurtTime);
             HurtTime -= Time.deltaTime;
         }
         GetHurt();
@@ -79,8 +83,12 @@ public class MonstersAI_FIXED : MonoBehaviour
         }
         if (GetInfo == true)
         {
-            #region 고정형 몬스터인 경우
-            if (Recon == false)
+
+			#region 데미지 함수
+			
+			#endregion
+			#region 고정형 몬스터인 경우
+			if (Recon == false)
             {
                 //그냥 여기서는 switch 없애도 될듯?
 
@@ -89,11 +97,13 @@ public class MonstersAI_FIXED : MonoBehaviour
                         {
                             if (_isMonstate == 0)
                             {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
+                                _Anim.SetBool("Attack", false);
                                 Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
                             }
                             else if (_isMonstate == 1)
                             {
                                 NotMovingMonsterAttack();
+                                _Anim.SetBool("Attack", true);
                                 //플레이어 발견모드(이때 조준&&공격)
                             }
                         }
@@ -147,17 +157,20 @@ public class MonstersAI_FIXED : MonoBehaviour
                     case 0: //일반(근접)
                         if (_isMonstate == 0)   //정찰모드
                         {
+                            _Anim.SetBool("Walk", true);
                             Moving();
                         }
                         //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
                         else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
                         {
                             //여기서 플레이어 방향 못잡음
+                            _Anim.SetBool("Walk", true);
                             Chasing();
                         }
                         else if (_isMonstate == 2)  //공격 모드. 
                         {
                             Check();
+                            _Anim.SetBool("Walk", false);
                         }
                         break;
                     case 1: //일반(원거리=사격형)
@@ -197,6 +210,20 @@ public class MonstersAI_FIXED : MonoBehaviour
                 Coin = Random.Range(1, 21);
                 //w_Coin = Random.Range(100, 501);
             }
+
+            if (HP <= 0)
+            {
+                isDead = true;
+                print("DEAD");
+                Destroy(this.gameObject);
+            }
+
+
+            if (isDead == true)
+            {
+                //죽으면
+                //animation.die불러오기
+            }
         }
     }
     #region 근접, 이동가능!(Recon=true) 몬스터의 이동 함수
@@ -211,14 +238,16 @@ public class MonstersAI_FIXED : MonoBehaviour
                 //time.deltaTime으로 해서 더 느려짐
                 transform.rotation = Quaternion.Euler(0, 0, 0);
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
-                //rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
+                //transform.translate로 하니까 좌표이동함수라서 통과해버림->아님, 좌표 반전될때 자식 오브젝트가 상대적으로 
+                // x=0이 아니라서 그럼
+               // rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
                 //velocity=한번에 계속 쭉 주는듯
             }
             else
             {
                 transform.rotation = Quaternion.Euler(0, 180, 0);
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
-                // rigid.velocity = Vector2.right * NormalSpeed * Time.deltaTime;
+                //rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
             }
             //코루틴 안에서 또 while 붙이니까 0->1로 가는 과정에서 멈추는듯?(코루틴도 계속 돌아감, while도 계속 돌아감)
             // transform.Translate(Vector2.left * 1f * Time.deltaTime);  업데이트에서는 매 프레임마다 명령문이 실행되니까 매 프레임마다 
@@ -228,6 +257,7 @@ public class MonstersAI_FIXED : MonoBehaviour
         }
         else
         {
+            rigid.velocity = Vector2.zero;
         }
     }
     #endregion
@@ -236,7 +266,6 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (_isMonstate == 1)
         {
-            print("TARGET" + Target.transform.position);
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Target.transform.position.x < transform.position.x)
             {
@@ -294,26 +323,8 @@ public class MonstersAI_FIXED : MonoBehaviour
         if (Hurt == true)
         {
             //그냥 여기서 if문으로 다 써버리니까 조건 중복되서 들어감
-            HurtTime-= Time.deltaTime;
-            if (HurtTime > WholeHurtTime * 0.75f)
-            {
-                //처음 맞았을 때
-                SR.color = new Color32(255, 255, 255, 0);
-                //그냥 color32쓰고 싶으면 따로 spriteRendere.Color32쓰는게 아니라 걍 Sr.color=new color(아니면 Color32)하면 됨
-            }
-           else if (HurtTime > WholeHurtTime * 0.5f)
-            {
-                SR.color = new Color32(255, 255, 255, 255);
-            }
-            else if (HurtTime > WholeHurtTime * 0.25f)
-            {
-                SR.color = new Color32(255, 255, 255, 5);
-            }
-            else if (HurtTime <WholeHurtTime * 0.25f)
-            {
-                SR.color = new Color32(255, 255, 255, 255);
-            }
-            else if (HurtTime <= 0f)
+            print("HurtTime:" + HurtTime);
+            if (HurtTime <= 0f)
             {
                 HurtTime = WholeHurtTime;
                 Hurt = false;
@@ -325,15 +336,20 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         if (col.transform.tag == "Player") {
             _CheckMode = true;  //true면 공격
-			//_GameManager._CheckGold = true;
-			//int coin = Random.Range(0, 21);
-			//_GameManager.m_GetGold(coin);
-		}
-        if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))
-        {   //칼이나 총알에 맞으면
+            if (Target.GetComponent<PlayerController>().touched == false)
+            {
+                Target.GetComponent<PlayerController>().touched = true;
+                //나중에 여기서 플레이어 hp깎는 것도 만들기
+            }
+        }
+        if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
+		{   
             if (Hurt == false)  //안맞은 상태라면
             {
+                print("HURT");
                 Hurt = true;
+                HP -= 10;
+                //나중에 플레이어가 착용한 무기의 공격력 적용하도록
             }
         }
 	}
@@ -349,9 +365,6 @@ public class MonstersAI_FIXED : MonoBehaviour
 		if(col.transform.tag == "Player"){
 			_CheckMode = false;
 			// 공격 받았을 때 데미지 처리.
-			//_GameManager._CheckGold = false;
-			//int coin = Random.Range(0, 21);
-			//_GameManager.m_GetGold(coin);	
 		}
 	}
 	private void OnCollisionStay2D(Collision2D other)
