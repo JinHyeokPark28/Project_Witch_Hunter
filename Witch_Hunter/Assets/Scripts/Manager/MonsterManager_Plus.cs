@@ -111,7 +111,6 @@ public class MonsterManager_Plus : MonoBehaviour
             {
                 RespawnPoint.Add(GameObject.FindGameObjectsWithTag("Respawn")[i].transform.position);
                 
-                print("RespawnPoint:" + RespawnPoint[i]);
             }
             print("Scene:" + Stage);
             for (int i = 0; i < RespawnPoint.Count; i++)

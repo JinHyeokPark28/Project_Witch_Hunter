@@ -62,12 +62,6 @@ public class DetectingPlayer : MonoBehaviour {
         }
         if (ParentMonster.GetComponent<MonstersAI_FIXED>().GetInfo == true)
         {
-            //마리오네트_S인경우 맵 전체를 살펴보기->이 오브젝트(특정 공간안에 플레이어 들어오면 플레이어 보는것(->노필요
-            //그냥 맵에 바로 플레이어 들어온 순간 바로 보도록->바로 공격자세 취하도록->베타 까지?
-            if (ParentMonster.GetComponent<MonstersAI_FIXED>().index == 2)
-            {
-                Destroy(this.gameObject);
-            }
         }
         #endregion
     }
@@ -78,6 +72,7 @@ public class DetectingPlayer : MonoBehaviour {
         {
             //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(추적모드=1)
             ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 1;
+            //들어오긴 함. 실제 스테이트도 바뀜
             PlayerExit = false;
         }
     }
