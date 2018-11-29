@@ -6,14 +6,14 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour {
 	#region Private Variable
 	private static GameManager _GameManager = null;
+    //private MonsterManager_Plus _MonsterManager = null;
 
-	
 
-	public Text Gold;                                           // 골드 텍스트
+    public Text Gold;                                           // 골드 텍스트
 	#endregion
 
 	#region Public Variable
-	public bool _CheckGold = false;
+	public bool _CheckGold = false; 
 	public bool _isDead = false;
 
 	public int m_Gold = 0;										// 몬스터 골드 드랍
@@ -29,7 +29,10 @@ public class GameManager : MonoBehaviour {
 			Destroy(gameObject);
 
 		DontDestroyOnLoad(gameObject);
-	}
+
+        //if (_MonsterManager == null)
+        //    _MonsterManager = transform.Find("EnemyManager").GetComponent<MonsterManager_Plus>();
+    }
 	#endregion
 
 	#region Public Method
@@ -62,5 +65,18 @@ public class GameManager : MonoBehaviour {
 		Gold.text ="G" + w_Gold.ToString("N0");
 	}*/
 	#endregion
+
+
+    //public MonsterManager_Plus monsterManager
+    //{ get { return _MonsterManager; } }
+
+    //public void Test()
+    //{
+    //    MonsterManager_Plus temp;
+
+    //    temp = GameManager.GetGameManager.monsterManager;
+        
+    //    temp.
+    //}
 
 }

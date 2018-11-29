@@ -97,8 +97,6 @@ public class PlayerController : MonoBehaviour {
 
                 if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
                 {
-                    print("PlayerPos:" + transform.position);
-                    print("PointPos:" + GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position);
                     //그전 씬에 있던 포지션 잡아버림
                     transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
                 }
@@ -112,8 +110,6 @@ public class PlayerController : MonoBehaviour {
                 //씬 전환되는데 씬 마지막 부분에서 시작해야 한다면(이전 씬에 돌입)
                 if (GameObject.FindGameObjectWithTag("SceneBackPoint") != null)
                 {
-                    print("PlayerPos:" + transform.position);
-                    print("PointPos:" + GameObject.FindGameObjectWithTag("SceneBackPoint").transform.position);
                     //그전 씬에 있던 포지션 잡아버림
                     transform.position = GameObject.FindGameObjectWithTag("SceneBackPoint").transform.position;
                 }
@@ -217,6 +213,13 @@ public class PlayerController : MonoBehaviour {
         if (collision.gameObject.tag == "Ground")
         {
             //바닥에 부딪히면
+            CanJump = true;
+        }
+        if (collision.gameObject.tag == "AirGround")
+        {
+            //공중에 있는 발판에 부딪히면
+            //스페이스바 누르고 위로 올라갈때(=중력에 의해 떨어지고 있는 상태가 아닐때) 발판에 부딪히면 발판 그대로 통과하도록 하기
+            //->다시 떨어지는 동안은??->떨어지는 동안 발판에 걸친 상태면??->triggerExit??
             CanJump = true;
         }
         

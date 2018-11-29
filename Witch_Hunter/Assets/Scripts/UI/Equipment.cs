@@ -7,6 +7,7 @@ public class Equipment : MonoBehaviour {
 
 	#region Private Variable
 	private PlayerStatManager thePlayerState;
+    private PlayerStateUI thePlayerUI;
 	private Inventory theInven;
 	private OKOrCancel theOOC;
 	private const int WEAPON = 0, GUN = 1, ARMOR = 2;
@@ -27,7 +28,8 @@ public class Equipment : MonoBehaviour {
 	#region Private Method
 	private void Start()
 	{
-		thePlayerState = FindObjectOfType<PlayerStatManager>();
+        thePlayerUI = GetComponent<PlayerStateUI>();
+        thePlayerState = FindObjectOfType<PlayerStatManager>();
 		theOOC = FindObjectOfType<OKOrCancel>();
 		theInven = FindObjectOfType<Inventory>();
 		text[0].text = "무기 1";
@@ -53,38 +55,26 @@ public class Equipment : MonoBehaviour {
 					}
 				}
 			}
-		}
+	}
 			else
 			{
 				ClearEquip();
 				ShowEquip();
 			}
 	}
-	private void EquipEffect(Item _item)
-	{
-		thePlayerState.atk += _item.atk;
-		thePlayerState.def += _item.def;
-		thePlayerState.recover_hp += _item.recover_hp;
-	}
-	private void TakeOffEffect(Item _item)
-	{
-		thePlayerState.atk -= _item.atk;
-		thePlayerState.def -= _item.def;
-		thePlayerState.recover_hp -= _item.recover_hp;
-	}
 	#endregion
 
 	#region Public Method
-	public void EquipItem(Item _item)
+	public void EquipItem(Item _item)                   // 아이템 장착
 	{
-		string temp = _item.itemID.ToString();
-		temp = temp.Substring(0, 3);
+		string temp = _item.itemID.ToString();         // 아이템아이디 스트링형으로 임시 저장
+		temp = temp.Substring(0, 3);                   // 아이템아이디 10001 -> 100이런식으로 잘라냄
 		switch(temp)
 		{
 			case "200": //무기
-				EquipItemCheck(WEAPON, _item);
-				text[0].text = _item.itemName;
-				img_slots[0].sprite = _item.itemIcon;
+				EquipItemCheck(WEAPON, _item);                  // 상수값 확인후 아이템 종류 확인
+				text[0].text = _item.itemName;                  // 아이템 이름 들어감
+				img_slots[0].sprite = _item.itemIcon;           // 아이템 아이콘 들어감
 				break;
 			case "201": //갑옷
 				EquipItemCheck(ARMOR, _item);
@@ -99,9 +89,9 @@ public class Equipment : MonoBehaviour {
 		}
 		ShowEquip();
 	}
-	public void EquipItemCheck(int _count, Item _item)
+	public void EquipItemCheck(int _count, Item _item)              // 아이템 확인하는 함수
 	{
-		if(equipItemList[_count].itemID == 0)
+		if(equipItemList[_count].itemID == 0)                       // 장비아이템 리스트 확인후 아이디
 		{
 			equipItemList[_count] = _item;
 		}
@@ -110,7 +100,6 @@ public class Equipment : MonoBehaviour {
 			theInven.EquipToInventory(equipItemList[_count]);
 			equipItemList[_count] = _item;
 		}
-		EquipEffect(_item);
 	}
 	public void ClearEquip()
 	{
@@ -137,6 +126,10 @@ public class Equipment : MonoBehaviour {
 			}
 		}
 	}
+    public void EquipStat(Item _item)
+    { 
+        equipItemList[selectedSlot].atk = thePlayerUI.S_dam;
+    }
 	#endregion
 	#region 코루틴
 	IEnumerator OOCCoroutine(string _up, string _down)
@@ -147,10 +140,10 @@ public class Equipment : MonoBehaviour {
 		if (theOOC.GetResult())
 		{
 			theInven.EquipToInventory(equipItemList[selectedSlot]);
-			TakeOffEffect(equipItemList[selectedSlot]);
 			equipItemList[selectedSlot] = new Item(0, "", "", Item.ItemType.Equip);
 			ClearEquip();
 			ShowEquip();
+            EquipStat(equipItemList[selectedSlot]);
 		}
 		inputKey = false;
 		Go_OOC.SetActive(false);

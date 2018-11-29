@@ -7,7 +7,6 @@ public class Inventory : MonoBehaviour
 {
 
 	#region Private Vairable
-	
 	private InventorySlot[] slots;      // 인벤토리 슬롯
 	private OKOrCancel theOOC;
 	private DatabaseManager theDatabase;
@@ -41,10 +40,10 @@ public class Inventory : MonoBehaviour
 	public GameObject[] selectedTabImages;  // 아이템 위에 있을때 깜박거릴 패널
 	#endregion
 	#region Private Method
-	private void Start()
+	private void Awake()
 	{
 		instance = this;
-		theDatabase = FindObjectOfType<DatabaseManager>();
+        theDatabase = FindObjectOfType<DatabaseManager>();
 		theOOC = FindObjectOfType<OKOrCancel>();
 		inventoryItemList = new List<Item>();
 		inventoryTabList = new List<Item>();
@@ -54,6 +53,12 @@ public class Inventory : MonoBehaviour
 
 	private void Update()
 	{
+        //if (Input.GetKeyDown(KeyCode.O))
+        //{
+        //    Debug.Log((theDatabase == null) ? "NULL" : "N");
+        //}
+
+
 		if (!stopKeyInput)
 		{
 			if (Input.GetKeyDown(KeyCode.I))
@@ -273,7 +278,7 @@ public class Inventory : MonoBehaviour
 						if(inventoryItemList[i].itemType == Item.ItemType.Use)
 						{
 							if (inventoryItemList[i].itemCount > 1)
-							{                     // 아이템이 1개보다 많으면 삭제
+							{                                                    // 아이템이 1개보다 많으면 삭제
 								inventoryItemList[i].itemCount--;
 								ShowItem();
 							}

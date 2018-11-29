@@ -7,15 +7,16 @@ public class DatabaseManager : MonoBehaviour {
 
 	#region Private Variable
 	private PlayerStatManager thePlayerStat;
-	#endregion
+    #endregion
 
-	#region Public Variable
-	static public DatabaseManager instance;
-	
-	#endregion
+    #region Public Variable
+    static public  DatabaseManager instance;
 
-	#region Private Method
-	private void Awake()
+    public List<Item> itemList = new List<Item>();
+    #endregion
+
+    #region Private Method
+    private void Awake()
 	{
 		if(instance != null)
 		{
@@ -87,15 +88,8 @@ public class DatabaseManager : MonoBehaviour {
 				break;
 			case 10102:
 				break;
-			case 20001:
-				break;
-			case 20101:
-				break;
-			case 20201:
-				break;
 
 		}
 	}
-	public List<Item> itemList = new List<Item>();
 	#endregion
 }

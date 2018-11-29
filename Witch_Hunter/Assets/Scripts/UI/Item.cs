@@ -13,10 +13,10 @@ public class Item{
 	public Sprite itemIcon;         // 아이템의 아이콘
 	public ItemType itemType;       // 아이템 타입
 
-	public int atk;
-	public int def;
-	public int recover_hp;
-	public int add_hp;
+	public int atk;                 // 아이템 공격력
+	public int def;                 // 아이템 방어력
+	public int recover_hp;          // 체력 회복력
+	public int add_hp;              // 추가 체력
 	public enum ItemType
 	{
 		Use, Equip, ETC

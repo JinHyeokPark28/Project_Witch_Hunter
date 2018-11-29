@@ -18,14 +18,16 @@ public class PlayerStateUI : MonoBehaviour {
 	public Image Player_Image;
 	public GameObject Go;
 	public Slider Healthy;
-
+    public int S_dam;
+    public int G_dam;
+    public int armor;
 	public int NowHP;
-	#endregion
-
+    #endregion
+   
 	#region Private Method
 	private void Start()
 	{
-		theGame = FindObjectOfType<GameManager>();
+        theGame = FindObjectOfType<GameManager>();
 		_StatManager = FindObjectOfType<PlayerStatManager>();
 		theEquip = FindObjectOfType<Equipment>();
 		theDatabase = FindObjectOfType<DatabaseManager>();
@@ -68,12 +70,11 @@ public class PlayerStateUI : MonoBehaviour {
 	}
 	public void SwordDamage()
 	{
-		text[1].text = _StatManager.atk.ToString();
-	}
+        text[1].text = PlayerStatManager.instance.atk.ToString();
+    }
 	public void GunDamage()
 	{
-
-		text[2].text = _StatManager.atk.ToString();
+        
 	}
 	public void Armor()
 	{

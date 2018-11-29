@@ -82,7 +82,7 @@ public class DetectingPlayer : MonoBehaviour {
         {
             //플레이어가 추적 영역 빠져나간 경우
             PlayerExit = true;
-            print("EXIT");
+
         }
     }
 }

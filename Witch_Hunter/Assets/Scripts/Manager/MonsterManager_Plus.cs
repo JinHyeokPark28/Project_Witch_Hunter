@@ -107,19 +107,21 @@ public class MonsterManager_Plus : MonoBehaviour
             Stage = SceneManager.GetActiveScene().buildIndex;
             //스테이지 바뀌면 리스폰 포인트 새로 받아옴
             //일반 몬스터 리젠
-            for (int i = 0; i < GameObject.FindGameObjectsWithTag("Respawn").Length; i++)
+            if (GameObject.FindGameObjectsWithTag("Respawn").Length > 0)
             {
-                RespawnPoint.Add(GameObject.FindGameObjectsWithTag("Respawn")[i].transform.position);
-                
+                print("RESPAWN_EXIST");
+                for (int i = 0; i < GameObject.FindGameObjectsWithTag("Respawn").Length; i++)
+                {
+                    RespawnPoint.Add(GameObject.FindGameObjectsWithTag("Respawn")[i].transform.position);
+
+                }
+                for (int i = 0; i < RespawnPoint.Count; i++)
+                {
+                    RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
+                    Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
+                }
             }
-            print("Scene:" + Stage);
-            for (int i = 0; i < RespawnPoint.Count; i++)
-            {
-                RandomNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-                Instantiate(NormalMonsterList[RandomNum], new Vector3(RespawnPoint[i].x, RespawnPoint[i].y + 3, transform.position.z), transform.rotation);
-            }
-            
-      
+
         }
 
     }

@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class WitchManager : MonoBehaviour
 {
-    private static MonsterManager_Plus _MonsterManager_Plus = null;
     public int Stage;   //스테이지 넘버에 따라 스폰하는 몬스터 종류 달라짐
     //각 씬의 오브젝트로부터 씬 넘버 받아옴
     public bool getSceneNumber;
@@ -27,6 +26,17 @@ public class WitchManager : MonoBehaviour
     public bool WitchExist; //마녀 오브젝트가 존재하는지
     public int NowStage;    //현재 스테이지 번호
     #endregion
+
+    private enum Contidion
+    {
+        BURN, FROZEN, KNOCKBACK
+
+    };
+    public enum S_Witch
+    {
+        ALCHEMIST, WIND, WATER, FIRE
+
+    };
     // Use this for initialization
     void Start()
     {
@@ -87,16 +97,6 @@ public class WitchManager : MonoBehaviour
             CanGoFinal = true;  //광기의 마녀 단계 해금
         }
 	}
-	private enum Contidion 
-	{ 
-	BURN, FROZEN, KNOCKBACK 
-	
-	};
-	public enum S_Witch
-	{ 
-	ALCHEMIST, WIND, WATER, FIRE 
-	
-	};
 	public void GetOption(int index)
     {
         //첫 줄만 읽어오도록 하는 함수

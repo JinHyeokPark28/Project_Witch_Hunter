@@ -16,7 +16,7 @@ public class PlayerSaveManager : MonoBehaviour {
     #region Private Variable
 
     #endregion
-
+  
     #region Public Variable
     public TextAsset PlayerInfoCSV; //게임을 처음 시작할 때 불러올 플레이어 정보
     public string[] option;
