@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour {
 	#region Private Variable
 	private static GameManager _GameManager = null;
+    public MenuManager _MenuManager = null;
     //private MonsterManager_Plus _MonsterManager = null;
 
 
@@ -30,15 +31,17 @@ public class GameManager : MonoBehaviour {
 
 		DontDestroyOnLoad(gameObject);
 
+        //if (_MenuManager == null)
+        //    _MenuManager.transform.Find("MenuManager").GetComponent<MenuManager>();
         //if (_MonsterManager == null)
         //    _MonsterManager = transform.Find("EnemyManager").GetComponent<MonsterManager_Plus>();
     }
 	#endregion
 
-	#region Public Method
-	public static GameManager GetGameManager{
-		get{ return _GameManager; }
-	}
+     #region Public Method
+     public static GameManager GetGameManager{
+      get{ return _GameManager; }
+     }
 
 	public void m_GetGold(int value)                          // 몬스터한테 얻는 돈
 	{

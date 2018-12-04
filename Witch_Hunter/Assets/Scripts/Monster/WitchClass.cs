@@ -8,6 +8,7 @@ public class WitchClass : MonoBehaviour
 {
     public GameObject WitchMngr;
     #region 몬스터 공통 속성
+    private GameObject Player;
     public string Name;
     public int HP;  //100으로 나누어지게!!
     public int WholeHP=0;    //hp 최댓값
@@ -35,14 +36,34 @@ public class WitchClass : MonoBehaviour
     private bool AllMake = false;
     private bool AllMake_2 = false;
     private bool AllMake_3 = false;
-    
+
     //매 페이즈마다 같이 써야 할것 같음
+    #endregion
+    #region 물 마녀 속성
+    public GameObject WaterBall;
+    private GameObject AquaWave_Left;
+    private GameObject AquaWave_Right;
+    private bool Water_Skill1_Done;
+    public Vector3 AquaWaveRespawnLocation;  //아쿠아 웨이브 소환할 벡터
+
     #endregion
     // Use this for initialization
     void Start()
     {
-       WitchMngr = GameObject.FindGameObjectWithTag("WitchManager");
+        Player = GameObject.FindGameObjectWithTag("Player");
+        WitchMngr = GameObject.FindGameObjectWithTag("WitchManager");
         Phase_before = 1;
+        for(int i = 0; i < GameObject.FindGameObjectsWithTag("Waves").Length; i++)
+        {
+            if (GameObject.FindGameObjectsWithTag("Waves")[i].name == "Waves_Left")
+            {
+                AquaWave_Left = GameObject.FindGameObjectsWithTag("Waves")[i];
+            }
+            else
+            {
+                AquaWave_Right = GameObject.FindGameObjectsWithTag("Waves")[i];
+            }
+        }
     }
 
     // Update is called once per frame
@@ -50,7 +71,6 @@ public class WitchClass : MonoBehaviour
     {
         if (getInfo == true)    //witchMAnager로부터 정보를 받아왔다면
         {
-
             //페이즈가 바뀌었는지 아닌지 체크하는 함수
             if (Phase_before != Phase&&Phase!=1)
             {
@@ -64,8 +84,9 @@ public class WitchClass : MonoBehaviour
             {
                 WholeHP = HP;   //HP최대량=처음 HP값
             }
-            if (index != 5)
+            if (index != 5&&HP>0)
             {
+
                 //광기 제외한 나머지 마녀들의 페이즈
                
                 if ((HP > WholeHP * 0.5f))
@@ -113,6 +134,20 @@ public class WitchClass : MonoBehaviour
                     {
                         JellyNeedle();
                         RespawningMarionnette();
+                    }
+                    break;
+                case 2:
+                    {
+                        //물의 마녀 인 경우
+                        if (Water_Skill1_Done == false)
+                        {
+                            StartCoroutine(WaterDrop());
+                        }
+                        else
+                        {
+                            //들어감
+                        }
+                        
                     }
                     break;
             }
@@ -224,7 +259,6 @@ public class WitchClass : MonoBehaviour
                         y = UnityEngine.Random.Range(0, GameObject.FindGameObjectsWithTag("Respawn").Length);
                         if (y != x)
                         {
-                            print("NOT_SAME");
                             break;
                         }
                     }
@@ -233,7 +267,6 @@ public class WitchClass : MonoBehaviour
                         z = UnityEngine.Random.Range(0, GameObject.FindGameObjectsWithTag("Respawn").Length);
                         if (z != x)
                         {
-                            print("NOT_SAME_phase2");
                             break;
                         }
                     }
@@ -264,5 +297,48 @@ public class WitchClass : MonoBehaviour
         }
     }
     #endregion
+    #endregion
+    #region 물의 마녀 스킬들(패턴들)
+    IEnumerator WaterDrop()
+    {
+        while(true)
+        //while (Water_Skill1_Done ==false)
+        {
+            if (WaterBall != null)
+            {
+                Water_Skill1_Done = true;   //우선 들어갔으니 한번은 실행됨
+                //페이즈1,2시에 사용되는 침수스킬
+                //물방울 플레이어 위치로 위에서 떨어짐-3개 소환
+                //플레이어가 뒤로 못지나가고, 없애려면 플레이어가 공격해서 없애야함
+                //페이즈 2때는 바닥에 떨어진 물방울이 3개가 되면 물의 마녀 회복 스킬 됨
+                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                yield return new WaitForSeconds(2);
+                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                yield return new WaitForSeconds(2);
+                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                yield return new WaitForSeconds(15);
+            }
+
+        }
+    }
+    void MakingAquaWave()
+    {
+        //비활성화 된 웨이브에게 자식들 오브젝트들 깨우라고&작동 시키라고 신호보내기
+        //좌우에 하나씩
+    }
+    #endregion
+    #region 다쳤을 때(플레이어에게 공격 먹었을 때)
+    //플레이어와 마녀 부딪혔을 때 그 충돌만 isTrigger로 처리하고싶음(안밀리게)
+    //특정 오브젝트과 충돌만 isTrigger처리 어떻게???
+    //방법1. 콜라이더 두개 붙이기(안떨어지도록 하나는 그대로 collider,다른 하나는 trigger)
+    //방법2. 부딪힌 동안에만 RIgidbody2d:kinematic으로 해서 중력값 안받게 처리. 그리고 콜라이더 trigger로 처리(점프하며 공격할때)
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player"&&collision.gameObject.GetComponent<PlayerController>().IsAttacking==true)
+        {
+            print("WITCH_HURT");
+            HP -= 10;
+        }
+    }
     #endregion
 }

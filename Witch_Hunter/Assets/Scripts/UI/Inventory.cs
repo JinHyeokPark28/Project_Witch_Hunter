@@ -6,7 +6,8 @@ using UnityEngine.UI;
 public class Inventory : MonoBehaviour
 {
 
-	#region Private Vairable
+    #region Private Vairable
+    private MenuManager theMenu;
 	private InventorySlot[] slots;      // 인벤토리 슬롯
 	private OKOrCancel theOOC;
 	private DatabaseManager theDatabase;
@@ -18,7 +19,7 @@ public class Inventory : MonoBehaviour
 	private int selectedItem;               // 선택된 아이템
 	private int selectedTab;                // 선택된 탭
 
-	private bool activated;                 // 인벤토리 활성화시 true;
+	public bool activated;                 // 인벤토리 활성화시 true;
 	private bool tabActivated;              // 탭 활성화시 true;
 	private bool itemActivated;             // 아이템 활성화시 true;
 	private bool stopKeyInput;              // 키입력 제한 (소비할 때 질의가 나옴, 그때 키입력 방지)
@@ -43,12 +44,14 @@ public class Inventory : MonoBehaviour
 	private void Awake()
 	{
 		instance = this;
+        theMenu = GetComponent<MenuManager>();
         theDatabase = FindObjectOfType<DatabaseManager>();
 		theOOC = FindObjectOfType<OKOrCancel>();
 		inventoryItemList = new List<Item>();
 		inventoryTabList = new List<Item>();
 		slots = Slots.GetComponentsInChildren<InventorySlot>();
-		theEquip = FindObjectOfType<Equipment>(); 
+		theEquip = FindObjectOfType<Equipment>();
+        
 	}
 
 	private void Update()
@@ -61,11 +64,11 @@ public class Inventory : MonoBehaviour
 
 		if (!stopKeyInput)
 		{
-			if (Input.GetKeyDown(KeyCode.I))
-			{
-				activated = !activated;
+			//if (Input.GetKeyDown(KeyCode.I))
+			//{
+				//activated = !activated;
 
-				if (activated)
+				if (activated == true)
 				{
 					// 안움직이게 하기
 					Go.SetActive(true);
@@ -84,7 +87,7 @@ public class Inventory : MonoBehaviour
 					OpenEquip(false);
 
 				}
-			}
+			//}
 
 			if (activated)                          // 인벤토리가 활성화 되었을 경우
 			{

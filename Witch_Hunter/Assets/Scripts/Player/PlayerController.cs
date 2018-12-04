@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour {
     public float JumpSpeed;
     public bool CanJump;
     //true면 점프 가능, false면 점프 불가능
+    public bool JumpUp;
+    //뛰었음&&공중으로 올라가는 상태(rigidbody.velocity.y>0)
     public bool IsAttacking;    //공격하고 있으면 true
     public bool UpAttack;
     //true면 위쪽으로 공격하고 있을 때(방향키 누르고 있을 때)
@@ -35,12 +37,13 @@ public class PlayerController : MonoBehaviour {
                                     //false면 backpoint에서 시작 ->씬 체인저 쪽에서 신호 줌
     private static bool playerExists; //이미 플레이어가 존재하면 true
                                       //선언된 함수 내에서만 접근이 가능하다.
-    /*정적(static)변수:
-    딱 1회만 초기화되고 프로그램 종료 시까지
-    메모리 공간에 존재한다.
-    출처: http://1924.tistory.com/30 */
-                                    //이 스크립트를 쓰는 모든 오브젝트는 같은 playerExists를 씀
-                                    // Use this for initialization
+                                      /*정적(static)변수:
+                                      딱 1회만 초기화되고 프로그램 종료 시까지
+                                      메모리 공간에 존재한다.
+                                      출처: http://1924.tistory.com/30 */
+                                      //이 스크립트를 쓰는 모든 오브젝트는 같은 playerExists를 씀
+                                      // Use this for initialization
+    private Rigidbody2D RG;
     #endregion
         //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
         //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
@@ -60,7 +63,7 @@ public class PlayerController : MonoBehaviour {
         {
             Destroy(gameObject);
         }
-
+        RG = this.gameObject.GetComponent<Rigidbody2D>();
         if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
         {
             //처음 시작할 포인트 따로, 씬에서 되돌아올 포인트 따로 한 씬에 최소 2개 있어야함
@@ -88,6 +91,7 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+       
         if (SceneNum != SceneManager.GetActiveScene().buildIndex)
         {
             //실제로 씬 바뀌었을 때 실행해야함
@@ -120,21 +124,18 @@ public class PlayerController : MonoBehaviour {
             }
             SceneNum = SceneManager.GetActiveScene().buildIndex;
         }
-
-
         UpAttack = false;
         DownState = false;
         PlayerMove();
         ChangeWeapon();
         NumberKeyManager();
         TouchEnemy();
+        JumpManaging();
         //공격,세이브,상호작용키
         if (Input.GetKeyDown(KeyCode.A))
         {
-            print("Press A");
             _Anim.SetBool("P_Attack", true);
             _Anim.SetBool("IsRun", false);
-            IsAttacking = true;
             if (CheckNPC == true)
             {
 
@@ -148,6 +149,10 @@ public class PlayerController : MonoBehaviour {
             else if (CheckSave == true)
             {
 
+            }
+            else
+            {
+                IsAttacking = true;
             }
             //세이브포인트
         }
@@ -196,17 +201,43 @@ public class PlayerController : MonoBehaviour {
             if (CanJump == true && Time.timeScale == 1)
             {
                 CanJump = false;
-                GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
+                RG.velocity = new Vector2(0, JumpSpeed);
+                //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
             }
             else
             {
             }
         }
-       
+
     }
     #endregion
-    
+    #region 뛰었을 때 발판 그대로 통과하도록하는 함수
+    void JumpManaging()
+    {
+        if (CanJump == false && RG.velocity.y >0f)
+        {
+            //뛰고 있는 중&&위로 올라갈 때는 공중에 있는 발판에 부딪혀도 레이어 충돌하지 않도록       
+            JumpUp = true;
+
+        }
+        //발판 태그은 AirGround로 맞춰줘야함
+        else
+        {
+            JumpUp = false;
+        }
+        if (JumpUp == false && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == true)
+        {
+            this.gameObject.GetComponent<BoxCollider2D>().isTrigger = false;
+        }
+        if (JumpUp == true && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == false)
+        {
+            this.gameObject.GetComponent<BoxCollider2D>().isTrigger = true;
+        }
+
+    }
+    #endregion
     #region CanJump관리
+  
     private void OnCollisionStay2D(Collision2D collision)
     {
 
@@ -220,15 +251,16 @@ public class PlayerController : MonoBehaviour {
             //공중에 있는 발판에 부딪히면
             //스페이스바 누르고 위로 올라갈때(=중력에 의해 떨어지고 있는 상태가 아닐때) 발판에 부딪히면 발판 그대로 통과하도록 하기
             //->다시 떨어지는 동안은??->떨어지는 동안 발판에 걸친 상태면??->triggerExit??
+            
             CanJump = true;
         }
         
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Ground")
+        if (collision.gameObject.tag == "Ground"||collision.gameObject.tag=="AirGround")
         {
-            //바닥에 부딪히면
+            //공중에 뜨는 상태면
             CanJump = false;
         }
     }
@@ -276,6 +308,7 @@ public class PlayerController : MonoBehaviour {
                 FlashActive = true;
             }
         }
+        
         if (GameObject.Find("NPCSymbol") != null)
         {
 
@@ -300,13 +333,11 @@ public class PlayerController : MonoBehaviour {
         if (collision.gameObject.transform.tag == "TreasureBox")
         {
             CollidedTreasureBox = collision.gameObject;
-            print("CollidedTreasure");
             OpeningTreasureBox();
         } 
         //Rigidbody2d기본은 멈추면 작동안해서 Sleeping모드로 들어감. 그래서 오브젝트가 움직이지 않으면 Rigidbody2d에 관련된 스크립트,함수들도 작동안함->해결법:rigidbody의 SleepingMode를 NeverSleep로 켜줘야함
         if (collision.gameObject.tag == "NPC")
         {
-            print("NPC");
            
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -378,11 +409,10 @@ public class PlayerController : MonoBehaviour {
     //만약 얘도 에러나면 update 쪽에서 A키 눌렸을 때 true인 bool함수 만들어서 하기!!
     void OpeningTreasureBox()
     {
-        print("dd");
         if (Input.GetKeyDown(KeyCode.A))
         {
-             print("AA");
-            Destroy(CollidedTreasureBox);
+            CollidedTreasureBox.GetComponent<TreasureBox>().isOpen = true;
+            //Destroy(CollidedTreasureBox);
             CollidedTreasureBox = null;
         }
     }

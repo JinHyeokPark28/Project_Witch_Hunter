@@ -8,6 +8,8 @@ using System;
 
 public class MonsterManager_Plus : MonoBehaviour
 {
+    //일일히 매니저 쪽에서 전체 보고 하는 것 보다는 
+    //각 포인트 마다 스크립트 달아서 각 포인트마다 리스폰 하는게 나음
     //몬스터, 마녀마다 CSV파일 따로있음
     #region Private Variable
     private static MonsterManager_Plus _MonsterManager_Plus = null;
@@ -109,7 +111,6 @@ public class MonsterManager_Plus : MonoBehaviour
             //일반 몬스터 리젠
             if (GameObject.FindGameObjectsWithTag("Respawn").Length > 0)
             {
-                print("RESPAWN_EXIST");
                 for (int i = 0; i < GameObject.FindGameObjectsWithTag("Respawn").Length; i++)
                 {
                     RespawnPoint.Add(GameObject.FindGameObjectsWithTag("Respawn")[i].transform.position);

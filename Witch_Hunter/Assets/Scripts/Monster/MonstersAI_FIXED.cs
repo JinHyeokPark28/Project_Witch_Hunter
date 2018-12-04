@@ -132,7 +132,6 @@ public class MonstersAI_FIXED : MonoBehaviour
                                 NotMovingMonsterAttack();
                                 _Anim.SetBool("Attack", true);
                                 _Anim.SetTrigger("SET");
-                                print("ATTACK");
                                 //플레이어 발견모드(이때 조준&&공격)
                             }
                             else if (_isMonstate == 3)
@@ -395,6 +394,7 @@ public class MonstersAI_FIXED : MonoBehaviour
 	}
 	private void OnCollisionStay2D(Collision2D other)
 	{
+      
 	}
     #region 고정형 원거리 몬스터가 플레이어 발견&공격하는 함수
     public void NotMovingMonsterAttack()

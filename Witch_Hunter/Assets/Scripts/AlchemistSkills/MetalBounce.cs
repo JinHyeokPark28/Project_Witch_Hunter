@@ -10,7 +10,6 @@ public class MetalBounce : MonoBehaviour {
     IEnumerator RespawningSlim()
     {
         yield return new WaitForSeconds(TimeNum);
-        print("START:" + TimeNum);
         while (true)
         {
             Instantiate(metalSlime, transform.position, Quaternion.Euler(0, 0, 0));
