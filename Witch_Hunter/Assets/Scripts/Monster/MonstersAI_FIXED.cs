@@ -80,12 +80,15 @@ public class MonstersAI_FIXED : MonoBehaviour
             HurtTime -= Time.deltaTime;
         }
         GetHurt();
-        if (_isMonstate == 0)
+        if (isDead == false)
         {
-            if (MovingTime < 0f)
+            if (_isMonstate == 0)
             {
-                MovingTime = 3f;
-                isLeft = !isLeft;   //계속 반대값 주기
+                if (MovingTime < 0f)
+                {
+                    MovingTime = 3f;
+                    isLeft = !isLeft;   //계속 반대값 주기
+                }
             }
         }
         if (GetInfo == true)
@@ -98,7 +101,11 @@ public class MonstersAI_FIXED : MonoBehaviour
 			if (Recon == false)
             {
                 //그냥 여기서는 switch 없애도 될듯?
-
+                if (HP <= 0)
+                {
+                    isDead = true;
+                    _isMonstate = 3;
+                }
                 switch (MonsterType) {
                     case 0:
                         {
@@ -291,7 +298,7 @@ public class MonstersAI_FIXED : MonoBehaviour
     #region 플레이어를 따라가는 함수
     void Chasing()
     {
-        if (_isMonstate == 1)
+        if (_isMonstate == 1&&isDead==false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Target.transform.position.x < transform.position.x)
