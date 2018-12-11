@@ -19,6 +19,10 @@ public class DetectingPlayer : MonoBehaviour {
         PosX = transform.localPosition.x;
         ParentMonster.GetComponent<MonstersAI_FIXED>().SearchArea = this.gameObject;
         //StartCoroutine(TimeChecker());
+        if (WaitTime == 0)
+        {
+            WaitTime = 5;
+        }
     }
     //플레이어 발견&&추적(_isMonState==1)인 상태에서 플레이어와 접촉 안한 상태
     /*IEnumerator TimeChecker()
