@@ -6,6 +6,7 @@ using System.IO;
 public class WitchClass : MonoBehaviour
 {
     public GameObject WitchMngr;
+    private BoxCollider2D Bounds;  //소울 파이어 소환할 때 맵 안에서만 있게 하려고
     #region 몬스터 공통 속성
     private GameObject Player;
     public string Name;
@@ -42,16 +43,24 @@ public class WitchClass : MonoBehaviour
     public GameObject WaterBall;
     private GameObject AquaWave_Left;
     private GameObject AquaWave_Right;
+    private bool DoNotPhaseUp = false;  //hp회복되도 페이즈 그대로인걸로
     private bool FindWave = false;  //찾으면 true
     private bool Water_Skill1_Done;
-    
     public bool WaveActive = false; //true면 아무거나 켜져있는것, 웨이브매니저 꺼지기 전에 얘 false로 다시 만들어줌
+    private bool ActivateRecovery = false;
+    public int DROP_NUMBER=0; //슬라임쪽에서 +1씩 더해줌. 3되면 회복시작
+    #endregion
+    #region 불의 마녀 속성
+    public GameObject Flame;
+    public int MadeFlameNumber = 0;
+    public GameObject FireRay;
     #endregion
     // Use this for initialization
     void Start()
     {
         Player = GameObject.FindGameObjectWithTag("Player");
         WitchMngr = GameObject.FindGameObjectWithTag("WitchManager");
+        Bounds = GameObject.FindGameObjectWithTag("Bounds").GetComponent<BoxCollider2D>();
         Phase_before = 1;
         for (int i = 0; i < GameObject.FindGameObjectsWithTag("Waves").Length; i++)
         {
@@ -102,13 +111,20 @@ public class WitchClass : MonoBehaviour
                 if ((HP > WholeHP * 0.5f))
                 {
                     //HP가 100%~75%라면
-                    Phase = 1;
-                    Phase_1();
+                    if (DoNotPhaseUp ==false)
+                    {
+                        Phase = 1;
+                        Phase_1();
+                        DoNotPhaseUp = true;
+                    }
                 }
-                else if (HP > 0)
+                if (DoNotPhaseUp == true)
                 {
-                    Phase = 2;
-                    Phase_2();
+                    if (HP > 0)
+                    {
+                        Phase = 2;
+                        Phase_2();
+                    }
                 }
             }
             else if (index == 5)
@@ -151,12 +167,12 @@ public class WitchClass : MonoBehaviour
                         //물의 마녀 인 경우
                         if (Water_Skill1_Done == false)
                         {
-                            //StartCoroutine(WaterDrop());
+                            StartCoroutine(WaterDrop());
                             Water_Skill1_Done = true;   //우선 들어갔으니 한번은 실행됨
                         }
                         if (WaveActive == false)
                         {
-                            StartCoroutine(WaveWave());
+                           // StartCoroutine(WaveWave());
                             WaveActive = true;
                         }
                         else
@@ -164,6 +180,15 @@ public class WitchClass : MonoBehaviour
                             //들어감
                         }
 
+                    }
+                    break;
+                case 3:
+                    //불의 마녀 페이즈1
+                    {
+                        if (MadeFlameNumber==0)
+                        {
+                            StartCoroutine(SoulFire());
+                        }
                     }
                     break;
             }
@@ -189,6 +214,33 @@ public class WitchClass : MonoBehaviour
                         //i++해서 2가 되면 더이상 프리팹 생성X->AllMake=true
                         break;
                     }
+                case 2:
+                    {
+                        if (Water_Skill1_Done == false)
+                        {
+                            StartCoroutine(WaterDrop());
+                            Water_Skill1_Done = true;   //우선 들어갔으니 한번은 실행됨
+                        }
+                        if (WaveActive == false)
+                        {
+                            // StartCoroutine(WaveWave());
+                            WaveActive = true;
+                        }
+                        if (GameObject.FindGameObjectsWithTag("WitchBullet").Length >= 3)
+                        {
+                            if (ActivateRecovery == false)
+                            {
+                                CheckingDrops();
+                            }
+                            if (DROP_NUMBER == 3)
+                            {
+                                HP += 20;
+                                DROP_NUMBER = 0;
+                            }
+                        }
+
+                    }
+                    break;
             }
         }
     }
@@ -318,21 +370,23 @@ public class WitchClass : MonoBehaviour
     #region 물방울 공격
     IEnumerator WaterDrop()
     {
+
         yield return new WaitForSeconds(1);
         while (true)
         //while (Water_Skill1_Done ==false)
         {
             if (WaterBall != null)
             {
+                
                 //페이즈1,2시에 사용되는 침수스킬
                 //물방울 플레이어 위치로 위에서 떨어짐-3개 소환
                 //플레이어가 뒤로 못지나가고, 없애려면 플레이어가 공격해서 없애야함
                 //페이즈 2때는 바닥에 떨어진 물방울이 3개가 되면 물의 마녀 회복 스킬 됨
-                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                GameObject drop1=Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
                 yield return new WaitForSeconds(2);
-                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                GameObject drop2=Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
                 yield return new WaitForSeconds(2);
-                Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
+                GameObject drop3=Instantiate(WaterBall, new Vector2(Player.transform.position.x, 18), new Quaternion(0, 0, 0, 0));
                 yield return new WaitForSeconds(15);
             }
 
@@ -364,7 +418,64 @@ public class WitchClass : MonoBehaviour
 
     }
     #endregion
+    #region 회복 함수
+    void CheckingDrops()
+    {
+        ActivateRecovery = true;
+        int x = 0;
+        List<GameObject> Drops = new List<GameObject>();
+        Drops.Clear();
+        for (int i = 0; i < GameObject.FindGameObjectsWithTag("WitchBullet").Length; i++)
+        {
+            if(GameObject.FindGameObjectsWithTag("WitchBullet")[i].name== "Water Drop")
+            {
+                x++;
+                Drops.Add(GameObject.FindGameObjectsWithTag("WitchBullet")[i]);
+                
+            }
+        }
+        if (x >= 3)
+        {
+            for(int y = 0; y < Drops.Count; y++)
+            {
+                Drops[y].GetComponent<Water_Drop>().GotoWitch = true;
+                
+            }
+        }
+        ActivateRecovery = false;
+    }
+    #endregion
+    //침수에 의해 생긴 물방울을 흡수, 일정    체력을 회복한다.
+    //2페이즈 때만 활성화
+    
+    void Water_Recovery()
+    {
+        if (Phase == 2)
+        {
+            
+        }
+    }
 
+
+    #endregion
+    #region 불의 마녀 스킬들
+    IEnumerator SoulFire()
+    {
+        while (MadeFlameNumber!=2)
+        {
+            int x = Random.Range((int)Bounds.bounds.max.x, (int)Bounds.bounds.min.x);
+            int y = Random.Range((int)Bounds.bounds.max.y, (int)Bounds.bounds.min.y);
+            yield return new WaitForSeconds(1f);
+            Instantiate(Flame, new Vector2(x,y),new Quaternion(0,0,0,0));
+            MadeFlameNumber++;
+            x=Random.Range((int)Bounds.bounds.max.x, (int)Bounds.bounds.min.x);
+            y=Random.Range((int)Bounds.bounds.max.y, (int)Bounds.bounds.min.y);
+            yield return new WaitForSeconds(1f);
+            Instantiate(Flame, new Vector2(x,y), new Quaternion(0, 0, 0, 0));
+            MadeFlameNumber++;
+           // StopCoroutine(SoulFire());    ->이거랑 while(true)로 돌리니 안됨
+        }
+    }
     #endregion
     #region 다쳤을 때(플레이어에게 공격 먹었을 때)
     //플레이어와 마녀 부딪혔을 때 그 충돌만 isTrigger로 처리하고싶음(안밀리게)

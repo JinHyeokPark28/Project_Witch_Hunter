@@ -17,6 +17,7 @@ public class MonsterManager_Plus : MonoBehaviour
     //각 씬의 오브젝트로부터 씬 넘버 받아옴
     public bool getSceneNumber;
     //각 씬에서 씬 넘버 받아오면 true, 한씬 넘어가면 바로 false로 바뀜
+    public int MonsterNumber=-1;   //랜덤이 아니라 정해놓고 만들고싶은 몬스터 리스트 넘버
     private bool CreatingMonster = false;
     //리스폰 했으면 true
     private enum Contidion { BURN, FROZEN, KNOCKBACK };
@@ -86,9 +87,19 @@ public class MonsterManager_Plus : MonoBehaviour
             print("NOT_CREATE");
             if (getSceneNumber == true)
             {
-                print("CREATE");
-                Instantiate(NormalMonsterList[RandNum], new Vector2(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 2), new Quaternion(0, 0, 0, 0));
-                CreatingMonster = true;
+                if (MonsterNumber == -1)
+                {
+                    print("CREATE");
+                    Instantiate(NormalMonsterList[RandNum], new Vector2(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 2), new Quaternion(0, 0, 0, 0));
+                    CreatingMonster = true;
+                }
+                else
+                {
+                    //만약 그대로-1이라면
+                    print("CREATE");
+                    Instantiate(NormalMonsterList[MonsterNumber], new Vector2(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 2), new Quaternion(0, 0, 0, 0));
+                    CreatingMonster = true;
+                }
             }
         }
     }

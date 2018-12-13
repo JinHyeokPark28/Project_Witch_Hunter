@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour {
 
+	private Item item;
 
 	#region Public Variable
 	public Image icon;
@@ -12,11 +13,16 @@ public class InventorySlot : MonoBehaviour {
 	public Text itemCount_Text;
 	public GameObject selected_Item;
 
+	private void Start()
+	{
+		item = GetComponent<Item>();
+	}
 	public void Additem(Item _item)
 	{
 		itemName_Text.text = _item.itemName;
-		icon.sprite = _item.itemIcon;
-		if(Item.ItemType.Use == _item.itemType)
+		//icon.sprite = _item.itemIcon;
+		if(item.itemID == 401 || item.itemID == 402 || item.itemID == 403 ||
+		item.itemID == 404 || item.itemID == 501 || item.itemID == 502)
 		{
 			if (_item.itemCount > 0)
 				itemCount_Text.text = "x " + _item.itemCount.ToString();

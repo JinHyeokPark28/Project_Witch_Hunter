@@ -103,17 +103,21 @@ public class PlayerController : MonoBehaviour {
         }
         if (HP > 0)
         {
-
-            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") == false)
-            {
-                //공격 애니메이션 끝나면 자동적으로 isAttacking을 false로 만들어줌
-                IsAttacking = false;
-            }
             _Anim.SetBool("IsRun", false);
             _Anim.SetBool("Hit", false);
             _Anim.SetBool("Jump", false);
             _Anim.SetBool("Attack", false);
             _Anim.SetBool("Dead", false);
+            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") == false)
+            {
+                //들어감
+                //공격 애니메이션 끝나면 자동적으로 isAttacking을 false로 만들어줌
+                IsAttacking = false;
+            }
+            else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack")==true)
+            {
+                IsAttacking = true;
+            }
             if (SceneNum != SceneManager.GetActiveScene().buildIndex)
             {
                 //실제로 씬 바뀌었을 때 실행해야함
@@ -172,18 +176,7 @@ public class PlayerController : MonoBehaviour {
                 {
 
                 }
-                else
-                {
-                    IsAttacking = true;
-                }
                 //세이브포인트
-            }
-            //공격 애니메이션 끝났을 때 P_Attack=false로 만들어주기
-            if (IsAttacking == false)
-            {
-                _Anim.SetBool("Attack", false);
-                // print("isattack:" + IsAttacking);
-
             }
             //무기 변경:총<->칼
             if (Input.GetKeyDown(KeyCode.D))
@@ -342,7 +335,6 @@ public class PlayerController : MonoBehaviour {
         {
             //마녀가 발사하는or 리스폰하는 투사체에 맞는 경우
             //체력감소
-            print("HIT BY WITCH_BULLET");
         }
         
     }

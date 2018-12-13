@@ -11,17 +11,28 @@ public class PlayerStatManager : MonoBehaviour {
 
 	public int atk;
 	public int def;
-	public int recover_hp;
-    
-	
+	//public int recover_hp;
+	//public int WeaponType;
+	//enum WeaponItem
+	//{
+	//	sword,
+	//	bong,
+	//	NonSelect,
+	//}
+	//WeaponItem WeaponTypeState = WeaponItem.NonSelect;
+	//WeaponTypeState = (WeaponItem) WEaponcount;
 	#endregion
 	#region Method
 	private void Start()
 	{
         theEquip = GetComponent<Equipment>();
         instance = this;
-        atk = theEquip.equipItemList[theEquip.selectedSlot].atk;
-        def = theEquip.equipItemList[theEquip.selectedSlot].def;
     }
+	private void Update()
+	{
+
+		//atk = theEquip.equipItemList[theEquip.selectedSlot].atk;
+		//def = theEquip.equipItemList[theEquip.selectedSlot].def;
+	}
 	#endregion
 }

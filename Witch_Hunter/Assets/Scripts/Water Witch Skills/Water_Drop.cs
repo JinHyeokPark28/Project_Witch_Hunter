@@ -16,9 +16,13 @@ public class Water_Drop : MonoBehaviour
     private GameObject Player;
     //중심과의 거리 최소 간격 5; 
     //플레이어 현재 위치 생각하면서 이미 기존에 나와있던 물방울들 위치 고려해야함
+    private GameObject MyWitch;
+    public bool GotoWitch = false;  //true면 마녀한테로 가서 사라짐
+    private float MovingSpeed = .5f;   //마녀한테로 갈때 움직이는 속도
     // Use this for initialization
     void Start()
     {
+        MyWitch = GameObject.FindGameObjectWithTag("Witch");
         Player = GameObject.FindGameObjectWithTag("Player");
         //if (GameObject.FindGameObjectsWithTag("WitchBullet").Length > 0)
         //{
@@ -67,11 +71,32 @@ public class Water_Drop : MonoBehaviour
             }
             if (isStart == true)
             {
-                transform.position = StopVector;
+                if (GotoWitch == false)
+                {
+                    transform.position = StopVector;
+                }
+                if (GotoWitch == true)
+                {
+                    Destroy(this.gameObject.GetComponent<Rigidbody2D>());
+                    GetComponent<PolygonCollider2D>().isTrigger = true;
+                    transform.position = Vector2.MoveTowards(this.gameObject.transform.position, MyWitch.transform.position, MovingSpeed);
+
+                    if ((transform.position.x > MyWitch.transform.position.x - 2) && (transform.position.x < MyWitch.transform.position.x + 2))
+                    {
+                        if ((transform.position.y > MyWitch.transform.position.y - 2) && (transform.position.y < MyWitch.transform.position.y + 2))
+                        {
+                           MyWitch.GetComponent<WitchClass>().DROP_NUMBER += 1;
+                            Destroy(this.gameObject);
+                        }
+
+                    }
+
+                }
             }
             //스프라이트 처리 시작
             //나중에 할것->trigger인 상태에서 pivot이 그라운드 좌표와 오차 범위 내의 겹침->스프라이트 변경
         }
+
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

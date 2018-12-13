@@ -16,9 +16,8 @@ public class ItemPickUp : MonoBehaviour {
 	{
 		if(collision.transform.tag.Equals("Player"))
 		{
-            theInven.GetAnItem(itemID, _count);
+        theInven.GetAnItem(itemID, _count);
 		Destroy(this.gameObject);
-
 		}
 	}
 }

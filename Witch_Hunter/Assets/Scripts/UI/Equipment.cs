@@ -9,9 +9,9 @@ public class Equipment : MonoBehaviour {
 	private PlayerStatManager thePlayerState;
     private PlayerStateUI thePlayerUI;
 	private Inventory theInven;
+	private ItemParser _itemParse;
 	private OKOrCancel theOOC;
 	private const int WEAPON = 0, GUN = 1, ARMOR = 2;
-	private const int S_DAM = 0, G_DAM = 1, DEF = 2;
 	private bool inputKey = true;
 	#endregion
 
@@ -28,7 +28,8 @@ public class Equipment : MonoBehaviour {
 	#region Private Method
 	private void Start()
 	{
-        thePlayerUI = GetComponent<PlayerStateUI>();
+		_itemParse = GetComponent<ItemParser>();
+		thePlayerUI = GetComponent<PlayerStateUI>();
         thePlayerState = FindObjectOfType<PlayerStatManager>();
 		theOOC = FindObjectOfType<OKOrCancel>();
 		theInven = FindObjectOfType<Inventory>();
@@ -74,17 +75,17 @@ public class Equipment : MonoBehaviour {
 			case "200": //무기
 				EquipItemCheck(WEAPON, _item);                  // 상수값 확인후 아이템 종류 확인
 				text[0].text = _item.itemName;                  // 아이템 이름 들어감
-				img_slots[0].sprite = _item.itemIcon;           // 아이템 아이콘 들어감
+				//img_slots[0].sprite = _item.itemIcon;           // 아이템 아이콘 들어감
 				break;
 			case "201": //갑옷
 				EquipItemCheck(ARMOR, _item);
 				text[2].text = _item.itemName;
-				img_slots[2].sprite = _item.itemIcon;
+				//img_slots[2].sprite = _item.itemIcon;
 				break;
 			case "202": // 총
 				EquipItemCheck(GUN, _item);
 				text[1].text = _item.itemName;
-				img_slots[1].sprite = _item.itemIcon;
+				//img_slots[1].sprite = _item.itemIcon;
 				break;
 		}
 		ShowEquip();
@@ -121,14 +122,14 @@ public class Equipment : MonoBehaviour {
 		{
 			if(equipItemList[i].itemID != 0)
 			{
-				img_slots[i].sprite = equipItemList[i].itemIcon;
+				//img_slots[i].sprite = equipItemList[i].itemIcon;
 				img_slots[i].color = color;
 			}
 		}
 	}
     public void EquipStat(Item _item)
     { 
-        equipItemList[selectedSlot].atk = thePlayerUI.S_dam;
+        //equipItemList[selectedSlot].atk = thePlayerUI.S_dam;
     }
 	#endregion
 	#region 코루틴
@@ -140,7 +141,7 @@ public class Equipment : MonoBehaviour {
 		if (theOOC.GetResult())
 		{
 			theInven.EquipToInventory(equipItemList[selectedSlot]);
-			equipItemList[selectedSlot] = new Item(0, "", "", Item.ItemType.Equip);
+			equipItemList[selectedSlot] = new Item();
 			ClearEquip();
 			ShowEquip();
             EquipStat(equipItemList[selectedSlot]);
