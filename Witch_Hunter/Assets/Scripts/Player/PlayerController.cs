@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour {
     //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
     public bool GunShot;
     //false 면 칼로 공격
+    private List<GameObject> BodyParts = new List<GameObject>();
     private bool Dead=false;
 	public bool CheckNPC;       // true면 대화창 실행
 	public bool CheckEnemy;     // true면 공격 가능
@@ -47,12 +48,20 @@ public class PlayerController : MonoBehaviour {
                                       // Use this for initialization
     private Rigidbody2D RG;
     #endregion
-        //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
-        //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
-        //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
+    //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
+    //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
+    //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
 
-        void Start()
+    void Start()
     {
+        BodyParts.Clear();
+        BodyParts.Add(this.gameObject.transform.Find("head").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("body").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("leftarm").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("rightarm").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("left").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("right").gameObject);
+        BodyParts.Add(this.gameObject.transform.Find("warm").gameObject);
         if (!playerExists)
         {
             playerExists = true;
@@ -78,17 +87,45 @@ public class PlayerController : MonoBehaviour {
     }
     IEnumerator Flash()
     {
-        while (FlashActive == true)
+       Camera MCamera;  //다쳤을 때 카메라 레이어 설정으로 플레이어 보였다가 안보였다가로 할려고
+        MCamera = Camera.main;
+        if (FlashActive == true)
         {
-            GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 0f);
+            for(int i = 0; i < BodyParts.Count; i++)
+            {
+                MCamera.GetComponent<Camera>().cullingMask = ~(1 << 11);
+            }
             yield return new WaitForSeconds(0.25f);
-            GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 1f);
+            for(int i = 0; i < BodyParts.Count; i++)
+            {
+                MCamera.GetComponent<Camera>().cullingMask = -1;
+                //BodyParts[i].color = new Color(BodyParts[i].color.r, BodyParts[i].color.g, BodyParts[i].color.b, 1f);
+            }
             yield return new WaitForSeconds(0.25f);
-            GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 0f);
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                MCamera.GetComponent<Camera>().cullingMask = ~(1 << 11);
+                // BodyParts[i].color = new Color(BodyParts[i].color.r, BodyParts[i].color.g, BodyParts[i].color.b, 0f);
+            }
             yield return new WaitForSeconds(0.25f);
-            GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 1f);
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                MCamera.GetComponent<Camera>().cullingMask = -1;
+                //  BodyParts[i].color = new Color(BodyParts[i].color.r, BodyParts[i].color.g, BodyParts[i].color.b, 1f);
+            }
             yield return new WaitForSeconds(0.25f);
+            //GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 0f);
+            //yield return new WaitForSeconds(0.25f);
+            //GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 1f);
+            //yield return new WaitForSeconds(0.25f);
+            //GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 0f);
+            //yield return new WaitForSeconds(0.25f);
+            //GetComponent<SpriteRenderer>().color = new Color(GetComponent<SpriteRenderer>().color.r, GetComponent<SpriteRenderer>().color.g, GetComponent<SpriteRenderer>().color.b, 1f);
+            //yield return new WaitForSeconds(0.25f);
         }
+        FlashActive = false;
+        yield break;
+        
     }
 
     // Update is called once per frame
@@ -117,6 +154,10 @@ public class PlayerController : MonoBehaviour {
             else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack")==true)
             {
                 IsAttacking = true;
+            }
+            else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == false)
+            {
+                FlashActive = false;
             }
             if (SceneNum != SceneManager.GetActiveScene().buildIndex)
             {
@@ -310,9 +351,22 @@ public class PlayerController : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Enemy")
         {
+            print("ENEMY_COL");
             //여기서 꼬였음!!!
             //GameObject.Find("HP & Coin").GetComponent<PlayerStatUIManager>().HPMinus = true;
             //hp가 깎이는건 touched=false일 때 깎임!!!!
+            if (touched == true)
+            {
+            }
+            else
+            {
+                print("P_HURT");
+                touched = true;
+                FlashActive = true;
+            }
+        }
+        if (collision.gameObject.tag == "WitchBullet")
+        {
             if (touched == true)
             {
             }
@@ -396,22 +450,25 @@ public class PlayerController : MonoBehaviour {
     #region 다쳤을 때
     void TouchEnemy()
     {
-    
-        if (FlashActive == true)
+        if (touched == true)
         {
-            print("flash");
-            HowLongFlash += Time.deltaTime;
-            if (touched == true)
+            if (FlashActive == true)
             {
-                touched = false;
+                //HowLongFlash += Time.deltaTime;
+                _Anim.SetBool("IsRun", false);
+                _Anim.SetBool("Jump", false);
+                _Anim.SetBool("Attack", false);
+                _Anim.SetBool("Hit", true);
                 StartCoroutine(Flash());
+                touched = false;
+                //한번만 코루틴 실행하도록 하는 touched==false전환
             }
-            if (HowLongFlash >= HurtFlashTime)
-            {
-                StopCoroutine(Flash());
-                FlashActive = false;
-                HowLongFlash = 0;
-            }
+            //if (HowLongFlash >= HurtFlashTime)
+            //{
+            //    StopCoroutine(Flash());
+            //    FlashActive = false;
+            //    HowLongFlash = 0;
+            //}
         }
         else
         {

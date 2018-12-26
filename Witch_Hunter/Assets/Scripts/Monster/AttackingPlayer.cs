@@ -16,24 +16,23 @@ public class AttackingPlayer : MonoBehaviour {
     void Start () {
         PosX = transform.localPosition.x;   //locapPosition으로 해야 부모와의 상대좌표로 나옴
         ParentMonster = this.gameObject.transform.parent.gameObject;
-        ParentMonster.GetComponent<MonstersAI_FIXED>().AttackArea = this.gameObject;
-        
+        if (ParentMonster.GetComponent<MonstersAI_FIXED>() != null)
+        { //고정형인 경우 AttackingPlayer부분 불필요
+                Destroy(this.gameObject);
 
+           
+        }
+        else
+        {
+            ParentMonster.GetComponent<MonsterAI_Moving>().AttackArea = this.gameObject;
+        }
     }
 
     // Update is called once per frame
     void Update () {
         //몬스터가 오른쪽으로 몸 돌리면 공격 범위도 위치가 달라짐
         //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
-        if (ParentMonster.GetComponent<MonstersAI_FIXED>().GetInfo == true)
-        {
-            if (ParentMonster.GetComponent<MonstersAI_FIXED>().Recon == false)
-            {
-                //고정형인 경우 AttackingPlayer부분 불필요
-                Destroy(this.gameObject);
-            }
-        }
-        
+       
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -42,20 +41,20 @@ public class AttackingPlayer : MonoBehaviour {
         if (collision.gameObject.tag == "Player")
         {
             //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음
-            ParentMonster.GetComponent<MonstersAI_FIXED>().SearchArea.GetComponent<BoxCollider2D>().enabled = false;
+            ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = false;
             //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
-            ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 2;
+            ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 2;
         }
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 1;
+            ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 1;
             //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음->됌
-            if (ParentMonster.GetComponent<MonstersAI_FIXED>().SearchArea.GetComponent<BoxCollider2D>().enabled == false)
+            if (ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled == false)
             {
-                ParentMonster.GetComponent<MonstersAI_FIXED>().SearchArea.GetComponent<BoxCollider2D>().enabled = true;
+                ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = true;
             }
             //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
         }

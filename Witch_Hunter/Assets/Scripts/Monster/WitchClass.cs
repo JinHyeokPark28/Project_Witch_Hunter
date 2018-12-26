@@ -156,7 +156,7 @@ public class WitchClass : MonoBehaviour
             {
                 case 1:
                     //연금술 마녀인경우:페이즈1-젤리니들
-                    //메탈슬라임이
+                    //메탈슬라임이 자식 오브젝트로 없으면 새로 하나 만들기
                     {
                         JellyNeedle();
                         RespawningMarionnette();
@@ -172,7 +172,7 @@ public class WitchClass : MonoBehaviour
                         }
                         if (WaveActive == false)
                         {
-                           // StartCoroutine(WaveWave());
+                           StartCoroutine(WaveWave());
                             WaveActive = true;
                         }
                         else
@@ -260,7 +260,7 @@ public class WitchClass : MonoBehaviour
     {
         //메탈슬라임이 투사체를 3초 간격으로 날림
         //메탈슬라임 안죽음(무적)
-        if (transform.Find("MetalSlime") == null)
+        if (this.gameObject.transform.Find("MetalSlime") == null)
         {
             if (AllMake == false)
             {

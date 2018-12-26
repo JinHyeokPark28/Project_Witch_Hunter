@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class MonstersAI_FIXED : MonoBehaviour
 {
+    //고정형 몬스터
     //MonsterManager가 몬스터 생성하면서 각 몬스터에 맞는 csv파일 파싱해서 공격력, hp,몬스터 타입(정찰,고정,사격,근접..),속도 등 나눠줌
     #region Private Variable
     private GameManager _GameManager;
+    private GameObject Player;
     public string Name;
     public int HP;  //몬스터 체력
     public int attack;  //몬스터 공격력,함정도 있음
@@ -51,11 +53,10 @@ public class MonstersAI_FIXED : MonoBehaviour
     public Rigidbody2D rigid;
     public SpriteRenderer SR;
     #endregion
-    #region 시간 변수
-    private float MovingTime = 3f;  //일반 이동형 몬스터가 움직일 수 있는 시간
-    #endregion
 
-    private void Start() {
+    private void Start()
+    {
+        Player = GameObject.FindGameObjectWithTag("Player");
         StartXPos = gameObject.transform.position.x;
         rigid = this.gameObject.GetComponent<Rigidbody2D>();
         SR = gameObject.GetComponent<SpriteRenderer>();
@@ -71,238 +72,78 @@ public class MonstersAI_FIXED : MonoBehaviour
         while (true)
         {
             DeadStart = true;
-            _Anim.SetBool("IsDead", true);
-            _Anim.SetBool("Atttack", false);
+            _Anim.SetBool("Dead", true);
+            _Anim.SetBool("Attack", false);
             _Anim.SetBool("Walk", true);
-            yield return new WaitForSeconds(5);
-            Destroy(gameObject);
-        }
-    }
-
-    private void Update() {
-        MovingTime -= Time.deltaTime;
-        if (Hurt == true)
-        {
-            HurtTime -= Time.deltaTime;
-        }
-        GetHurt();
-        if (isDead == false)
-        {
-            if (_isMonstate == 0)
-            {
-                //시작한 지점.x좌표보다 더 왼쪽으로 5 갔으면 방향 바꾸기
-                if (isLeft == true)
-                {
-                    if (transform.position.x < StartXPos - 3)
-                    {
-                        isLeft = false;
-                    }
-                }
-                else
-                //isLeft==false;    //오른쪽으로 가던 중
-                {
-                    if (transform.position.x > StartXPos)
-                    {
-                        isLeft = true;
-                    }
-                }
-                //if (MovingTime < 0f)
-                //{
-                //    MovingTime = 3f;
-                //    isLeft = !isLeft;   //계속 반대값 주기
-                //}
-            }
-        }
-        if (GetInfo == true)
-        {
-
-            #region 데미지 함수
-
-            #endregion
-            if (HP > 0)
-            {
-
-                #region 고정형 몬스터인 경우
-                if (Recon == false)
-                {
-                    //그냥 여기서는 switch 없애도 될듯?
-                    if (HP <= 0)
-                    {
-                        isDead = true;
-                        _isMonstate = 3;
-                    }
-                    switch (MonsterType)
-                    {
-                        case 0:
-                            {
-                                if (_isMonstate == 0)
-                                {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
-                                    _Anim.SetBool("Attack", false);
-                                    Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
-                                }
-                                else if (_isMonstate == 1)
-                                {
-                                    NotMovingMonsterAttack();
-                                    _Anim.SetBool("Attack", true);
-                                    print("ATTACK");
-                                    //플레이어 발견모드(이때 조준&&공격)
-                                }
-                                else if (_isMonstate == 3)
-                                {
-                                    //죽었으면
-                                }
-                            }
-                            break;
-                        case 1: //마리오네트 사수
-                            {
-                                if (_isMonstate == 0)
-                                {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
-                                    _Anim.SetBool("Attack", false);
-                                    Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
-                                }
-                                else if (_isMonstate == 1)
-                                {
-                                    NotMovingMonsterAttack();
-                                    _Anim.SetBool("Attack", true);
-                                    _Anim.SetTrigger("SET");
-                                    //플레이어 발견모드(이때 조준&&공격)
-                                }
-                                else if (_isMonstate == 3)
-                                {
-                                    //죽었으면
-                                }
-                            }
-                            break;
-                        case 2:
-                            {
-                                if (_isMonstate == 0)
-                                {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
-                                    _Anim.SetBool("Attack", false);
-                                    Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
-                                }
-                                else if (_isMonstate == 1)
-                                {
-                                    NotMovingMonsterAttack();
-                                    _Anim.SetBool("Attack", true);
-                                    print("ATTACK");
-                                    //플레이어 발견모드(이때 조준&&공격)
-                                }
-                                else if (_isMonstate == 3)
-                                {
-                                    //죽었으면
-                                }
-                            }
-                            break;
-                        case 3:
-                            {
-                                if (_isMonstate == 0)
-                                {
-                                    Watching();
-                                }
-                            }
-                            break;
-                    }
-                }
-                #endregion
-                #region 움직일수 있는 몬스터 경우
-                else if (Recon == true)
-                {
-                    if (_isMonstate == 0 && ResetStartXPos == true)
-                    {
-                        print("RESET_X_POSITION");
-                        StartXPos = transform.position.x;
-                        ResetStartXPos = false;
-                    }
-                    if (_isMonstate == 1)
-                    {
-                        //추적->일반 모드시 새로 X잡으라고 알려줌
-                        ResetStartXPos = true;
-                    }
-                    //getinfo==true로 조건 문 안주니 바로 시작해버림(getinfo로 안받은 상태에서)
-                    //고정형이 아니라면
-                    switch (MonsterType)
-                    {
-                        case 0: //일반(근접)
-                            if (_isMonstate == 0)   //정찰모드
-                            {
-                                _Anim.SetBool("isDead", false);
-                                _Anim.SetBool("Atttack", false);
-                                _Anim.SetBool("Walk", true);
-                                Moving();
-                            }
-                            //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
-                            else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
-                            {
-                                _Anim.SetBool("isDead", false);
-                                //여기서 플레이어 방향 못잡음
-                                _Anim.SetBool("Walk", true);
-                                _Anim.SetBool("Atttack", false);
-                                Chasing();
-                            }
-                            else if (_isMonstate == 2)  //공격 모드. 
-                            {
-                                Check();
-                                _Anim.SetBool("Walk", false);
-                                _Anim.SetBool("Attack", true);
-                            }
-                            break;
-                        case 1: //일반(원거리=사격형)
-
-                            break;
-                        case 2: //강화형(hp두배)->그냥 csv에 알아서 저장된것 불러오도록
-                            if (_isMonstate == 0)   //정찰모드
-                            {
-                                Moving();
-                            }
-                            //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
-                            else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
-                            {
-                                Chasing();
-                            }
-                            else if (_isMonstate == 2)  //공격 모드. 
-                            {
-                                Check();
-                            }
-                            break;
-                        case 3: //자폭&원거리 공격형&움직임 가능
-                                //정찰시-왔다갔다함. 플레이어 발견->공격  
-                            if (_isMonstate == 0)   //정찰모드
-                            {
-                                Moving();
-                            }
-                            else if (_isMonstate == 1)
-                            {
-                                //플레이어 발견
-                            }
-                            break;
-                    }
-                }
-                #endregion
-            }
             if (Coin == 0)
             {
                 Coin = Random.Range(1, 21);
                 //w_Coin = Random.Range(100, 501);
             }
-
-            if (HP <= 0)
-            {
-                _isMonstate = 3;
-                isDead = true;
-            }
-
-
-            if (isDead == true)
-            {
-                if (DeadStart == false)
-                {
-                    //죽으면
-                    StartCoroutine(Dead());
-                //animation.die불러오기
-                }
-            }
+            yield return new WaitForSeconds(5);
+            Destroy(gameObject);
         }
     }
+
+    private void Update()
+    {
+        if (Hurt == true)
+        {
+            HurtTime -= Time.deltaTime;
+        }
+        if (GetInfo == true)
+        {
+            #region HP>0일 경우
+            if (HP > 0&&isDead==false)
+            {
+                #region 고정형 몬스터인 경우
+                if (Recon == false)
+                {
+                    if (_isMonstate == 0)
+                    {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
+                        _Anim.SetBool("Attack", false);
+                        Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
+                    }
+                    else if (_isMonstate == 1)
+                    {
+                        NotMovingMonsterAttack();
+                        _Anim.SetBool("Attack", true);
+                        _Anim.SetTrigger("SET");
+                        print("ATTACK");
+                        //플레이어 발견모드(이때 조준&&공격)
+                    }
+                    else if (_isMonstate == 3)
+                    {
+                        //죽었으면
+                    }
+                }
+                #endregion
+            }
+            #endregion
+        }
+        #region HP>0일 경우
+        if (HP <= 0)
+        {
+            print("DEAD");
+            _isMonstate = 3;
+            isDead = true;
+        }
+        #endregion
+
+        #region 죽는 거 처리하는 부분
+        if (isDead == true)
+        {
+            if (DeadStart == false)
+            {
+                //죽으면
+                StartCoroutine(Dead());
+                //animation.die불러오기
+            }
+        }
+        #endregion
+
+    }
+
     #region 근접, 이동가능!(Recon=true) 몬스터의 이동 함수
     public void Moving()
     {
@@ -317,7 +158,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
                 //transform.translate로 하니까 좌표이동함수라서 통과해버림->아님, 좌표 반전될때 자식 오브젝트가 상대적으로 
                 // x=0이 아니라서 그럼
-               // rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
+                // rigid.velocity = Vector2.left * NormalSpeed * Time.deltaTime;
                 //velocity=한번에 계속 쭉 주는듯
             }
             else
@@ -341,7 +182,7 @@ public class MonstersAI_FIXED : MonoBehaviour
     #region 플레이어를 따라가는 함수
     void Chasing()
     {
-        if (_isMonstate == 1&&isDead==false)
+        if (_isMonstate == 1 && isDead == false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Target.transform.position.x < transform.position.x)
@@ -406,11 +247,16 @@ public class MonstersAI_FIXED : MonoBehaviour
                 Hurt = false;
             }
         }
+        else if (Hurt == false)
+        {
+            // HP -= 10; 
+        }
     }
     #endregion
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.transform.tag == "Player") {
+        if (col.transform.tag == "Player")
+        {
             _CheckMode = true;  //true면 공격
             if (Target.GetComponent<PlayerController>().touched == false)
             {
@@ -418,34 +264,37 @@ public class MonstersAI_FIXED : MonoBehaviour
                 //나중에 여기서 플레이어 hp깎는 것도 만들기
             }
         }
-        if ((col.gameObject.transform.tag =="Sword")|| (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
-		{   
-            if (Hurt == false)  //안맞은 상태라면
+        if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
+        {
+            if (Player.GetComponent<PlayerController>().IsAttacking == true)
             {
+                print("M+_HURT");
                 GetHurt();
                 HP -= 10;
+                print("HP:" + HP);
                 //나중에 플레이어가 착용한 무기의 공격력 적용하도록
             }
         }
-	}
-	private void OnTriggerStay2D(Collider2D col)
-	{
-		if (_CheckMode == true) Check();
+    }
+    private void OnTriggerStay2D(Collider2D col)
+    {
+        if (_CheckMode == true) Check();
         //check():공격 타이밍 체크하는 함수
-		if (_CheckMode == false) return;
+        if (_CheckMode == false) return;
 
-	}
-	private void OnTriggerExit2D(Collider2D col)
-	{
-		if(col.transform.tag == "Player"){
-			_CheckMode = false;
-			// 공격 받았을 때 데미지 처리.
-		}
-	}
-	private void OnCollisionStay2D(Collision2D other)
-	{
-      
-	}
+    }
+    private void OnTriggerExit2D(Collider2D col)
+    {
+        if (col.transform.tag == "Player")
+        {
+            _CheckMode = false;
+            // 공격 받았을 때 데미지 처리.
+        }
+    }
+    private void OnCollisionStay2D(Collision2D other)
+    {
+
+    }
     #region 고정형 원거리 몬스터가 플레이어 발견&공격하는 함수
     public void NotMovingMonsterAttack()
     {
@@ -459,13 +308,13 @@ public class MonstersAI_FIXED : MonoBehaviour
                 //플레이어가 몬스터 왼편에 있을 때
                 transform.rotation = Quaternion.Euler(0, 0, 0);
             }
-           if (Target.transform.position.x > transform.position.x)
+            if (Target.transform.position.x > transform.position.x)
             {
                 transform.rotation = Quaternion.Euler(0, 180, 0);
             }
         }
         //고정형 원거리 몬스터 공격 타입
     }
-	#endregion
+    #endregion
 
 }
