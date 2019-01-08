@@ -13,19 +13,15 @@ public class PlayerFollower : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Player = GameObject.FindGameObjectWithTag("Player");
+        //씬 크기를 알려주는 바운드 박스의 콜라이더를 불러옴->씬 크기 알수있음
         boundBox = GameObject.FindGameObjectWithTag("Bounds").GetComponent<BoxCollider2D>();
-        //print("BoundMAx:" + boundBox.bounds.max);
-        //print("BoundMin:" + boundBox.bounds.min);
-        //print("CAMERAHalfSIze:" + GetComponent<Camera>().orthographicSize);
-        //print("CAmeraCenter:" + transform.position);
+        //현재 카메라 화면의 가로 길이 계산
         ScreenWidth = GetComponent<Camera>().orthographicSize / Screen.height * Screen.width;
-        //print("ScreenWidth:" + ScreenWidth);
     }
 
     // Update is called once per frame
     void LateUpdate() {
         transform.position = new Vector3(Player.transform.position.x, Player.transform.position.y, transform.position.z);
-        
         if (transform.position.x+ ScreenWidth > boundBox.bounds.max.x)
         {
             transform.position = new Vector3(boundBox.bounds.max.x -ScreenWidth, transform.position.y, transform.position.z);
@@ -44,8 +40,6 @@ public class PlayerFollower : MonoBehaviour {
         }
        
     }
-    //cameraController에게 여기 Bounds가 있다고 알려줌
-    
 }
        
   

@@ -26,6 +26,7 @@ public class WitchClass : MonoBehaviour
     #region 마녀 특별 속성
     public int Phase;   //0(죽음),1(100%이하),2(75%이하),3(광기만의 특별 페이즈),
     public int WitchType;  //0이면 물속성, 1이면 불속성, 2면 바람속성
+    private enum WitchList { Alchemy=0,Water,Fire,Wind,Mad };
     public bool isFinalBoss;    //isBoss=true이고 최종보스이면 true
     #endregion
     #region 연금술 마녀 속성
@@ -105,9 +106,7 @@ public class WitchClass : MonoBehaviour
             }
             if (index != 5 && HP > 0)
             {
-
-                //광기 제외한 나머지 마녀들의 페이즈
-
+                
                 if ((HP > WholeHP * 0.5f))
                 {
                     //HP가 100%~75%라면
@@ -151,7 +150,6 @@ public class WitchClass : MonoBehaviour
     {
         if (Phase == 1)
         {
-
             switch (index)
             {
                 case 1:
@@ -197,9 +195,7 @@ public class WitchClass : MonoBehaviour
     #endregion
     #region 페이즈2(체력 75%~50%)
     public void Phase_2()
-    {   //우선 클래스에서 선언하고 나중에 고치기
-        //GameObject MetalSlime = GameObject.Instantiate(Resources.Load(Application.dataPath + "/Assets/Resources/RuffImages/Metal_Slime_Temporary/TestMetalBounce.png", GameObject);
-        //bool AllMake=false;
+    {   
         if (Phase == 2)
         {
             switch (index)
@@ -209,9 +205,6 @@ public class WitchClass : MonoBehaviour
                     {
                         RespawningMarionnette();
                         MetalBounceSkill();
-                        //연금술 마녀인경우:페이즈2
-                        //2.메탈바운스-메탈슬라임이 공중에서 떨어지며 튕긴다.(위쪽에서)
-                        //i++해서 2가 되면 더이상 프리팹 생성X->AllMake=true
                         break;
                     }
                 case 2:
@@ -223,7 +216,7 @@ public class WitchClass : MonoBehaviour
                         }
                         if (WaveActive == false)
                         {
-                            // StartCoroutine(WaveWave());
+                            StartCoroutine(WaveWave());
                             WaveActive = true;
                         }
                         if (GameObject.FindGameObjectsWithTag("WitchBullet").Length >= 3)
@@ -478,16 +471,19 @@ public class WitchClass : MonoBehaviour
     }
     #endregion
     #region 다쳤을 때(플레이어에게 공격 먹었을 때)
-    //플레이어와 마녀 부딪혔을 때 그 충돌만 isTrigger로 처리하고싶음(안밀리게)
-    //특정 오브젝트과 충돌만 isTrigger처리 어떻게???
-    //방법1. 콜라이더 두개 붙이기(안떨어지도록 하나는 그대로 collider,다른 하나는 trigger)
-    //방법2. 부딪힌 동안에만 RIgidbody2d:kinematic으로 해서 중력값 안받게 처리. 그리고 콜라이더 trigger로 처리(점프하며 공격할때)
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Player" && collision.gameObject.GetComponent<PlayerController>().IsAttacking == true)
+        if ((collision.gameObject.tag == "Sword"|| collision.gameObject.tag == "Bullet") && Player.GetComponent<PlayerController>().IsAttacking == true)
         {
             print("WITCH_HURT");
-            HP -= 10;
+            if (collision.gameObject.tag == "Sword")
+            {
+                HP -= Player.GetComponent<PlayerController>().SwordDamage;
+            }
+            if (collision.gameObject.tag == "Bullet")
+            {
+                HP -= Player.GetComponent<PlayerController>().BulletDagmage;
+            }
         }
     }
     #endregion

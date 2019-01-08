@@ -81,7 +81,6 @@ public class WaveManager : MonoBehaviour
                 WaveChildren.Add(child.gameObject);
             }
             //정렬 할당위해 길이와 함께 선언선언선언~~
-            //int pivotNum = (int)(WaveChildren.Count / 2);
             //퀵정렬은 나중에 해보기
             for (int i = 0; i < WaveChildren.Count - 1; i++)
             {

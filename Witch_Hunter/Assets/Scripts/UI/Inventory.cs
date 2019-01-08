@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//System.DateTime.Now.Second
 public class Inventory : MonoBehaviour
 {
 	#region Private Vairable
@@ -34,9 +35,10 @@ public class Inventory : MonoBehaviour
 	public static Inventory instance;
 	public Text Description_Text;           // 부연 설명
 	public string[] tabDescription;         // 탭 부연 설명
-	
+
 	public Transform Slots;                 // 슬롯 부모객체
 
+	public GameObject Go_Combi;             // 조합창 활성화 및 비활성화.
 	public GameObject Go_Equip;             // 장비창 활성화 및 비활성화.
 	public GameObject Go_OOC;               // 선택지 활성화 및 비활성화
 	public GameObject Go;                   // 인벤토리 활성화 및 비활성화
@@ -56,11 +58,10 @@ public class Inventory : MonoBehaviour
 
 	private void Update()
 	{
-		//if (Input.GetKeyDown(KeyCode.O))
+		//if (Input.GetKeyDown(KeyCode.L))
 		//{
-		//	Debug.Log((_Item == null) ? "NULL" : "N");
+		//	Debug.Log((_item == null) ? "NULL" : "N");
 		//}
-
 
 		if (!stopKeyInput)
 		{
@@ -71,6 +72,7 @@ public class Inventory : MonoBehaviour
 				if (activated == true)
 				{
 					// 안움직이게 하기
+					//Time.timeScale = 0; // 알파값 코루틴이 안돔.
 					Go.SetActive(true);
 					selectedTab = 0;
 					tabActivated = true;
@@ -80,6 +82,7 @@ public class Inventory : MonoBehaviour
 				}
 				else if (activated == false)
 				{
+					//Time.timeScale = 1;
 					StopAllCoroutines();
 					Go.SetActive(false);
 					tabActivated = false;
@@ -88,6 +91,25 @@ public class Inventory : MonoBehaviour
 
 				}
 
+			}
+			else if(Input.GetKeyDown(KeyCode.Escape))
+			{
+				activated = !activated;
+
+				if(activated == false)
+				{
+					// 메뉴매니저에서 연동되서 다른 UI창 킬때 자동으로 false 시켜주기.
+					tabActivated = false;
+					itemActivated = false;
+					OpenEquip(false);
+					Go.SetActive(false);
+				}
+				else if(activated == true)
+				{
+					// 메뉴매니저에서 연동되서 다른 UI창 킬때 자동으로 false 시켜주기.
+					tabActivated = true;
+					itemActivated = false;
+				}
 			}
 
 			if (activated)                          // 인벤토리가 활성화 되었을 경우
@@ -119,8 +141,16 @@ public class Inventory : MonoBehaviour
 						tabActivated = false;
 						preventExec = true;
 						ShowItem();
-						if (selectedTab == 0) OpenEquip(true);
-						if (selectedTab == 1) OpenEquip(false);
+						if (selectedTab == 0)
+						{
+							OpenEquip(true);
+							OpenCombination(false);
+						}
+						if (selectedTab == 1)
+						{
+							OpenEquip(false);
+							OpenCombination(true);
+						}
 					}
 				}
 
@@ -181,18 +211,18 @@ public class Inventory : MonoBehaviour
 						itemActivated = false;
 						tabActivated = true;
 						OpenEquip(false);
+						OpenCombination(false);
 						ShowTab();
 					}
 				}           // 아이템 활성화시 키입력 처리
 
 				if (Input.GetKeyUp(KeyCode.Return)) // 키 입력 중복 처리
 					preventExec = false;
-
 			}
-
 		}
 	}
 	#endregion
+
 	#region Public Method
 	public void EquipToInventory(Item _item)            // 장비창에서 인벤토리로 옮김
 	{
@@ -213,7 +243,7 @@ public class Inventory : MonoBehaviour
 					{
 						temp = _item.itemID.ToString();
 						temp.Substring(0, 1);
-						switch (temp)
+						switch (temp)	// 아이템 아이디 첫번째, 두번째에 따라서 구별한다.
 						{
 							case "10":
 								inventoryTabList.Add(inventoryItemList[i]);
@@ -227,7 +257,6 @@ public class Inventory : MonoBehaviour
 							case "40":
 								inventoryTabList.Add(inventoryItemList[i]);
 								break;
-
 						}
 					}
 				}
@@ -239,7 +268,7 @@ public class Inventory : MonoBehaviour
 					{
 						temp = _item.itemID.ToString();
 						temp.Substring(0, 1);
-						switch (temp)
+						switch (temp) // 아이템 아이디 첫번째, 두번째에 따라서 구별한다.
 						{
 							case "40":
 								inventoryTabList.Add(inventoryItemList[i]);
@@ -328,14 +357,13 @@ public class Inventory : MonoBehaviour
 							break;
 						}
 						else if (inventoryItemList[i].itemID != 401 || inventoryItemList[i].itemID != 402 ||
-						inventoryItemList[i].itemID != 403 || inventoryItemList[i].itemID != 404 ||
-						inventoryItemList[i].itemID != 501 || inventoryItemList[i].itemID != 502)
+							inventoryItemList[i].itemID != 403 || inventoryItemList[i].itemID != 404 ||
+							inventoryItemList[i].itemID != 501 || inventoryItemList[i].itemID != 502)
 						{
 							theEquip.EquipItem(inventoryItemList[i]);                   // 장비한 아이템 삭제
 							inventoryItemList.RemoveAt(i);
 							ShowItem();
 							break;
-
 						}
 
 					}
@@ -395,7 +423,6 @@ public class Inventory : MonoBehaviour
 	}
 	public void GetAnItem(int _itemID, int _count = 1)
 	{
-
 		for (int i = 0; i < _item.ItemList.Length; i++)                    // 데이터베이스 아이템 검색
 		{
 			if (_itemID == _item.ItemList[i].itemID)                      // 데이터베이스 아이템 발견
@@ -405,12 +432,14 @@ public class Inventory : MonoBehaviour
 					if (inventoryItemList[j].itemID == _itemID)                 // 소지품에 같은 아이템이 있다. -> 소지량 증감
 					{
 						if (inventoryItemList[i].itemID == 401 || inventoryItemList[i].itemID == 402 ||
-						inventoryItemList[i].itemID == 403 || inventoryItemList[i].itemID == 404 ||
-						inventoryItemList[i].itemID == 501 || inventoryItemList[i].itemID == 502)
+							inventoryItemList[i].itemID == 403 || inventoryItemList[i].itemID == 404 ||
+							inventoryItemList[i].itemID == 501 || inventoryItemList[i].itemID == 502)
 						{
 							inventoryItemList[j].itemCount += _count;
 						}
-						else
+						else if (inventoryItemList[i].itemID == 101 || inventoryItemList[i].itemID != 402 ||
+								inventoryItemList[i].itemID != 403 || inventoryItemList[i].itemID != 404 ||
+								inventoryItemList[i].itemID != 501 || inventoryItemList[i].itemID != 502)
 						{
 							inventoryItemList.Add(_item.ItemList[i]);
 						}
@@ -429,5 +458,10 @@ public class Inventory : MonoBehaviour
 	{
 		Go_Equip.SetActive(check);
 	}
+	public void OpenCombination(bool check)
+	{
+		Go_Combi.SetActive(check);
+	}
 	#endregion
+
 }

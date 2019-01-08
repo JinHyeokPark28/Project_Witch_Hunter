@@ -13,15 +13,16 @@ public class MonsterManager_Plus : MonoBehaviour
     //몬스터, 마녀마다 CSV파일 따로있음
     #region Private Variable
     private static MonsterManager_Plus _MonsterManager_Plus = null;
-  public int Stage;   //스테이지 넘버에 따라 스폰하는 몬스터 종류 달라짐
+    private int Stage;   //스테이지 넘버에 따라 스폰하는 몬스터 종류 달라짐
     //각 씬의 오브젝트로부터 씬 넘버 받아옴
-    public bool getSceneNumber;
+    private bool getSceneNumber;
     //각 씬에서 씬 넘버 받아오면 true, 한씬 넘어가면 바로 false로 바뀜
-    public int MonsterNumber=-1;   //랜덤이 아니라 정해놓고 만들고싶은 몬스터 리스트 넘버
     private bool CreatingMonster = false;
     //리스폰 했으면 true
     private enum Contidion { BURN, FROZEN, KNOCKBACK };
     #endregion
+    public int MonsterNumber = -1;   //랜덤이 아니라 정해놓고 만들고싶은 몬스터 리스트 넘버
+
     #region CSV 변수 목록
     public TextAsset MonsterCSV;
     public string[] option;
@@ -41,7 +42,6 @@ public class MonsterManager_Plus : MonoBehaviour
     #endregion
    //리스폰 포인트마다 각자 몬스터 생성하는 걸로 바꾸기
         //NormalListMonster에 반드시 인덱스에 맞게 배치되어야함!!!
-    #region Private Method
     public void Start()
     {
         WholeText = MonsterCSV.text;
@@ -65,7 +65,6 @@ public class MonsterManager_Plus : MonoBehaviour
         {
             getSceneNumber = false;
             Stage = SceneManager.GetActiveScene().buildIndex;
-            print("STAGE: " + Stage);
             
         }
         else if (Stage == SceneManager.GetActiveScene().buildIndex)
@@ -81,15 +80,15 @@ public class MonsterManager_Plus : MonoBehaviour
         {
             getSceneNumber = true;
         }
+        #region 몬스터 생성함수
         if (CreatingMonster == false)
         {
             int RandNum = UnityEngine.Random.Range(0, NormalMonsterList.Count);
-            print("NOT_CREATE");
             if (getSceneNumber == true)
             {
                 if (MonsterNumber == -1)
                 {
-                    print("CREATE");
+                    //특정 몬스터 번호가 주어지지 않았다면(몬스터 인덱스1부터 존재)
                     Instantiate(NormalMonsterList[RandNum], new Vector2(this.gameObject.transform.position.x, this.gameObject.transform.position.y + 2), new Quaternion(0, 0, 0, 0));
                     CreatingMonster = true;
                 }
@@ -102,8 +101,9 @@ public class MonsterManager_Plus : MonoBehaviour
                 }
             }
         }
+        #endregion
     }
-    
+
 
     #region CSV함수
     public void GetOption(int index)
@@ -120,86 +120,54 @@ public class MonsterManager_Plus : MonoBehaviour
         int x = 0;
         for(int i = j; i < NormalMonsterList.Count+1; i++)
         {
-            if ((NormalMonsterList[x].GetComponent<MonsterAI_Moving>() != null)
-                &&(NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() == null))
-            {
-                //움직일 수 있는 몬스터인 경우->그런 스크립트만 가지고 있는 경우
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().index = Convert.ToInt32(data[i, 0]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().Name = data[i, 1];
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().attack = Convert.ToInt32(data[i, 3]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().HP = Convert.ToInt32(data[i, 2]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().MonsterType = Convert.ToInt32(data[i, 4]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().NormalSpeed = Convert.ToSingle(data[i, 5]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().attack = Convert.ToInt32(data[i, 6]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>()._CheckDelay = Convert.ToSingle(data[i, 8]);
-                NormalMonsterList[x].GetComponent<MonsterAI_Moving>().GetInfo = true;
-            }
-            else if ((NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() != null)&&
-                (NormalMonsterList[x].GetComponent<MonsterAI_Moving>() == null))
-            {
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[i, 8]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
-                NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
+             //j=1
+                if ((NormalMonsterList[x].GetComponent<MonsterAI_Moving>() != null)
+                    && (NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() == null))
+                {
+                    //움직일 수 있는 몬스터인 경우->그런 스크립트만 가지고 있는 경우
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().index = Convert.ToInt32(data[i, 0]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().MonsterName = data[i, 1];
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().attack = Convert.ToInt32(data[i, 3]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().HP = Convert.ToInt32(data[i, 2]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().MonsterType = Convert.ToInt32(data[i, 4]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().NormalSpeed = Convert.ToSingle(data[i, 5]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().attack = Convert.ToInt32(data[i, 6]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>()._CheckDelay = Convert.ToSingle(data[i, 8]);
+                    NormalMonsterList[x].GetComponent<MonsterAI_Moving>().GetInfo = true;
+                }
+                else if ((NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() != null) &&
+                    (NormalMonsterList[x].GetComponent<MonsterAI_Moving>() == null))
+                {
+                    //움직일 수 없는 고정형 몬스터 인 경우
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterName = data[i, 1];
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[i, 8]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
+                    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
 
-            }
-            //if (NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()== null)
-            //{
-            //    //스크립트 컴포넌트가 없다면
-            //    NormalMonsterList[x].AddComponent<MonstersAI_FIXED>();
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay= Convert.ToSingle(data[i, 8]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
+                }
+                if (x < NormalMonsterList.Count)
+                {
+                    x++;
+                }
+                else if (x >= NormalMonsterList.Count)
+                {
+                    break;
+                }
 
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
-            //}
-            //else if(NormalMonsterList[x].GetComponent<MonstersAI_FIXED>() != null)
-            //{
-            //    //스크립트 컴포넌트가 있다면
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().index = Convert.ToInt32(data[i, 0]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Name = data[i, 1];
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 3]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().HP = Convert.ToInt32(data[i, 2]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().MonsterType = Convert.ToInt32(data[i, 4]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().NormalSpeed = Convert.ToSingle(data[i, 5]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().attack = Convert.ToInt32(data[i, 6]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._AttackSpeed = Convert.ToSingle(data[i, 7]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>()._CheckDelay = Convert.ToSingle(data[i, 8]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().Recon = Convert.ToBoolean(data[i, 10]);
-            //    NormalMonsterList[x].GetComponent<MonstersAI_FIXED>().GetInfo = true;
-            //}
-            if (x < NormalMonsterList.Count)
-            {
-                x++;
-            }
-            else if (x >= NormalMonsterList.Count)
-            {
-                break;
-            }
+          
         }
 
     }
     #endregion
-    private void m_Attack()
-    {
-    }
-    #endregion
-
+    
     #region public Method
     public static MonsterManager_Plus GetMonsterManager
     {

@@ -14,7 +14,6 @@ public class DetectingPlayer : MonoBehaviour {
     public bool PlayerExit = true;    //플레이어와 접촉하면 false 빠져나가면 true
 	// Use this for initialization
 	void Start () {
-        //자동으로 부모 오브젝트 찾게 해줌
         ParentMonster = this.gameObject.transform.parent.gameObject;
         PosX = transform.localPosition.x;
         if (ParentMonster.GetComponent<MonstersAI_FIXED>() != null)
@@ -31,69 +30,40 @@ public class DetectingPlayer : MonoBehaviour {
             WaitTime = 5;
         }
     }
-    //플레이어 발견&&추적(_isMonState==1)인 상태에서 플레이어와 접촉 안한 상태
-    /*IEnumerator TimeChecker()
-    {
-        print("Time Checker Function Start");
-        //왜 여기서 안돌아가나? UPdate에 두니까 됌->왜???????->while 안들어가고 바로 나가는듯
-        //해결책:update에 계속 돌리기->근데 그러기엔 안그래도 update쪽에서 매 프레임마다 나가고 코루틴도 update만큼은 아니지만
-        //자원 크게 잡아먹어서 무리->그냥 함수 따로 만들어서 update에서 불러오기 하는 걸로 하기
-        while (ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate == 1 && PlayerExit == true)
-        {
-            print("0"); //->얘도 안찍힘 
-            yield return new WaitForSeconds(5);
-            ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 0;
-        }
-    }*/
 
     // Update is called once per frame
     void Update () {
         #region 고정형 몬스터인 경우
         if (ParentMonster.GetComponent<MonsterAI_Moving>() == null)
         {
-            //그냥 getcomponent<monstersAI_FIXED>()!=null로 하니까 안들어감
-            //고정형 몬스터일 경우
-            //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
             #region 몬스터 상태 전환(플레이어가 발견 영역에서 빠져나간뒤 추적 하는 동안 시간 초과
             //플레이어가 이 발견 영역&&공격 영역&&몬스터 콜라이더 영역에 충돌하지 않은 상태여야 한다->쫓는 상태이긴 함
-            if (ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate == 1 && PlayerExit == true)
+            if (ParentMonster.GetComponent<MonstersAI_FIXED>().NowMonstate == MonstersAI_FIXED._IsMonstate.AttackState
+                && PlayerExit == true)
             {
-
-                print("IN");    //들어옴
-                //조건 만족할 !동안!에만 지속되어야 한다->if로는 왔다갔다함
-                //한번 이어지면 끝까지 이어져야 한다. 중간에 조건 불만족하면 exitTime=0으로 되어야함
-
-                //ExitTime은 if문이 맞을때 들어온다->계속 쌓임(조건 만족:더해짐->조건 안만족:안더해짐(그대로있음)->조건만족:더해짐)
                 ExitTime += Time.deltaTime;
                 if (ExitTime >= WaitTime)
                 {
                     print("EXIT");
                     //ParentState = 0;    //안됨:왜?->얜 그냥 _isMonState값 만을 받는 변수라서
-                    ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 0;
+                    ParentMonster.GetComponent<MonstersAI_FIXED>().NowMonstate = MonstersAI_FIXED._IsMonstate.ReconState;
                     ExitTime = 0;
                 }
             }
             #endregion
         }
         #endregion
-
         else if (ParentMonster.GetComponent<MonsterAI_Moving>() != null)
         {
             //움직일 수 있는 몬스터 인경우
-            if (ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate == 1 && PlayerExit == true)
+            if (ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate==MonsterAI_Moving._IsMonstate.ChasingState
+                && PlayerExit == true)
             {
-
-                print("Moving_IN");    //들어옴
-                //조건 만족할 !동안!에만 지속되어야 한다->if로는 왔다갔다함
-                //한번 이어지면 끝까지 이어져야 한다. 중간에 조건 불만족하면 exitTime=0으로 되어야함
-
-                //ExitTime은 if문이 맞을때 들어온다->계속 쌓임(조건 만족:더해짐->조건 안만족:안더해짐(그대로있음)->조건만족:더해짐)
                 ExitTime += Time.deltaTime;
                 if (ExitTime >= WaitTime)
                 {
                     print("Moving_EXIT");
-                    //ParentState = 0;    //안됨:왜?->얜 그냥 _isMonState값 만을 받는 변수라서
-                    ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 0;
+                    ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ReconState;
                     ExitTime = 0;
                 }
             }
@@ -109,20 +79,17 @@ public class DetectingPlayer : MonoBehaviour {
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //한번 범위로 진입하면 바로 추적모드로 바뀜->범위 벗어나면?
         if (collision.gameObject.tag == "Player")
         {
-            print("PlayerOn");
             //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(추적모드=1)
             if (ParentMonster.GetComponent<MonstersAI_FIXED>() != null)
             {
-                ParentMonster.GetComponent<MonstersAI_FIXED>()._isMonstate = 1;
+                ParentMonster.GetComponent<MonstersAI_FIXED>().NowMonstate = MonstersAI_FIXED._IsMonstate.AttackState;
             }
             else if (ParentMonster.GetComponent<MonsterAI_Moving>() != null)
             {
-                ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 1;
+                ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ChasingState;
             }
-            //들어오긴 함. 실제 스테이트도 바뀜
             PlayerExit = false;
         }
     }
@@ -130,8 +97,6 @@ public class DetectingPlayer : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Player")
         {
-            print("PlayerExit");
-            //플레이어가 추적 영역 빠져나간 경우
             PlayerExit = true;
         }
     }

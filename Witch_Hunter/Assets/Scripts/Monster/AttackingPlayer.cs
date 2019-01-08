@@ -8,7 +8,6 @@ using UnityEngine;
 
 public class AttackingPlayer : MonoBehaviour {
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
-
     public GameObject ParentMonster;
     public float PosX;
     //현재 x좌표(상대좌표)
@@ -19,8 +18,6 @@ public class AttackingPlayer : MonoBehaviour {
         if (ParentMonster.GetComponent<MonstersAI_FIXED>() != null)
         { //고정형인 경우 AttackingPlayer부분 불필요
                 Destroy(this.gameObject);
-
-           
         }
         else
         {
@@ -30,28 +27,23 @@ public class AttackingPlayer : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        //몬스터가 오른쪽으로 몸 돌리면 공격 범위도 위치가 달라짐
-        //부모 오브젝트에서 오일러쓰면 localPosition도 그 바뀐 오일러값에 따라 달라짐
        
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        //코드 꼬일수도 있음->정찰범위,공격범위 겹치는 부분에서 계속 실시간으로 monState값이 바뀔수도?->방지 필요
+        //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음
         if (collision.gameObject.tag == "Player")
         {
-            //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음
             ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = false;
-            //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
-            ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 2;
+            ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate=MonsterAI_Moving._IsMonstate.AttackState;
         }
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            ParentMonster.GetComponent<MonsterAI_Moving>()._isMonstate = 1;
-            //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음->됌
+            ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ChasingState;
             if (ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled == false)
             {
                 ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = true;
@@ -59,9 +51,4 @@ public class AttackingPlayer : MonoBehaviour {
             //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
         }
     }
-    //플레이어와 접촉하는 경우(0.외부)
-    //1. 본체(몸)과 접촉
-    //2.정찰 콜라이더에 접촉
-    //3. 공격 범위 콜라이더에 접촉
-    //각각 접촉하는 경우의 수가 3개씩 존재(
 }

@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//보물 상자에 달린 스크립트
 public class TreasureBox : MonoBehaviour
 {
-    public bool isOpen = false;
+    public bool isOpen = false; //플레이어와 상호작용 하면 플레이어 스크립트 쪽에서 isOpen=true로 변환
     private bool Active = false;    //박스 열리면 true가 되는 변수
     public int coin;
     //보물상자에 붙어있는 스크립트

@@ -1,13 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 public class MonsterAI_Moving : MonoBehaviour
 {
     //리스폰 포인트에 달린 몬스터매니저 스크립트 로부터 정보 받으면 getinfo=true
     //움직일 수 있는, 일반 몬스터 스크립트
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
-
-    public string Name;
+    #region private 변수
+    private bool Recon = false;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
+    private Animator _Anim;
+    private int Coin;
+    private bool DeadStart = false;
+    private float StartXPos;    //시작할 때 position의 X좌표 값
+    private bool ResetStartXPos = false;    //추적모드->일반상태로 되돌아왔을 때 해야 할것
+                                            //추적모드->일반상태시 true로 바뀌어서 새로 StartXPos잡도록 함. 그 뒤엔 다시 false
+    private GameObject Player;
+    private Rigidbody2D rigid;
+    #endregion
+    #region CSV 파서(리스폰 포인트에 달린 MonsterManager_Plus)로부터 값 받는 변수들
+    public string MonsterName;
     public int HP;  //몬스터 체력
     public int attack;  //몬스터 공격력,함정도 있음
     public int index;   //몬스터 인덱스
@@ -18,39 +29,27 @@ public class MonsterAI_Moving : MonoBehaviour
     public float _CheckDelay = 2;   //쿨타임 한계시간
     public bool isDead; //죽으면 true(죽으면 코인줌)->마녀 죽으면 다시 리젠 못함
     public int Stage_Location;  //몬스터 출현 스테이지 
-    public int _isMonstate = 0;                // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드 3:죽음(IsDead==true)
-    //고정형:0=경비모드,1:공격모드
-    private bool Recon=false;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
-    private Animator _Anim;
-    private int Coin;
+    public  enum _IsMonstate { ReconState =0,ChasingState,AttackState,DeadState};
+    public _IsMonstate NowMonstate =_IsMonstate.ReconState;
+              // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드 3:죽음(IsDead==true)
+                                               //고정형:0=경비모드,1:공격모드
+    #endregion
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
     public bool GetInfo;    //MonsterManager로부터 정보 받으면 true
-    public bool isLeft = true; //왼쪽으로 가는 중이면 true
-    public float HurtTime;  //무적인 시간(Time.deltaTime으로 더해주고, 만약이게 0보다 작으면 Hurt=false
+    private bool isLeft = true; //왼쪽으로 가는 중이면 true
+    //이동형 몬스터는 씬 시작 시 자신의 X좌표를 받아 StartXPos에 넣고, 왼쪽으로 움직이다 X좌표가 StartXPos보다 일정 값(현재 5)
+    //보다 작으면 isLeft=false로 전환
+    private bool HurtEffectStart = false;
     public float WholeHurtTime = 0.5f;  //무적인 시간 전체
-    public bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
+    private bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
                         //공격받아도 일시적으로 무적 상태이다
-    private bool DeadStart = false;
-    private float StartXPos;    //시작할 때 position의 X좌표 값
-    private bool ResetStartXPos = false;    //추적모드->일반상태로 되돌아왔을 때 해야 할것
-                                            //추적모드->일반상태시 true로 바뀌어서 새로 StartXPos잡도록 함. 그 뒤엔 다시 false
-    private GameObject Player;
-    private Rigidbody2D rigid;
+   
     #region 자식 오브젝트
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
     public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝
                                     //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
     #endregion
     // Use this for initialization
-    void Start()
-    {
-        Player = GameObject.FindGameObjectWithTag("Player");
-        rigid = gameObject.GetComponent<Rigidbody2D>();
-        StartXPos = gameObject.transform.position.x;
-        HurtTime = WholeHurtTime;
-        _Anim = GetComponent<Animator>();
-
-    }
     #region 죽을 때 시작되는 코루틴
     IEnumerator Dead()
     {
@@ -59,7 +58,7 @@ public class MonsterAI_Moving : MonoBehaviour
             DeadStart = true;
             _Anim.SetBool("IsDead", true);
             _Anim.SetBool("Attack", false);
-          //  _Anim.SetBool("Walk", false);
+            //  _Anim.SetBool("Walk", false);
             yield return new WaitForSeconds(5);
             #region 죽을 때 떨어지는 코인 갯수 정하기
             if (Coin == 0)
@@ -72,6 +71,15 @@ public class MonsterAI_Moving : MonoBehaviour
         }
     }
     #endregion
+    void Start()
+    {
+        Player = GameObject.FindGameObjectWithTag("Player");
+        rigid = gameObject.GetComponent<Rigidbody2D>();
+        StartXPos = gameObject.transform.position.x;
+        _Anim = GetComponent<Animator>();
+       
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -80,15 +88,14 @@ public class MonsterAI_Moving : MonoBehaviour
         #region HP>0 이상인 상태
             if (HP>0)
             {
-                
-                #region 정찰모드(_isMonState==0)
-                if (_isMonstate == 0)
+                #region 정찰모드(NowMonstate==0)
+                if (NowMonstate==_IsMonstate.ReconState)
                 {
                     _Anim.SetBool("Walk", true);
                     _Anim.SetBool("Attack", false);
                     _Anim.SetBool("IsDead", false);
                     Moving();
-                    #region 방향 지정함수 시작한 지점.x좌표보다 더 왼쪽으로 5 갔으면 방향 바꾸기
+                    #region 이동형 몬스터의 방향 지정함수. 시작한 지점의 X좌표보다 더 왼쪽으로 5 갔으면 방향 바꾸기
                     if (isLeft == true)
                     {
                         if (transform.position.x < StartXPos - 3)
@@ -117,7 +124,7 @@ public class MonsterAI_Moving : MonoBehaviour
                 #endregion
                 #region 추적 모드
                 //정찰 함수 주기->왔다갔다 해야하니까 코루틴으로 줘야할듯?
-                else if (_isMonstate == 1)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
+                else if (NowMonstate==_IsMonstate.ChasingState)  //플레이어 발견->추적모드&&추적 범위 콜라이더와 플레이어 충돌
                 {
                     _Anim.SetBool("IsDead", false);
                     //여기서 플레이어 방향 못잡음
@@ -127,7 +134,7 @@ public class MonsterAI_Moving : MonoBehaviour
                 }
                 #endregion
                 #region 공격 모드
-                else if (_isMonstate == 2)  //공격 모드. 
+                else if (NowMonstate==_IsMonstate.AttackState)  //공격 모드. 
                 {
                     //Check();
                     _Anim.SetBool("Walk", false);
@@ -140,7 +147,7 @@ public class MonsterAI_Moving : MonoBehaviour
             else if (HP <= 0)
             {
                 isDead = true;
-                _isMonstate = 3;
+                NowMonstate = _IsMonstate.DeadState;
             }
             if (isDead == true)
             {
@@ -154,11 +161,21 @@ public class MonsterAI_Moving : MonoBehaviour
         #endregion
         }
     }
+    //void ManagingAnim()
+    //{
+    //    if (NowMonstate == _IsMonstate.ReconState)
+    //    {
+    //        _Anim.SetBool("Walk", true);
+    //        _Anim.SetBool("Attack", false);
+    //        _Anim.SetBool("IsDead", false);
+    //    }
+    //}
     #region 근접, 이동가능!(Recon=true) 몬스터의 이동 함수
     public void Moving()
     {
-        if (_isMonstate == 0)   //다른 상태로 접어들었을때 꺼지기 위해서
+        if (NowMonstate==_IsMonstate.ReconState)   //다른 상태로 접어들었을때 꺼지기 위해서
         {
+           
             if (isLeft == true)
             {
                 //기본 왼쪽 형태
@@ -175,16 +192,13 @@ public class MonsterAI_Moving : MonoBehaviour
         }
         else
         {
-            //원본에는 주석 해제
-           // rigid.velocity = Vector2.zero;
         }
     }
     #endregion
-
     #region 플레이어 추적 함수(_isMonState==1)
     void Chasing()
     {
-        if (_isMonstate == 1 && isDead == false)
+        if (NowMonstate==_IsMonstate.ChasingState && isDead == false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Player.transform.position.x < transform.position.x)
@@ -202,43 +216,37 @@ public class MonsterAI_Moving : MonoBehaviour
     }
     #endregion
     #region 몬스터가 다칠때 깜빡이는 함수(다치는건 트리거에 걸어놓음)
-    void GetHurt()
+    IEnumerator GetHurt()
     {
-        if (Hurt == true)
-        {
-            //그냥 여기서 if문으로 다 써버리니까 조건 중복되서 들어감
-            if (HurtTime <= 0f)
+        HurtEffectStart = true;
+        while (Hurt == true)
             {
-                HurtTime = WholeHurtTime;
-                Hurt = false;
+            yield return new WaitForSeconds(WholeHurtTime);
+            Hurt = false;
+            HurtEffectStart = false;
+            StopCoroutine(GetHurt());
             }
         }
-        else if (Hurt == false)
-        {
-        }
-    }
     #endregion
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.transform.tag == "Player")
-        {
-            _CheckMode = true;  //true면 공격
-            if (Player.GetComponent<PlayerController>().touched == false)
-            {
-                Player.GetComponent<PlayerController>().touched = true;
-                //나중에 여기서 플레이어 hp깎는 것도 만들기
-            }
-        }
         if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
             if (Player.GetComponent<PlayerController>().IsAttacking == true)
             {
-                print("M+_HURT");
-                GetHurt();
-                HP -= 10;
-                print("HP:" + HP);
-                //나중에 플레이어가 착용한 무기의 공격력 적용하도록
+                if (HurtEffectStart == false)
+                {
+                    StartCoroutine(GetHurt());
+                }
+                HP -= 10; if (col.gameObject.tag == "Sword")
+                {
+                    HP -= Player.GetComponent<PlayerController>().SwordDamage;
+                }
+                if (col.gameObject.tag == "Bullet")
+                {
+                    HP -= Player.GetComponent<PlayerController>().BulletDagmage;
+                }
             }
         }
     }
@@ -253,6 +261,10 @@ public class MonsterAI_Moving : MonoBehaviour
             _CheckMode = false;
             // 공격 받았을 때 데미지 처리.
         }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+       
     }
     private void OnCollisionStay2D(Collision2D other)
     {

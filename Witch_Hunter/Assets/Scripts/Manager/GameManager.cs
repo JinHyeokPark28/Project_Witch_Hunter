@@ -38,6 +38,11 @@ public class GameManager : MonoBehaviour {
 		//    _MonsterManager = transform.Find("EnemyManager").GetComponent<MonsterManager_Plus>();
 		if (_ItemParser == null)
 			_ItemParser = GameObject.Find("GameManager").GetComponent<ItemParser>();
+
+		//// 마우스 커서 잠금
+		//Cursor.lockState = CursorLockMode.Locked;
+		//// 마우스 커서 안보이게 하기
+		//Cursor.visible = false;
     }
 	#endregion
 

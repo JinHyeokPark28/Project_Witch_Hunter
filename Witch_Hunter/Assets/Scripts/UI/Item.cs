@@ -17,7 +17,6 @@ public class Item : ItemParser
 	public int itemType;				// 아이템 타입
 	public int itemCount;				// 아이템 개수
 	public Item[] ItemList;
-	
 	#endregion
 
 	#region Public Method
@@ -27,16 +26,14 @@ public class Item : ItemParser
 		MakingItem(1);
 	}
 	#endregion
-
 	public void MakingItem(int i)
 	{
-		
+		int j = 0;
 		ItemList = new Item[CellLength - i];
 		for (int x = i; x < CellLength; x++)
 		{
-			int j = 0;
-			ItemList[j] = new Item();   //이거 안해줘서 에러났음;;
-										//클래스 꼭 하나씩 초기화 시키자;;
+			
+			ItemList[j] = new Item();							 //이거 안해줘서 에러났음;;	//클래스 꼭 하나씩 초기화 시키자;;
 			ItemList[j].itemID = Convert.ToInt32(data[x, 0]);
 			ItemList[j].itemName = data[x, 1];
 			ItemList[j].itemDescription = data[x, 2];
@@ -47,6 +44,7 @@ public class Item : ItemParser
 			if (j < CellLength - i)
 			{
 				j++;
+
 			}
 			else
 			{
@@ -60,19 +58,14 @@ public class Item : ItemParser
 	{
 		switch (_itemID)
 		{
-			case 10001:
+			case 401:
 				break;
-			case 10002:
+			case 402:
 				break;
-			case 10003:
+			case 403:
 				break;
-			case 10004:
+			case 404:
 				break;
-			case 10101:
-				break;
-			case 10102:
-				break;
-
 		}
 	}
 }

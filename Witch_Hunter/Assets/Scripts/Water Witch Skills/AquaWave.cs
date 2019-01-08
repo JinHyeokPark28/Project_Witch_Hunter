@@ -6,6 +6,7 @@ public class AquaWave: MonoBehaviour
     public GameObject WaveManager;  //파도 관리하는 부모 오브젝트 받는 웨이브매니저 게임오브젝트
     private float speed = 10f;
     private bool MovingUp = true;
+    //HaveToEnd=true면 함수 종료
     private bool HavetoEnd = false;
     private float y_pos = -11f;  //worldpositon
     public int MyNum=-1;
@@ -36,6 +37,7 @@ public class AquaWave: MonoBehaviour
             i++;
             if (i == 2)
             {
+                //함수 두번 돌았으면->끝내기
                 HavetoEnd = true;
                 i = 0;
             }
@@ -62,7 +64,6 @@ public class AquaWave: MonoBehaviour
         }
         //transform.position = new Vector2(transform.position.x, y_pos);
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -79,7 +80,6 @@ public class AquaWave: MonoBehaviour
         }
         if (HavetoEnd == true)
         {
-            
             if (WaveManager.GetComponent<WaveManager>().IsLeftWave == true)
             {
                 //부모 파도가 왼쪽에서 시작하는가?->YES->내가 맨 오른쪽(마지막)파도인가?

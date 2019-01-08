@@ -9,7 +9,6 @@ using System;
 public class ItemParser : MonoBehaviour
 {
 	#region 변수 목록
-	public static CSVParser _CSV = null;
 	public TextAsset Item_List;
 	//텍스트파일 받는 MonsterCSV->여기다가 CSV넣으면 됨
 	public string[] option;
@@ -31,8 +30,6 @@ public class ItemParser : MonoBehaviour
 		WholeText = Item_List.text;
 		//WholeText에 MonsterCSV에 있는 텍스트를 넣음
 		TextArray = WholeText.Split('\n');
-
-		Debug.Log("텍스트어레이" + TextArray[0]);
 		//TextArray 원소 하나마다 WholeText를 한 줄씩 쪼개서 넣어줌
 		CellLength = TextArray.Length;
 		//셀이 한 세로줄에 몇 개 있는가?:TextArray가 몇 개나 있는지(전체 텍스트를 엔터로 나눈 길이)
@@ -48,7 +45,7 @@ public class ItemParser : MonoBehaviour
 				data[i, j] = TextArray[i].Split(',')[j];
 			}
 		}
-		print(CellLength);
+
 
 	}
 
