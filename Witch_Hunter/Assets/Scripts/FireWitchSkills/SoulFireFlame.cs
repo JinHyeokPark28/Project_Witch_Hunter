@@ -46,7 +46,7 @@ public class SoulFireFlame : MonoBehaviour {
     {
         if ((collision.gameObject.tag == "Sword") || (collision.gameObject.tag == "Bullet"))
         {
-            if (Player.GetComponent<PlayerController>().IsAttacking == true)
+            if (Player.GetComponent<PlayerController>().NowState == PlayerController.PlayerState.Attack)
             {
                 print("HIT");
                 HitNum++;

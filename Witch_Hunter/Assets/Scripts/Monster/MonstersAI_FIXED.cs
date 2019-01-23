@@ -26,7 +26,6 @@ public class MonstersAI_FIXED : MonoBehaviour
     public float _AttackSpeed = 4f;      // 공격 속도(때릴 때 속도):근접,이동가능
     public float _CheckTime = 0;    //공격 쿨타임 재는 시간->원거리,고정에 쓰임
     public float _CheckDelay = 2;   //쿨타임 한계시간
-    public bool isDead; //죽으면 true(죽으면 코인줌)->마녀 죽으면 다시 리젠 못함
     public int Stage_Location;  //몬스터 출현 스테이지 
     public bool Recon;  //몬스터가 움직일 수 있는 타입인지 true면 정찰(false-고정형이면 무조건 원거리)
     public int MonsterType; //0이면 일반(근접공격-근거리) 1이면 사격-원거리 2면 강화형(HP 더 커짐) 3-자폭
@@ -44,10 +43,17 @@ public class MonstersAI_FIXED : MonoBehaviour
     #region 자식 오브젝트
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
     public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝
-    //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
+                                    //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
+    #endregion
+    #region 마리오네트 사수의 총알
+    public GameObject M_Bullet;
+    public bool DidShot = false;
+    //총 쏘면 true로 바꿔줌->애니메이션 끝나면 true
+    private Vector2 BulletRespawnPos = new Vector2(-1, -0.3f);
+    //총알 리스폰할 마리오네트와의 로컬 포지션 지점
     #endregion
 
-    #region 컴포넌트 변수
+    #region 컴포넌트 변수 
     public Rigidbody2D rigid;
     public SpriteRenderer SR;
     #endregion
@@ -56,10 +62,11 @@ public class MonstersAI_FIXED : MonoBehaviour
     {
         while (true)
         {
+            GetComponent<BoxCollider2D>().isTrigger = true;
+            rigid.constraints = RigidbodyConstraints2D.FreezePositionY;
             DeadStart = true;
-            _Anim.SetBool("Dead", true);
+            _Anim.SetBool("IsDead", true);
             _Anim.SetBool("Attack", false);
-            _Anim.SetBool("Walk", false);
             if (Coin == 0)
             {
                 Coin = Random.Range(1, 21);
@@ -92,6 +99,7 @@ public class MonstersAI_FIXED : MonoBehaviour
         //몬스터 초기 _isMonState 값 줘야함
         _Anim = GetComponent<Animator>();
         StartCoroutine(DirectionMaker());
+        
     }
    
     private void Update()
@@ -102,10 +110,29 @@ public class MonstersAI_FIXED : MonoBehaviour
         }
         if (GetInfo == true)
         {
-            #region HP>0일 경우
-            if (HP > 0&&isDead==false)
+            if ((MonsterName == "Marionette_S") && (M_Bullet == null))
             {
-                    if (NowMonstate==_IsMonstate.ReconState)
+                print("bb");
+                M_Bullet = Resources.Load<GameObject>("Test_M_Bullet");
+                //나중에 폴더 넣어서 관리
+            }
+            #region HP>0일 경우
+            if (HP > 0 && NowMonstate != _IsMonstate.DeadState)
+            {
+                if (DidShot == false)
+                {
+                    if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("SHOT") == true)
+                    {
+                        print("shot");
+                        Instantiate(M_Bullet, new Vector2(transform.position.x + BulletRespawnPos.x, transform.position.y + BulletRespawnPos.y), Quaternion.Euler(0, 90, 0));
+                        DidShot = true;
+                    }
+                }
+                if ((DidShot == true) && (_Anim.GetCurrentAnimatorStateInfo(0).IsName("idle_Marionette_S") == true))
+                {
+                    DidShot = false;
+                }
+                if (NowMonstate==_IsMonstate.ReconState)
                     {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
                         _Anim.SetBool("Attack", false);
                         Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
@@ -114,7 +141,8 @@ public class MonstersAI_FIXED : MonoBehaviour
                     {
                         NotMovingMonsterAttack();
                         _Anim.SetBool("Attack", true);
-                        _Anim.SetTrigger("SET");
+                    
+                    _Anim.SetTrigger("SET");
                         //플레이어 발견모드(이때 조준&&공격)
                     }
                     else if (NowMonstate == _IsMonstate.DeadState)
@@ -130,12 +158,11 @@ public class MonstersAI_FIXED : MonoBehaviour
         {
             print("DEAD");
             NowMonstate = _IsMonstate.DeadState;
-            isDead = true;
         }
         #endregion
 
         #region 죽는 거 처리하는 부분
-        if (isDead == true)
+        if (NowMonstate == _IsMonstate.DeadState)
         {
             if (DeadStart == false)
             {
@@ -155,6 +182,7 @@ public class MonstersAI_FIXED : MonoBehaviour
         {
             //플레이어붙인 태그를 자동으로 찾게 되어있음
             //플레이어가 몬스터 왼편에 있을 때
+           
 
             if (Player.transform.position.x < transform.position.x)
             {
@@ -208,16 +236,19 @@ public class MonstersAI_FIXED : MonoBehaviour
        
         if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
-            if (Player.GetComponent<PlayerController>().IsAttacking == true)
+            if (Player.GetComponent<PlayerController>().NowState ==PlayerController.PlayerState.Attack)
             {
+                print("p_attack");
                 GetHurt();
                 if (col.gameObject.tag == "Sword")
                 {
                     HP -= Player.GetComponent<PlayerController>().SwordDamage;
+                    print("m_hp:" + HP);
                 }
                 if (col.gameObject.tag == "Bullet")
                 {
                     HP -= Player.GetComponent<PlayerController>().BulletDagmage;
+                    print("m_hp:" + HP);
                 }
             }
         }

@@ -7,7 +7,7 @@ public class PlayerStateUI : MonoBehaviour {
 	#region Private Variable
 	private bool inputKey = true;
 	private PlayerStatManager _StatManager;
-	private Equipment theEquip;
+
 	private GameManager theGame;
 	#endregion
 
@@ -28,7 +28,6 @@ public class PlayerStateUI : MonoBehaviour {
 	{
         theGame = FindObjectOfType<GameManager>();
 		_StatManager = FindObjectOfType<PlayerStatManager>();
-		theEquip = FindObjectOfType<Equipment>();
 	}
 	private void Update()
 	{

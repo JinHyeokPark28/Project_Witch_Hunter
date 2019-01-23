@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-public class PlayerController : MonoBehaviour {
+using Anima2D;
+public class PlayerController : MonoBehaviour
+{
     #region 변수 목록
     public int HP = 50;
     public float Speed = 5;
@@ -12,21 +13,21 @@ public class PlayerController : MonoBehaviour {
     //true면 점프 가능, false면 점프 불가능
     public bool JumpUp;
     //뛰었음&&공중으로 올라가는 상태(rigidbody.velocity.y>0)
-    public bool IsAttacking;    //공격하고 있으면 true
-    public bool touched;
-    private bool HurtAnimStart = false;
-    //IEnumerator 함수 업데이트에서 여러번 호출되는 것을 방지, true일 때 while문 실행시키고 바로 false로 전환
+    private bool isPlayerHit;
+    public bool IsHitAnimActive = false;
+   public enum PlayerState{Dead=-10,Idle=0,Hit=1,Run=2,Jump=3,Attack=4};
+    public PlayerState NowState = PlayerState.Idle;
     public bool GunShot;
     public int SwordDamage = 5;
     public int BulletDagmage = 5;
     //false 면 칼로 공격
-	public bool CheckNPC;       // true면 대화창 실행
-	public bool CheckEnemy;     // true면 공격 가능
-	private bool CheckChest;     // true면 상자 열기
-	public bool CheckSave;		// true면 세이브 하기
+    public bool CheckNPC;       // true면 대화창 실행
+    public bool CheckEnemy;     // true면 공격 가능
+    private bool CheckChest;     // true면 상자 열기
+    public bool CheckSave;		// true면 세이브 하기
     private bool ContactingSavePoint = false;
-	private Animator _Anim;
-    private int SceneNum=-1;
+    private Animator _Anim;
+    private int SceneNum = -1;
     public bool SceneStart = true;  //씬 전환시 true면 시작 포인트에서 플레이어 시작
                                     //false면 backpoint에서 시작 ->씬 체인저 쪽에서 신호 줌
     private static bool playerExists; //이미 플레이어가 존재하면 true
@@ -39,18 +40,52 @@ public class PlayerController : MonoBehaviour {
                                       // Use this for initialization
     private Rigidbody2D RG;
     private GameObject MySword;
+    public List<GameObject> BodyParts = new List<GameObject>();
+    #endregion
+    #region 눌러진 키 관리
+    private bool isAKeyPressed;
+    private bool isMoveKeyPressed;
     #endregion
     //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
     //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
     //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
+    #region 다치면 스프라이트 깜빡이는 코루틴
+    IEnumerator HitSpriteFlashing()
+    {
+        while(NowState==PlayerState.Hit)
+        {
+            print("hit_FLASH");
+            for(int i = 0; i < BodyParts.Count; i++)
+            {
+                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
+            }
+            yield return new WaitForSeconds(0.05f);
 
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+            print("HIT_END");
+        }
+    }
+    #endregion
     void Start()
     {
         if (MySword == null)
         {
             MySword = this.gameObject.transform.Find("TestSword").gameObject;
-            print(MySword);           
+            print(MySword);
         }
+        BodyParts.Clear();
+        BodyParts.Add(transform.Find("body").gameObject);
+        BodyParts.Add(transform.Find("head").gameObject);
+        BodyParts.Add(transform.Find("leftarm").gameObject);
+        BodyParts.Add(transform.Find("rightarm").gameObject);
+        BodyParts.Add(transform.Find("warm").gameObject);
+        BodyParts.Add(transform.Find("left").gameObject);
+        BodyParts.Add(transform.Find("right").gameObject);
+        BodyParts.Add(transform.Find("Sword").gameObject);
         if (!playerExists)
         {
             playerExists = true;
@@ -71,73 +106,96 @@ public class PlayerController : MonoBehaviour {
             //A에서 시작할 포인트 하나, B에서 시작할 포인트 하나, B에서 A로 갈때 다시 A에서 시작할 포인트 하나
             gameObject.transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
         }
-		_Anim = GetComponent<Animator>();
-       
+        _Anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
-    void Update() {
-        
+    void Update()
+    {
+        CheckingPlayerState();
         if (HP <= 0)
         {
-            _Anim.SetBool("IsRun", false);
-            _Anim.SetBool("Hit", false);
-            _Anim.SetBool("Jump", false);
-            _Anim.SetBool("IsRun", false);
             _Anim.SetBool("Dead", true);
         }
         else
         {
-
+            _Anim.SetBool("Dead", false);
             ChangeWeapon();
             NumberKeyManager();
-            TouchEnemy();
             VectorMovingInScenes();
-           
-                _Anim.SetBool("IsRun", false);
-                _Anim.SetBool("Hit", false);
-                _Anim.SetBool("Jump", false);
-                _Anim.SetBool("Attack", false);
-                _Anim.SetBool("Dead", false);
+            if (isPlayerHit == false)
+                //&& _Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == false)
+            {
+                _Anim.SetInteger("State", 1);
                 JumpManaging();
-                PressingAKey();
                 PlayerMove();
-                //무기 변경:총<->칼
-                if (Input.GetKeyDown(KeyCode.D))
+                PressingAKey();
+            }
+            if (isPlayerHit == true)
+            {
+                _Anim.SetInteger("State", 0);
+                if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == true)
                 {
-                    //  print("CHANGE_WEAPON");
+                    StartCoroutine(HitSpriteFlashing());
+                    _Anim.SetTrigger("Auto");
+                    _Anim.SetInteger("State", 1);
+                    print("hit");
+                    isPlayerHit = false;
                 }
-
-            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") == false)
-            {
-                //들어감
-                //공격 애니메이션 끝나면 자동적으로 isAttacking을 false로 만들어줌
-                IsAttacking = false;
             }
-            else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") == true)
+           
+           
+        
+            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == true)
             {
-                IsAttacking = true;
+                IsHitAnimActive = true;
             }
-            else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == false)
+            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == false)
             {
-                print("HIT_END");
-                HurtAnimStart = false;
-                touched = false;
+                IsHitAnimActive = false;
             }
         }
     }
+    #region 플레이어 상태 구분
+    void CheckingPlayerState()
+    {
+        if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Die") == true)
+        {
+            NowState = PlayerState.Dead;
+        }
+        else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == true)
+        {
+            NowState = PlayerState.Hit;
+        }
+        else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") == true)
+        {
+            //들어감
+            //공격 애니메이션 끝나면 자동적으로 isAttacking을 false로 만들어줌
+            NowState = PlayerState.Attack;
+        }
+        else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Run") == true)
+        {
+            NowState = PlayerState.Run;
+        }
+        else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Jump") == true)
+        {
+            NowState = PlayerState.Jump;
+        }
+        else
+        {
+            NowState = PlayerState.Idle;
+        }
+    }
+    #endregion
     #region A키 눌렀을 때(공격&NPC상호작용)
     void PressingAKey()
     {
-        if (CheckChest == false&&CheckNPC==false&&ContactingSavePoint==false)
-        {           
+        if (CheckChest == false && CheckNPC == false && ContactingSavePoint == false)
+        {
             //보물상자와 접촉 안했단 조건 하에서
             if (Input.GetKeyDown(KeyCode.A))
             {
-
-                _Anim.SetBool("Attack", true);
-                _Anim.SetBool("IsRun", false);
-               
+                _Anim.SetInteger("State", 4);
                 //세이브포인트
             }
         }
@@ -148,29 +206,25 @@ public class PlayerController : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-			// 스프라이트 애니메이션 넣기
-			_Anim.SetBool("IsRun", true);
+            // 스프라이트 애니메이션 넣기
+            _Anim.SetInteger("State", 2);
             transform.Translate(Vector2.right * Speed * Time.deltaTime);
-			transform.rotation = Quaternion.Euler(0, 180, 0);
+            transform.rotation = Quaternion.Euler(0, 180, 0);
 
         }
         else if (Input.GetKey(KeyCode.RightArrow))
-		{
-			_Anim.SetBool("IsRun", true);
-			transform.Translate(Vector2.right * Speed * Time.deltaTime);
-			transform.rotation = Quaternion.Euler(0, 0, 0);
-		}
-		else
-		{
-			_Anim.SetBool("IsRun", false);
-		}
+        {
+            _Anim.SetInteger("State", 2);
+            transform.Translate(Vector2.right * Speed * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
         //점프키
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (CanJump == true && Time.timeScale == 1)
             {
-                _Anim.SetBool("IsRun", false);
-                _Anim.SetBool("Jump", true);
+                _Anim.SetInteger("State", 3);
+                print("jump");
                 CanJump = false;
                 RG.velocity = new Vector2(0, JumpSpeed);
                 //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
@@ -185,7 +239,7 @@ public class PlayerController : MonoBehaviour {
     #region 뛰었을 때 발판 그대로 통과하도록하는 함수
     void JumpManaging()
     {
-        if (CanJump == false && RG.velocity.y >0f)
+        if (CanJump == false && RG.velocity.y > 0f)
         {
             //뛰고 있는 중&&위로 올라갈 때는 공중에 있는 발판에 부딪혀도 레이어 충돌하지 않도록       
             JumpUp = true;
@@ -207,8 +261,8 @@ public class PlayerController : MonoBehaviour {
 
     }
     #endregion
-	#region 숫자키관리(아이템 사용키)
-	void NumberKeyManager()
+    #region 숫자키관리(아이템 사용키)
+    void NumberKeyManager()
     {
         //숫자 키 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -217,17 +271,17 @@ public class PlayerController : MonoBehaviour {
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-           // print("2");
+            // print("2");
 
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-           // print("3");
+            // print("3");
 
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-          //  print("4");
+            //  print("4");
 
         }
 
@@ -254,43 +308,49 @@ public class PlayerController : MonoBehaviour {
     private void OnCollisionEnter2D(Collision2D collision)
     {
         //플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
-        if ((collision.gameObject.tag == "Enemy")&&
-            (collision.gameObject.name!="ChasingArea")&&(collision.gameObject.name!="AttackingArea"))
+        if ((collision.gameObject.tag == "Enemy") &&
+            (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea")&&HP>0)
         {
-            if (touched == false)
+            
+            if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null)&& 
+                (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate!=MonsterAI_Moving._IsMonstate.DeadState))
             {
-                touched = true;
-            }
-            if (collision.gameObject.GetComponent<MonsterAI_Moving>() != null)
-            {
-                
-                HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                if (isPlayerHit == false)
+                {
+                    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                    isPlayerHit = true;
+                }
                 print("P_HP:" + HP);
             }
-            if (collision.gameObject.GetComponent<MonstersAI_FIXED>() != null)
+            if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null)&&
+                (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate!=MonstersAI_FIXED._IsMonstate.DeadState))
             {
-                HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                if (isPlayerHit == false)
+                {
+                    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                    isPlayerHit = true;
+                }
                 print("P_HP:" + HP);
             }
             if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
             {
-                
-                RG.velocity = new Vector2(4, 4);
+
+                RG.velocity = new Vector2(2.5f, 2.5f);
             }
             else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
             {
-                RG.velocity = new Vector2(-4, 4);
+                RG.velocity = new Vector2(-2.5f, 2.5f);
             }
         }
         if (collision.gameObject.tag == "WitchBullet")
         {
             if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
             {
-                RG.velocity = new Vector2(4, 4);
+                RG.velocity = new Vector2(2.5f, 2.5f);
             }
             else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
             {
-                RG.velocity = new Vector2(-4, 4);
+                RG.velocity = new Vector2(-2.5f, 2.5f);
             }
         }
     }
@@ -304,19 +364,27 @@ public class PlayerController : MonoBehaviour {
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "WitchBullet")
+        if ((collision.gameObject.tag == "WitchBullet")|| (collision.gameObject.tag == "Enemy"))
         {
-            if (touched == true)
+            if (isPlayerHit == false)
             {
+                isPlayerHit = true;
             }
-            else
-            {
-                print("P_HURT");
-                touched = true;
-            }
+            //if (collision.gameObject.GetComponent<MonsterAI_Moving>() != null)
+            //{
+
+            //    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+            //    print("P_HP:" + HP);
+            //}
+            //if (collision.gameObject.GetComponent<MonstersAI_FIXED>() != null)
+            //{
+            //    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+            //    print("P_HP:" + HP);
+            //}
+            //_Anim.SetInteger("State", 1);
+           // isPlayerHit = true;
         }
-
-
+        
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
@@ -388,34 +456,12 @@ public class PlayerController : MonoBehaviour {
 
     void ChangeWeapon()
     {
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            GunShot=! GunShot;
+            GunShot = !GunShot;
         }
     }
-    #region 다쳤을 때
-    void TouchEnemy()
-    {
-        if (touched == true)
-        {
-            if (HurtAnimStart == false)
-            {
-                print("hit_anim");
-                _Anim.SetBool("Dead", false);
-                _Anim.SetBool("IsRun", false);
-                _Anim.SetBool("Jump", false);
-                _Anim.SetBool("Attack", false);
-                _Anim.SetBool("Hit", true);
-                HurtAnimStart = true;
-            }
-        }
-        else
-        {
-
-        }
-    }
-    #endregion
-   
+  
     #region 저장하는 함수
     void Save()
     {

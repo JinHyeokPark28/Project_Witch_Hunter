@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerStatManager : MonoBehaviour {
 	#region Variable
 	public static PlayerStatManager instance;
-    private Equipment theEquip;
 	public int hp;
 	public int currentHP;
 
@@ -25,7 +24,6 @@ public class PlayerStatManager : MonoBehaviour {
 	#region Method
 	private void Start()
 	{
-        theEquip = GetComponent<Equipment>();
         instance = this;
     }
 	private void Update()

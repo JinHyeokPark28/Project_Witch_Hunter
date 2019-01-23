@@ -473,7 +473,8 @@ public class WitchClass : MonoBehaviour
     #region 다쳤을 때(플레이어에게 공격 먹었을 때)
     private void OnCollisionEnter(Collision collision)
     {
-        if ((collision.gameObject.tag == "Sword"|| collision.gameObject.tag == "Bullet") && Player.GetComponent<PlayerController>().IsAttacking == true)
+        if ((collision.gameObject.tag == "Sword"|| collision.gameObject.tag == "Bullet") 
+            && (Player.GetComponent<PlayerController>().NowState == PlayerController.PlayerState.Attack))
         {
             print("WITCH_HURT");
             if (collision.gameObject.tag == "Sword")

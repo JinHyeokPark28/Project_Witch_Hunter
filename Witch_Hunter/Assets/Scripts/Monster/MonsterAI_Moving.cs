@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Anima2D;
 public class MonsterAI_Moving : MonoBehaviour
 {
     //리스폰 포인트에 달린 몬스터매니저 스크립트 로부터 정보 받으면 getinfo=true
@@ -42,9 +43,10 @@ public class MonsterAI_Moving : MonoBehaviour
     private bool HurtEffectStart = false;
     public float WholeHurtTime = 0.5f;  //무적인 시간 전체
     private bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
-                        //공격받아도 일시적으로 무적 상태이다
-   
+                         //공격받아도 일시적으로 무적 상태이다
+
     #region 자식 오브젝트
+    private List<GameObject> BodyParts = new List<GameObject>();
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
     public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝
                                     //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
@@ -55,6 +57,8 @@ public class MonsterAI_Moving : MonoBehaviour
     {
         while (true)
         {
+            GetComponent<BoxCollider2D>().isTrigger = true;
+            rigid.constraints = RigidbodyConstraints2D.FreezePositionY;
             DeadStart = true;
             _Anim.SetBool("IsDead", true);
             _Anim.SetBool("Attack", false);
@@ -70,6 +74,8 @@ public class MonsterAI_Moving : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    #endregion
+    #region 다치면 스프라이트 깜빡이는 코루틴
     #endregion
     void Start()
     {
@@ -91,6 +97,8 @@ public class MonsterAI_Moving : MonoBehaviour
                 #region 정찰모드(NowMonstate==0)
                 if (NowMonstate==_IsMonstate.ReconState)
                 {
+                   
+
                     _Anim.SetBool("Walk", true);
                     _Anim.SetBool("Attack", false);
                     _Anim.SetBool("IsDead", false);
@@ -146,10 +154,9 @@ public class MonsterAI_Moving : MonoBehaviour
         #region HP<=0이라면
             else if (HP <= 0)
             {
-                isDead = true;
                 NowMonstate = _IsMonstate.DeadState;
             }
-            if (isDead == true)
+            if (NowMonstate == _IsMonstate.DeadState)
             {
                 if (DeadStart == false)
                 {
@@ -161,15 +168,6 @@ public class MonsterAI_Moving : MonoBehaviour
         #endregion
         }
     }
-    //void ManagingAnim()
-    //{
-    //    if (NowMonstate == _IsMonstate.ReconState)
-    //    {
-    //        _Anim.SetBool("Walk", true);
-    //        _Anim.SetBool("Attack", false);
-    //        _Anim.SetBool("IsDead", false);
-    //    }
-    //}
     #region 근접, 이동가능!(Recon=true) 몬스터의 이동 함수
     public void Moving()
     {
@@ -233,7 +231,7 @@ public class MonsterAI_Moving : MonoBehaviour
     {
         if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
-            if (Player.GetComponent<PlayerController>().IsAttacking == true)
+            if (Player.GetComponent<PlayerController>().NowState==PlayerController.PlayerState.Attack)
             {
                 if (HurtEffectStart == false)
                 {

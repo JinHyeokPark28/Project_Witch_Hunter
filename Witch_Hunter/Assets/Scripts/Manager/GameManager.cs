@@ -7,9 +7,6 @@ public class GameManager : MonoBehaviour {
 	#region Private Variable
 	private static GameManager _GameManager = null;
    
-	//private MonsterManager_Plus _MonsterManager = null;
-	public ItemParser _ItemParser = null;
-
 
     public Text Gold;                                           // 골드 텍스트
 	#endregion
@@ -36,9 +33,7 @@ public class GameManager : MonoBehaviour {
 		//    _MenuManager.transform.Find("MenuManager").GetComponent<MenuManager>();
 		//if (_MonsterManager == null)
 		//    _MonsterManager = transform.Find("EnemyManager").GetComponent<MonsterManager_Plus>();
-		if (_ItemParser == null)
-			_ItemParser = GameObject.Find("GameManager").GetComponent<ItemParser>();
-
+		
 		//// 마우스 커서 잠금
 		//Cursor.lockState = CursorLockMode.Locked;
 		//// 마우스 커서 안보이게 하기
