@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     public bool IsHitAnimActive = false;
    public enum PlayerState{Dead=-10,Idle=0,Hit=1,Run=2,Jump=3,Attack=4};
     public PlayerState NowState = PlayerState.Idle;
-    public bool GunShot;
+    public bool GunShot=false;
     public int SwordDamage = 5;
     public int BulletDagmage = 5;
     //false 면 칼로 공격
@@ -40,7 +40,8 @@ public class PlayerController : MonoBehaviour
                                       // Use this for initialization
     private Rigidbody2D RG;
     private GameObject MySword;
-    public List<GameObject> BodyParts = new List<GameObject>();
+    private GameObject BackSword;
+    private List<GameObject> BodyParts = new List<GameObject>();
     #endregion
     #region 눌러진 키 관리
     private bool isAKeyPressed;
@@ -76,6 +77,10 @@ public class PlayerController : MonoBehaviour
         {
             MySword = this.gameObject.transform.Find("TestSword").gameObject;
             print(MySword);
+        }
+        if (BackSword == null)
+        {
+            BackSword = this.gameObject.transform.Find("Sword").gameObject;
         }
         BodyParts.Clear();
         BodyParts.Add(transform.Find("body").gameObject);
@@ -121,6 +126,7 @@ public class PlayerController : MonoBehaviour
         {
             _Anim.SetBool("Dead", false);
             ChangeWeapon();
+            ManagingSword();
             NumberKeyManager();
             VectorMovingInScenes();
             if (isPlayerHit == false)
@@ -156,6 +162,37 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    #region 칼 움직임 활성화 관리
+    //게임 시작할 때 실제 몬스터한테 닿는 칼 비활성화 시켜줘야 공격할 때만 활성화됨
+    void ManagingSword()
+    {
+        if (NowState != PlayerState.Attack)
+        {
+            if (MySword.activeInHierarchy == true)
+            {
+                print("FALSE");
+                MySword.SetActive(false);
+            }
+            if (BackSword.activeInHierarchy == false)
+            {
+                BackSword.SetActive(true);
+            }
+        }
+        else if (NowState == PlayerState.Attack)
+        {
+            if(GunShot == false)
+            {
+                BackSword.SetActive(false);
+                //검으로 공격할 때는 캐릭터 등에 있는 검 안보이고, 휘두르는 검만 보이도록
+                if (MySword.activeInHierarchy == false)
+                {
+                    print("dd");
+                    MySword.SetActive(true);
+                }
+            }
+        }
+    }
+    #endregion
     #region 플레이어 상태 구분
     void CheckingPlayerState()
     {
@@ -364,25 +401,12 @@ public class PlayerController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if ((collision.gameObject.tag == "WitchBullet")|| (collision.gameObject.tag == "Enemy"))
+        if (collision.gameObject.tag == "WitchBullet")
         {
             if (isPlayerHit == false)
             {
                 isPlayerHit = true;
             }
-            //if (collision.gameObject.GetComponent<MonsterAI_Moving>() != null)
-            //{
-
-            //    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
-            //    print("P_HP:" + HP);
-            //}
-            //if (collision.gameObject.GetComponent<MonstersAI_FIXED>() != null)
-            //{
-            //    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
-            //    print("P_HP:" + HP);
-            //}
-            //_Anim.SetInteger("State", 1);
-           // isPlayerHit = true;
         }
         
     }
