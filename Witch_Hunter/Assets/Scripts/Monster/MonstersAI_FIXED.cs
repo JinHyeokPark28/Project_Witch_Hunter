@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Anima2D;
 
 public class MonstersAI_FIXED : MonoBehaviour
 {
@@ -41,14 +42,16 @@ public class MonstersAI_FIXED : MonoBehaviour
     #endregion
 
     #region 자식 오브젝트
+    private List<GameObject> Bodyparts = new List<GameObject>();
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
     public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝
                                     //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
     #endregion
     #region 마리오네트 사수의 총알
     public GameObject M_Bullet;
-    public bool DidShot = false;
+    public bool ShootStart = false;
     //총 쏘면 true로 바꿔줌->애니메이션 끝나면 true
+    //bool로 하니까 안됨
     private Vector2 BulletRespawnPos = new Vector2(-1, -0.3f);
     //총알 리스폰할 마리오네트와의 로컬 포지션 지점
     #endregion
@@ -80,13 +83,41 @@ public class MonstersAI_FIXED : MonoBehaviour
     #region 몬스터 좌우 방향 시간에 따라 결정하는 함수
     IEnumerator DirectionMaker()
     {
-        while(true)
+        while(NowMonstate==_IsMonstate.ReconState)
         {
             isLeft = true;
             yield return new WaitForSeconds(2);
             isLeft = false;
             yield return new WaitForSeconds(2);
         }
+    }
+    #endregion
+    #region 총알 쏘는 함수
+    IEnumerator Marionnette_Shooting()
+    {
+        //들어감
+        while (true)
+        {
+            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("SHOT") == true)
+            {
+                print("shotshot");
+                if (isLeft == true)
+                {
+                    Instantiate(M_Bullet, new Vector2(transform.position.x + BulletRespawnPos.x, transform.position.y + BulletRespawnPos.y), Quaternion.Euler(0, 0, 90));
+                }
+                else if (isLeft == false)
+                {
+                    Instantiate(M_Bullet, new Vector2(transform.position.x - BulletRespawnPos.x, transform.position.y + BulletRespawnPos.y), Quaternion.Euler(0, 0, 270));
+                }
+                yield return new WaitForSeconds(1f);
+            }
+            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("delay") == true)
+            {
+
+            }
+            yield return null;
+        }
+
     }
     #endregion
     private void Start()
@@ -99,7 +130,17 @@ public class MonstersAI_FIXED : MonoBehaviour
         //몬스터 초기 _isMonState 값 줘야함
         _Anim = GetComponent<Animator>();
         StartCoroutine(DirectionMaker());
-        
+        Bodyparts.Clear();
+        if(this.gameObject.name== "Marionnette_S")
+        {
+            //마리오네트 사수라면
+            Bodyparts.Add(transform.Find("Body").gameObject);
+            Bodyparts.Add(transform.Find("Head").gameObject);
+            Bodyparts.Add(transform.Find("Left_Foot").gameObject);
+            Bodyparts.Add(transform.Find("Right_Foot").gameObject);
+            Bodyparts.Add(transform.Find("Right_Hand").gameObject);
+            Bodyparts.Add(transform.Find("Left_Hand").gameObject);
+        }
     }
    
     private void Update()
@@ -119,37 +160,33 @@ public class MonstersAI_FIXED : MonoBehaviour
             #region HP>0일 경우
             if (HP > 0 && NowMonstate != _IsMonstate.DeadState)
             {
-                if (DidShot == false)
-                {
-                    if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("SHOT") == true)
-                    {
-                        print("shot");
-                        Instantiate(M_Bullet, new Vector2(transform.position.x + BulletRespawnPos.x, transform.position.y + BulletRespawnPos.y), Quaternion.Euler(0, 90, 0));
-                        DidShot = true;
-                    }
+
+                if (NowMonstate == _IsMonstate.ReconState)
+                {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
+                    _Anim.SetBool("Attack", false);
+                    Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
                 }
-                if ((DidShot == true) && (_Anim.GetCurrentAnimatorStateInfo(0).IsName("idle_Marionette_S") == true))
+                else if (NowMonstate == _IsMonstate.AttackState)
                 {
-                    DidShot = false;
-                }
-                if (NowMonstate==_IsMonstate.ReconState)
-                    {   //평소 모드(플레이어오나 안오나 살펴보는 모드)  ->좌우 살피도록
-                        _Anim.SetBool("Attack", false);
-                        Watching(); //고정형 몬스터가 플레이어 오나 안오나 살피는 함수
-                    }
-                    else if (NowMonstate == _IsMonstate.AttackState)
+                    if(this.gameObject.name == "Marionnette_S")
                     {
-                        NotMovingMonsterAttack();
-                        _Anim.SetBool("Attack", true);
-                    
+                        if (ShootStart == false)
+                        {
+                            StartCoroutine(Marionnette_Shooting());
+                            ShootStart = true;
+                        }
+                    }
+                    FixedMonsterLooking();
+                    _Anim.SetBool("Attack", true);
+
                     _Anim.SetTrigger("SET");
-                        //플레이어 발견모드(이때 조준&&공격)
-                    }
-                    else if (NowMonstate == _IsMonstate.DeadState)
-                    {
-                        //죽었으면
-                        //밑에서 처리
-                    }
+                    //플레이어 발견모드(이때 조준&&공격)
+                }
+                else if (NowMonstate == _IsMonstate.DeadState)
+                {
+                    //죽었으면
+                    //밑에서 처리
+                }
             }
             #endregion
         }
@@ -174,8 +211,9 @@ public class MonstersAI_FIXED : MonoBehaviour
         #endregion
 
     }
+   
     #region 고정형 원거리 몬스터가 플레이어 발견&공격하는 함수
-    public void NotMovingMonsterAttack()
+    public void FixedMonsterLooking()
     {
 
         if (NowMonstate == _IsMonstate.AttackState)   //현재 몬스터 동작 상태=공격상태인지 체크
@@ -186,11 +224,13 @@ public class MonstersAI_FIXED : MonoBehaviour
 
             if (Player.transform.position.x < transform.position.x)
             {
+                isLeft = true;
                 transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             //플레이어가 몬스터 오른쪽에 있을 때
             if (Player.transform.position.x > transform.position.x)
             {
+                isLeft = false;
                 transform.rotation = Quaternion.Euler(0, 180, 0);
             }
         }
@@ -214,41 +254,57 @@ public class MonstersAI_FIXED : MonoBehaviour
     }
     #endregion
     #region 몬스터가 다칠때 깜빡이는 함수
-    void GetHurt()
+    IEnumerator GetHurt()
     {
-        if (Hurt == true)
+        while (Hurt == true)
         {
-            //그냥 여기서 if문으로 다 써버리니까 조건 중복되서 들어감
-            if (HurtTime <= 0f)
+            for(int i = 0; i < Bodyparts.Count; i++)
             {
-                HurtTime = WholeHurtTime;
-                Hurt = false;
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
             }
-        }
-        else if (Hurt == false)
-        {
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
+            }
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+            Hurt = false;
+
         }
     }
     #endregion
     private void OnTriggerEnter2D(Collider2D col)
     {
         //몬스터와 플레이어가 부딪혔을 경우
-       
         if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
             if (Player.GetComponent<PlayerController>().NowState ==PlayerController.PlayerState.Attack)
             {
-                print("p_attack");
-                GetHurt();
-                if (col.gameObject.tag == "Sword")
+                if (NowMonstate != _IsMonstate.DeadState)
                 {
-                    HP -= Player.GetComponent<PlayerController>().SwordDamage;
-                    print("m_hp:" + HP);
-                }
-                if (col.gameObject.tag == "Bullet")
-                {
-                    HP -= Player.GetComponent<PlayerController>().BulletDagmage;
-                    print("m_hp:" + HP);
+
+                    Hurt = true;
+                    StartCoroutine(GetHurt());
+                    if (col.gameObject.tag == "Sword")
+                    {
+                        HP -= Player.GetComponent<PlayerController>().SwordDamage;
+                        print("m_hp:" + HP);
+                    }
+                    if (col.gameObject.tag == "Bullet")
+                    {
+                        HP -= Player.GetComponent<PlayerController>().BulletDagmage;
+                        print("m_hp:" + HP);
+                    }
                 }
             }
         }

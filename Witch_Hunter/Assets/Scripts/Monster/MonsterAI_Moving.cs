@@ -40,13 +40,11 @@ public class MonsterAI_Moving : MonoBehaviour
     private bool isLeft = true; //왼쪽으로 가는 중이면 true
     //이동형 몬스터는 씬 시작 시 자신의 X좌표를 받아 StartXPos에 넣고, 왼쪽으로 움직이다 X좌표가 StartXPos보다 일정 값(현재 5)
     //보다 작으면 isLeft=false로 전환
-    private bool HurtEffectStart = false;
-    public float WholeHurtTime = 0.5f;  //무적인 시간 전체
     private bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
                          //공격받아도 일시적으로 무적 상태이다
 
     #region 자식 오브젝트
-    private List<GameObject> BodyParts = new List<GameObject>();
+    private List<GameObject> Bodyparts = new List<GameObject>();
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
     public GameObject AttackArea;   //플레이어와 접촉하면 몬스터가 공격하도록 하는 자식오브젝트 AttackingArea담을 오브젝
                                     //고정형 몬스터or함정인 경우 AttackArea 버림:(고정형0(평소><->1(발견&공격)상태만 왔다갔다함)
@@ -75,7 +73,35 @@ public class MonsterAI_Moving : MonoBehaviour
         }
     }
     #endregion
-    #region 다치면 스프라이트 깜빡이는 코루틴
+    #region 몬스터가 다칠때 깜빡이는 함수
+    IEnumerator GetHurt()
+    {
+        while (Hurt == true)
+        {
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
+            }
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
+            }
+            yield return new WaitForSeconds(0.05f);
+            for (int i = 0; i < Bodyparts.Count; i++)
+            {
+                Bodyparts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+            Hurt = false;
+
+        }
+    }
     #endregion
     void Start()
     {
@@ -83,7 +109,13 @@ public class MonsterAI_Moving : MonoBehaviour
         rigid = gameObject.GetComponent<Rigidbody2D>();
         StartXPos = gameObject.transform.position.x;
         _Anim = GetComponent<Animator>();
-       
+        Bodyparts.Clear();
+        Bodyparts.Add(this.transform.Find("Head").gameObject);
+        Bodyparts.Add(this.transform.Find("Body").gameObject);
+        Bodyparts.Add(this.transform.Find("Right_Hand").gameObject);
+        Bodyparts.Add(this.transform.Find("Left_Hand").gameObject);
+        Bodyparts.Add(this.transform.Find("Left_Foot").gameObject);
+        Bodyparts.Add(this.transform.Find("Ringt_Foot").gameObject);
     }
 
     // Update is called once per frame
@@ -213,37 +245,26 @@ public class MonsterAI_Moving : MonoBehaviour
         }
     }
     #endregion
-    #region 몬스터가 다칠때 깜빡이는 함수(다치는건 트리거에 걸어놓음)
-    IEnumerator GetHurt()
-    {
-        HurtEffectStart = true;
-        while (Hurt == true)
-            {
-            yield return new WaitForSeconds(WholeHurtTime);
-            Hurt = false;
-            HurtEffectStart = false;
-            StopCoroutine(GetHurt());
-            }
-        }
-    #endregion
+  
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if ((col.gameObject.transform.tag == "Sword") || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
+        if (((col.gameObject.transform.tag == "Sword")&&(Player.GetComponent<PlayerController>().NowState == PlayerController.PlayerState.Attack))
+            || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
-            if (Player.GetComponent<PlayerController>().NowState==PlayerController.PlayerState.Attack)
+            if (NowMonstate != _IsMonstate.DeadState && HP > 0)
             {
-                if (HurtEffectStart == false)
-                {
-                    StartCoroutine(GetHurt());
-                }
-                HP -= 10; if (col.gameObject.tag == "Sword")
+                Hurt = true;
+                StartCoroutine(GetHurt());
+                if (col.gameObject.tag == "Sword")
                 {
                     HP -= Player.GetComponent<PlayerController>().SwordDamage;
+                    print("m_hp:" + HP);
                 }
                 if (col.gameObject.tag == "Bullet")
                 {
                     HP -= Player.GetComponent<PlayerController>().BulletDagmage;
+                    print("m_hp:" + HP);
                 }
             }
         }

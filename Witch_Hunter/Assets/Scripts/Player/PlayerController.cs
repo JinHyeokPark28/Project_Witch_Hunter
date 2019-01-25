@@ -13,8 +13,8 @@ public class PlayerController : MonoBehaviour
     //true면 점프 가능, false면 점프 불가능
     public bool JumpUp;
     //뛰었음&&공중으로 올라가는 상태(rigidbody.velocity.y>0)
-    private bool isPlayerHit;
-    public bool IsHitAnimActive = false;
+    public bool isPlayerHit;
+    private bool IsHitAnimActive = false;
    public enum PlayerState{Dead=-10,Idle=0,Hit=1,Run=2,Jump=3,Attack=4};
     public PlayerState NowState = PlayerState.Idle;
     public bool GunShot=false;
@@ -43,40 +43,16 @@ public class PlayerController : MonoBehaviour
     private GameObject BackSword;
     private List<GameObject> BodyParts = new List<GameObject>();
     #endregion
-    #region 눌러진 키 관리
-    private bool isAKeyPressed;
-    private bool isMoveKeyPressed;
-    #endregion
+    
     //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
     //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
     //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
-    #region 다치면 스프라이트 깜빡이는 코루틴
-    IEnumerator HitSpriteFlashing()
-    {
-        while(NowState==PlayerState.Hit)
-        {
-            print("hit_FLASH");
-            for(int i = 0; i < BodyParts.Count; i++)
-            {
-                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
-            }
-            yield return new WaitForSeconds(0.05f);
 
-            for (int i = 0; i < BodyParts.Count; i++)
-            {
-                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
-            }
-            yield return new WaitForSeconds(0.05f);
-            print("HIT_END");
-        }
-    }
-    #endregion
     void Start()
     {
         if (MySword == null)
         {
             MySword = this.gameObject.transform.Find("TestSword").gameObject;
-            print(MySword);
         }
         if (BackSword == null)
         {
@@ -145,7 +121,6 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine(HitSpriteFlashing());
                     _Anim.SetTrigger("Auto");
                     _Anim.SetInteger("State", 1);
-                    print("hit");
                     isPlayerHit = false;
                 }
             }
@@ -170,7 +145,6 @@ public class PlayerController : MonoBehaviour
         {
             if (MySword.activeInHierarchy == true)
             {
-                print("FALSE");
                 MySword.SetActive(false);
             }
             if (BackSword.activeInHierarchy == false)
@@ -186,9 +160,29 @@ public class PlayerController : MonoBehaviour
                 //검으로 공격할 때는 캐릭터 등에 있는 검 안보이고, 휘두르는 검만 보이도록
                 if (MySword.activeInHierarchy == false)
                 {
-                    print("dd");
                     MySword.SetActive(true);
                 }
+            }
+        }
+    }
+    #endregion
+    #region 점프 공격 및 달리다가 공격 전환 관리
+    void ManagingAttackAnim()
+    {
+        //점프하다 공격
+        if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Jump") == true)
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                _Anim.SetInteger("State", 4);
+            }
+        }
+        //달리다 공격
+        else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Run") == true)
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                _Anim.SetInteger("State", 4);
             }
         }
     }
@@ -261,7 +255,6 @@ public class PlayerController : MonoBehaviour
             if (CanJump == true && Time.timeScale == 1)
             {
                 _Anim.SetInteger("State", 3);
-                print("jump");
                 CanJump = false;
                 RG.velocity = new Vector2(0, JumpSpeed);
                 //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
@@ -322,6 +315,25 @@ public class PlayerController : MonoBehaviour
 
         }
 
+    }
+    #endregion
+    #region 다치면 스프라이트 깜빡이는 코루틴
+    IEnumerator HitSpriteFlashing()
+    {
+        while (NowState == PlayerState.Hit)
+        {
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 0, 0);
+            }
+            yield return new WaitForSeconds(0.05f);
+
+            for (int i = 0; i < BodyParts.Count; i++)
+            {
+                BodyParts[i].GetComponent<SpriteMeshInstance>().color = new Color(1, 1, 1);
+            }
+            yield return new WaitForSeconds(0.05f);
+        }
     }
     #endregion
     #region CanJump관리 및 OnCollision ,OnTrigger관리

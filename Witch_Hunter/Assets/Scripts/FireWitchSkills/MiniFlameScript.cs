@@ -6,7 +6,7 @@ using UnityEngine;
 public class MiniFlameScript : MonoBehaviour {
     private GameObject Player;
     public int DamageNum=5;  //플레이어가 입는 피해 수치
-    private float Speed = 2.5f; 
+    public float Speed = 2.5f; 
 	// Use this for initialization
 	void Start () {
         if(this.gameObject.name== "Test_M_Bullet")
