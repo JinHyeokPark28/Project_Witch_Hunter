@@ -413,14 +413,52 @@ public class PlayerController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "WitchBullet")
+        //플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
+        if ((collision.gameObject.tag == "Enemy") &&
+            (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea") && HP > 0)
         {
-            if (isPlayerHit == false)
+
+            if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null) &&
+                (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate != MonsterAI_Moving._IsMonstate.DeadState))
             {
-                isPlayerHit = true;
+                if (isPlayerHit == false)
+                {
+                    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                    isPlayerHit = true;
+                }
+                print("P_HP:" + HP);
+            }
+            if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
+                (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
+            {
+                if (isPlayerHit == false)
+                {
+                    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                    isPlayerHit = true;
+                }
+                print("P_HP:" + HP);
+            }
+            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+            {
+
+                RG.velocity = new Vector2(2.5f, 2.5f);
+            }
+            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+            {
+                RG.velocity = new Vector2(-2.5f, 2.5f);
             }
         }
-        
+        if (collision.gameObject.tag == "WitchBullet")
+        {
+            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+            {
+                RG.velocity = new Vector2(2.5f, 2.5f);
+            }
+            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+            {
+                RG.velocity = new Vector2(-2.5f, 2.5f);
+            }
+        }
     }
     private void OnTriggerStay2D(Collider2D collision)
     {

@@ -42,7 +42,7 @@ public class MonsterAI_Moving : MonoBehaviour
     //보다 작으면 isLeft=false로 전환
     private bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
                          //공격받아도 일시적으로 무적 상태이다
-
+    private bool StopChasing = false;   //씬 전환하는 부분(맵의 끝부분)에 도달했으면 더이상 플레이어 쫓지 안도록
     #region 자식 오브젝트
     private List<GameObject> Bodyparts = new List<GameObject>();
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
@@ -228,7 +228,7 @@ public class MonsterAI_Moving : MonoBehaviour
     #region 플레이어 추적 함수(_isMonState==1)
     void Chasing()
     {
-        if (NowMonstate==_IsMonstate.ChasingState && isDead == false)
+        if (NowMonstate==_IsMonstate.ChasingState && isDead == false&&StopChasing==false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Player.transform.position.x < transform.position.x)
@@ -249,6 +249,11 @@ public class MonsterAI_Moving : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
+        if (col.gameObject.GetComponent<SceneChanger>() != null)
+        {
+            //만약 씬 전환하는 부분이 부딪혔다면 움직이지 말고 공격만 하기
+            StopChasing = true;
+        }
         if (((col.gameObject.transform.tag == "Sword")&&(Player.GetComponent<PlayerController>().NowState == PlayerController.PlayerState.Attack))
             || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
@@ -275,6 +280,11 @@ public class MonsterAI_Moving : MonoBehaviour
     }
     private void OnTriggerExit2D(Collider2D col)
     {
+        if (col.gameObject.GetComponent<SceneChanger>() != null)
+        {
+            //씬 전환하는 부분에서 빠져 나왔으면
+            StopChasing = false;
+        }
         if (col.transform.tag == "Player")
         {
             _CheckMode = false;

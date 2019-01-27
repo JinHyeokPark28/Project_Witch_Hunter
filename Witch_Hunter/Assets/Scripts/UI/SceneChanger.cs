@@ -41,7 +41,9 @@ public class SceneChanger : MonoBehaviour {
     {
         if (CanGoback == true)
         {
-            if (collision.gameObject.tag == "Player")
+            if (collision.gameObject.tag == "Player"&&
+                collision.gameObject.GetComponent<PlayerController>().NowState!=PlayerController.PlayerState.Hit
+                && collision.gameObject.GetComponent<PlayerController>().NowState != PlayerController.PlayerState.Dead)
             {
                 if (LoadBeforeScene == true)
                 {
