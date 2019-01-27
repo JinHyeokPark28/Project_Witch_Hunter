@@ -50,6 +50,12 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        if (Physics2D.GetIgnoreLayerCollision(10, 11)==true)
+        {//만약 레이어 10(Enemy)와 레이어11(player)가 충돌 무시하도록 되어있으면
+            
+            //충돌하도록 바꾸기
+            Physics2D.IgnoreLayerCollision(10, 11, false);
+        }
         if (MySword == null)
         {
             MySword = this.gameObject.transform.Find("TestSword").gameObject;
@@ -97,6 +103,11 @@ public class PlayerController : MonoBehaviour
         if (HP <= 0)
         {
             _Anim.SetBool("Dead", true);
+            if (Physics2D.GetIgnoreLayerCollision(10, 11) == false)
+            {
+                print("ignor_Collision");
+                Physics2D.IgnoreLayerCollision(10, 11,true);
+            }
         }
         else
         {
@@ -356,52 +367,62 @@ public class PlayerController : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        //플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
-        if ((collision.gameObject.tag == "Enemy") &&
-            (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea")&&HP>0)
+        if (HP > 0)
         {
-            
-            if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null)&& 
-                (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate!=MonsterAI_Moving._IsMonstate.DeadState))
-            {
-                if (isPlayerHit == false)
-                {
-                    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
-                    isPlayerHit = true;
-                }
-                print("P_HP:" + HP);
-            }
-            if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null)&&
-                (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate!=MonstersAI_FIXED._IsMonstate.DeadState))
-            {
-                if (isPlayerHit == false)
-                {
-                    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
-                    isPlayerHit = true;
-                }
-                print("P_HP:" + HP);
-            }
-            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+            //플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
+            if ((collision.gameObject.tag == "Enemy") &&
+                (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea"))
             {
 
-                RG.velocity = new Vector2(2.5f, 2.5f);
+                if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null) &&
+                    (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate != MonsterAI_Moving._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                        isPlayerHit = true;
+                    }
+                    print("P_HP:" + HP);
+                }
+                if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
+                    (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                        isPlayerHit = true;
+
+                        if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
+                    }
+                    print("P_HP:" + HP);
+                }
             }
-            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+            if (collision.gameObject.tag == "WitchBullet")
             {
-                RG.velocity = new Vector2(-2.5f, 2.5f);
+                if (isPlayerHit == false)
+                {
+                    isPlayerHit = true;
+                    if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(2.5f, 2.5f);
+                    }
+                    else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(-2.5f, 2.5f);
+                    }
+                }
+                
             }
         }
-        if (collision.gameObject.tag == "WitchBullet")
-        {
-            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
-            {
-                RG.velocity = new Vector2(2.5f, 2.5f);
-            }
-            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
-            {
-                RG.velocity = new Vector2(-2.5f, 2.5f);
-            }
-        }
+        
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
@@ -413,52 +434,62 @@ public class PlayerController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
-        if ((collision.gameObject.tag == "Enemy") &&
-            (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea") && HP > 0)
-        {
+        if (HP > 0)
+        {//플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
+            if ((collision.gameObject.tag == "Enemy") &&
+                (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea"))
+            {
 
-            if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null) &&
-                (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate != MonsterAI_Moving._IsMonstate.DeadState))
+                if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null) &&
+                    (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate != MonsterAI_Moving._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                        isPlayerHit = true;
+                    }
+                    print("P_HP:" + HP);
+                }
+                if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
+                    (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                        isPlayerHit = true;
+
+                        if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
+                    }
+                    print("P_HP:" + HP);
+                }
+            }
+            if (collision.gameObject.tag == "WitchBullet")
             {
                 if (isPlayerHit == false)
                 {
-                    HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
                     isPlayerHit = true;
+                    print("P_HP:" + HP);
+                    if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(2.5f, 2.5f);
+                    }
+                    else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(-2.5f, 2.5f);
+                    }
                 }
-                print("P_HP:" + HP);
-            }
-            if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
-                (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
-            {
-                if (isPlayerHit == false)
-                {
-                    HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
-                    isPlayerHit = true;
-                }
-                print("P_HP:" + HP);
-            }
-            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
-            {
-
-                RG.velocity = new Vector2(2.5f, 2.5f);
-            }
-            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
-            {
-                RG.velocity = new Vector2(-2.5f, 2.5f);
+               
             }
         }
-        if (collision.gameObject.tag == "WitchBullet")
-        {
-            if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
-            {
-                RG.velocity = new Vector2(2.5f, 2.5f);
-            }
-            else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
-            {
-                RG.velocity = new Vector2(-2.5f, 2.5f);
-            }
-        }
+        
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
