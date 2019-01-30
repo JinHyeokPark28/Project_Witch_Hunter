@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
+	[SerializeField]
+	public GetItem getItem;
 
 	private ItemManager _ItemManager;
 	private Inventory _Inven;
 
 	public int ItemName;
 	public int ItemCount;
-	public Sprite ItemImage;
+	public string ItemType;
 
 	private void Start()
 	{
@@ -23,7 +25,8 @@ public class Item : MonoBehaviour
 		if(other.transform.tag == "Player")
 		{
 			_Inven.PutinInventory(ItemName);
-			Destroy(this.gameObject);
+
+			this.gameObject.SetActive(false);
 		}
 	}
 }

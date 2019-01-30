@@ -11,7 +11,13 @@ public class MiniFlameScript : MonoBehaviour {
 	void Start () {
         if(this.gameObject.name== "Test_M_Bullet")
         {
-            print("bullet");
+            for(int i = 0; i < GameObject.FindGameObjectsWithTag("Enemy").Length; i++)
+            {
+                if(GameObject.FindGameObjectsWithTag("Enemy")[i].name== "Marionnette_S")
+                {
+                    DamageNum = GameObject.FindGameObjectsWithTag("Enemy")[i].GetComponent<MonstersAI_FIXED>().attack;
+                }
+            }
         }
         if (GameObject.FindGameObjectWithTag("Player") != null)
         {
@@ -37,7 +43,8 @@ public class MiniFlameScript : MonoBehaviour {
     private void OnTriggerEnter2D(Collider2D collision)
     {
         //플레이어와 부딪혔을 경우
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player"&& 
+            collision.gameObject.GetComponent<PlayerController>().NowState != PlayerController.PlayerState.Hit)
         {
             Player.GetComponent<PlayerController>().HP -= DamageNum;
             Destroy(this.gameObject);

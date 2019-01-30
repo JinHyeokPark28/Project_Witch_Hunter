@@ -9,38 +9,41 @@ public class InventorySlots : MonoBehaviour {
 	public Text ItemCount;
 	public Image ItemImage;
 	private ItemManager _ItemManager;
+	private Item _Item;
 
 	[SerializeField]
 	public GetItem getItem;
 
-	private List<InventorySlots> SlotList;
+	private List<InventorySlots> SlotList = new List<InventorySlots>();
 
 	private void Start()
 	{
-		SlotList = new List<InventorySlots>();
 		_ItemManager = FindObjectOfType<ItemManager>();
-  
+		_Item = FindObjectOfType<Item>();
+		ItemImage.sprite = null;
 	}
-	public void AddItem(GetItem item)
+	public void AddItem(Item item)
 	{
-		ItemID.text = item.ItemID.ToString();
-		if (getItem.Count > 0)
-			ItemCount.text = "x " + item.Count.ToString();
+		ItemID.text = getItem.Name.ToString();
+		//_Item.gameObject.GetComponent<SpriteRenderer>().sprite = ItemImage.sprite;
+		if (getItem.Count > 1)
+			ItemCount.text = "x " + getItem.Count.ToString();
 		else
 			ItemCount.text = "";
 
 	}
-	public void GenerateIcon()
-	{ 
-		for (int i = 0; i < SlotList.Count; i++)
-		{
-			Debug.Log(SlotList[i].ItemImage);
-		}
-	}
 	public void RemoveSlot()
 	{
-	//	ItemID.text = "";
-	//	ItemCount.text = "";
-	//	ItemImage = null;
+		for (int i = 0; i < SlotList.Count; i++)
+		{
+			if (SlotList[i].ItemID.text == null)
+			{
+				SlotList[i].ItemID.text = "";
+				SlotList[i].ItemCount.text = "";
+				SlotList[i].ItemImage = null;
+			}
+			else
+				return;
+		}
 	}
 }

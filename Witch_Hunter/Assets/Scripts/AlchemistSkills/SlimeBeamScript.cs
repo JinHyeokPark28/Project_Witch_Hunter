@@ -32,7 +32,8 @@ public class SlimeBeamScript : MonoBehaviour {
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player"
+            &&collision.gameObject.GetComponent<PlayerController>().NowState!=PlayerController.PlayerState.Hit)
         {
             //플레이어와 부딪힌다면
             //플레이어 HP 깎는 스크립트

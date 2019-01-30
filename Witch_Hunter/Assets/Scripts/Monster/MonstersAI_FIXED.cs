@@ -75,7 +75,7 @@ public class MonstersAI_FIXED : MonoBehaviour
                 Coin = Random.Range(1, 21);
                 //w_Coin = Random.Range(100, 501);
             }
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(.5f);
             Destroy(gameObject);
         }
     }

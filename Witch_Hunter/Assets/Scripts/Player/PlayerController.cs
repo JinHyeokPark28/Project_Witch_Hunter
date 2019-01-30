@@ -5,7 +5,22 @@ using UnityEngine.SceneManagement;
 using Anima2D;
 public class PlayerController : MonoBehaviour
 {
-    #region 변수 목록
+	#region 변수 목록
+	// 인벤토리 받아올 변수
+	private Inventory _Inven;
+
+	// 옵션창 오브젝트
+	public GameObject OptionObject;
+
+	// 미니맵 오브젝트
+	public GameObject MinimapObject;
+
+	// Option On/Off
+	private bool OnOption = false;
+
+	// Minimap On/Off
+	private bool OnMinimap = false;
+
     public int HP = 50;
     public float Speed = 5;
     public float JumpSpeed;
@@ -14,8 +29,8 @@ public class PlayerController : MonoBehaviour
     public bool JumpUp;
     //뛰었음&&공중으로 올라가는 상태(rigidbody.velocity.y>0)
     public bool isPlayerHit;
-    private bool IsHitAnimActive = false;
-   public enum PlayerState{Dead=-10,Idle=0,Hit=1,Run=2,Jump=3,Attack=4};
+    private Vector3 Movement;
+	public enum PlayerState{Dead=-10,Idle=0,Hit=1,Run=2,Jump=3,Attack=4};
     public PlayerState NowState = PlayerState.Idle;
     public bool GunShot=false;
     public int SwordDamage = 5;
@@ -47,7 +62,7 @@ public class PlayerController : MonoBehaviour
     //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
     //플레이어 스크립트에서 시작 포인트 바로 잡도록 하기
     //start문에서 시작하자마자 포인트 잡기&다른 씬으로 넘어가면 거기에 있는 포인트 자동으로 잡아주기
-
+    
     void Start()
     {
         if (Physics2D.GetIgnoreLayerCollision(10, 11)==true)
@@ -94,11 +109,13 @@ public class PlayerController : MonoBehaviour
             gameObject.transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
         }
         _Anim = GetComponent<Animator>();
+		_Inven = FindObjectOfType<Inventory>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         CheckingPlayerState();
         if (HP <= 0)
         {
@@ -136,18 +153,10 @@ public class PlayerController : MonoBehaviour
                 }
             }
            
-           
-        
-            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == true)
-            {
-                IsHitAnimActive = true;
-            }
-            if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Hit") == false)
-            {
-                IsHitAnimActive = false;
-            }
         }
-    }
+		UIController();
+
+	}
     #region 칼 움직임 활성화 관리
     //게임 시작할 때 실제 몬스터한테 닿는 칼 비활성화 시켜줘야 공격할 때만 활성화됨
     void ManagingSword()
@@ -246,6 +255,10 @@ public class PlayerController : MonoBehaviour
     #region 플레이어 움직임
     void PlayerMove()
     {
+        if (transform.position.z != 0f)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        }
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             // 스프라이트 애니메이션 넣기
@@ -291,14 +304,14 @@ public class PlayerController : MonoBehaviour
         {
             JumpUp = false;
         }
-        if (JumpUp == false && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == true)
-        {
-            this.gameObject.GetComponent<BoxCollider2D>().isTrigger = false;
-        }
-        if (JumpUp == true && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == false)
-        {
-            this.gameObject.GetComponent<BoxCollider2D>().isTrigger = true;
-        }
+        //if (JumpUp == false && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == true)
+        //{
+        //    this.gameObject.GetComponent<BoxCollider2D>().isTrigger = false;
+        //}
+        //if (JumpUp == true && this.gameObject.GetComponent<BoxCollider2D>().isTrigger == false)
+        //{
+        //    this.gameObject.GetComponent<BoxCollider2D>().isTrigger = true;
+        //}
 
     }
     #endregion
@@ -510,16 +523,17 @@ public class PlayerController : MonoBehaviour
         }
         //Rigidbody2d기본은 멈추면 작동안해서 Sleeping모드로 들어감. 그래서 오브젝트가 움직이지 않으면 Rigidbody2d에 관련된 스크립트,함수들도 작동안함->해결법:rigidbody의 SleepingMode를 NeverSleep로 켜줘야함
 
-        //보물상자와 충돌하지 않은 상태라면
+        //보물상자와 충돌하지 않은 상태&&NPC와 있는 상태라면
         if (collision.gameObject.tag == "NPC")
         {
 
             CheckNPC = true;
             if (Input.GetKeyDown(KeyCode.A))
             {
-                if (CheckChest == false)
+                if (CheckChest == false&&
+                 GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking ==false)
                 {
-                    //NPC 처리
+                    GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking = true;
                 }
             }
         }
@@ -589,7 +603,9 @@ public class PlayerController : MonoBehaviour
                 if (GameObject.FindGameObjectWithTag("SceneStartPoint") != null)
                 {
                     //그전 씬에 있던 포지션 잡아버림
-                    transform.position = GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position;
+                    transform.position = new Vector3
+                        (GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position.x,
+                        GameObject.FindGameObjectWithTag("SceneStartPoint").transform.position.y, 0f);
                 }
                 if (Camera.main.GetComponent<PlayerFollower>().Player == null)
                 {
@@ -612,5 +628,41 @@ public class PlayerController : MonoBehaviour
             SceneNum = SceneManager.GetActiveScene().buildIndex;
         }
     }
-    #endregion
+	#endregion
+
+	#region UI 컨트롤 키
+	private void UIController()
+	{
+		if(Input.GetKeyDown(KeyCode.Tab))			// 맵 켜기
+		{
+			OnMinimap = !OnMinimap;
+
+			if(OnMinimap == true)
+			{
+				MinimapObject.SetActive(true);
+				OptionObject.SetActive(false);
+				_Inven.m_Inventory.SetActive(false);
+			}
+			else
+			{
+				MinimapObject.SetActive(false);
+			}
+		}
+		if(Input.GetKeyDown(KeyCode.Escape))        // 옵션창
+		{
+			OnOption = !OnOption;
+
+			if (OnOption == true)
+			{
+				OptionObject.SetActive(true);
+				MinimapObject.SetActive(false);
+				_Inven.m_Inventory.SetActive(false);
+			}
+			else
+			{
+				OptionObject.SetActive(false);
+			}
+		}
+	}
+	#endregion
 }

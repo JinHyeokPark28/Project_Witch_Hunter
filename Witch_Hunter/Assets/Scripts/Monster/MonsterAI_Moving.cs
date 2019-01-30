@@ -61,7 +61,7 @@ public class MonsterAI_Moving : MonoBehaviour
             _Anim.SetBool("IsDead", true);
             _Anim.SetBool("Attack", false);
             //  _Anim.SetBool("Walk", false);
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(.5f);
             #region 죽을 때 떨어지는 코인 갯수 정하기
             if (Coin == 0)
             {
