@@ -25,6 +25,15 @@ public class Marionnette_Sword_Script : MonoBehaviour {
             {
                 Player.GetComponent<PlayerController>().isPlayerHit = true;
                 Player.GetComponent<PlayerController>().HP -= Marionnette.GetComponent<MonsterAI_Moving>().attack;
+                if (collision.gameObject.transform.position.x > gameObject.transform.position.x)
+                {
+
+                    collision.GetComponent<Rigidbody2D>().velocity = new Vector2(2.5f, 2.5f);
+                }
+                else if (collision.gameObject.transform.position.x <= gameObject.transform.position.x)
+                {
+                    collision.GetComponent<Rigidbody2D>().velocity = new Vector2(-2.5f, 2.5f);
+                }
                 //현재 맞은 상태가 아니라면
             }
         }

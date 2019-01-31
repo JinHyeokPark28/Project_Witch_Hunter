@@ -15,12 +15,6 @@ public class PlayerController : MonoBehaviour
 	// 미니맵 오브젝트
 	public GameObject MinimapObject;
 
-	// Option On/Off
-	private bool OnOption = false;
-
-	// Minimap On/Off
-	private bool OnMinimap = false;
-
     public int HP = 50;
     public float Speed = 5;
     public float JumpSpeed;
@@ -122,7 +116,6 @@ public class PlayerController : MonoBehaviour
             _Anim.SetBool("Dead", true);
             if (Physics2D.GetIgnoreLayerCollision(10, 11) == false)
             {
-                print("ignor_Collision");
                 Physics2D.IgnoreLayerCollision(10, 11,true);
             }
         }
@@ -139,7 +132,7 @@ public class PlayerController : MonoBehaviour
                 _Anim.SetInteger("State", 1);
                 JumpManaging();
                 PlayerMove();
-                PressingAKey();
+                PressingXKey();
             }
             if (isPlayerHit == true)
             {
@@ -192,7 +185,7 @@ public class PlayerController : MonoBehaviour
         //점프하다 공격
         if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Jump") == true)
         {
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 _Anim.SetInteger("State", 4);
             }
@@ -200,7 +193,7 @@ public class PlayerController : MonoBehaviour
         //달리다 공격
         else if (_Anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Run") == true)
         {
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 _Anim.SetInteger("State", 4);
             }
@@ -239,12 +232,12 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
     #region A키 눌렀을 때(공격&NPC상호작용)
-    void PressingAKey()
+    void PressingXKey()
     {
         if (CheckChest == false && CheckNPC == false && ContactingSavePoint == false)
         {
             //보물상자와 접촉 안했단 조건 하에서
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 _Anim.SetInteger("State", 4);
                 //세이브포인트
@@ -274,18 +267,23 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, 0, 0);
         }
         //점프키
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            if (CanJump == true && Time.timeScale == 1)
+            //대화창 안켜져있으면 점프
+            if (GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking == false)
             {
-                _Anim.SetInteger("State", 3);
-                CanJump = false;
-                RG.velocity = new Vector2(0, JumpSpeed);
-                //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
+                if (CanJump == true && Time.timeScale == 1)
+                {
+                    _Anim.SetInteger("State", 3);
+                    CanJump = false;
+                    RG.velocity = new Vector2(0, JumpSpeed);
+                    //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
+                }
+                else
+                {
+                }
             }
-            else
-            {
-            }
+            
         }
 
     }
@@ -394,8 +392,17 @@ public class PlayerController : MonoBehaviour
                     {
                         HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
                         isPlayerHit = true;
+                        if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
                     }
-                    print("P_HP:" + HP);
+                    
                 }
                 if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
                     (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
@@ -415,7 +422,6 @@ public class PlayerController : MonoBehaviour
                             RG.velocity = new Vector2(-2.5f, 2.5f);
                         }
                     }
-                    print("P_HP:" + HP);
                 }
             }
             if (collision.gameObject.tag == "WitchBullet")
@@ -430,6 +436,7 @@ public class PlayerController : MonoBehaviour
                     else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
                     {
                         RG.velocity = new Vector2(-2.5f, 2.5f);
+ 
                     }
                 }
                 
@@ -460,8 +467,82 @@ public class PlayerController : MonoBehaviour
                     {
                         HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
                         isPlayerHit = true;
+                        if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
                     }
-                    print("P_HP:" + HP);
+                }
+                if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
+                    (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonstersAI_FIXED>().attack;
+                        isPlayerHit = true;
+
+                        if (collision.gameObject.transform.position.x < this.gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
+                    }
+                }
+            }
+            if (collision.gameObject.tag == "WitchBullet")
+            {
+                if (isPlayerHit == false)
+                {
+                    isPlayerHit = true;
+                    if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(2.5f, 2.5f);
+                    }
+                    else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                    {
+                        RG.velocity = new Vector2(-2.5f, 2.5f);
+                    }
+                }
+               
+            }
+        }
+        
+    }
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        //키 습득
+        if (HP > 0)
+        {//플레이어와 적이 부딪힐 시 플레이어가 밀려나도록 하는 함수
+            if ((collision.gameObject.tag == "Enemy") &&
+                (collision.gameObject.name != "ChasingArea") && (collision.gameObject.name != "AttackingArea"))
+            {
+
+                if ((collision.gameObject.GetComponent<MonsterAI_Moving>() != null) &&
+                    (collision.gameObject.GetComponent<MonsterAI_Moving>().NowMonstate != MonsterAI_Moving._IsMonstate.DeadState))
+                {
+                    if (isPlayerHit == false)
+                    {
+                        HP -= collision.gameObject.GetComponent<MonsterAI_Moving>().attack;
+                        isPlayerHit = true;
+                        if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
+                        {
+
+                            RG.velocity = new Vector2(2.5f, 2.5f);
+                        }
+                        else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
+                        {
+                            RG.velocity = new Vector2(-2.5f, 2.5f);
+                        }
+                    }
                 }
                 if ((collision.gameObject.GetComponent<MonstersAI_FIXED>() != null) &&
                     (collision.gameObject.GetComponent<MonstersAI_FIXED>().NowMonstate != MonstersAI_FIXED._IsMonstate.DeadState))
@@ -481,41 +562,17 @@ public class PlayerController : MonoBehaviour
                             RG.velocity = new Vector2(-2.5f, 2.5f);
                         }
                     }
-                    print("P_HP:" + HP);
                 }
-            }
-            if (collision.gameObject.tag == "WitchBullet")
-            {
-                if (isPlayerHit == false)
-                {
-                    isPlayerHit = true;
-                    print("P_HP:" + HP);
-                    if (collision.gameObject.transform.position.x < gameObject.transform.position.x)
-                    {
-                        RG.velocity = new Vector2(2.5f, 2.5f);
-                    }
-                    else if (collision.gameObject.transform.position.x >= gameObject.transform.position.x)
-                    {
-                        RG.velocity = new Vector2(-2.5f, 2.5f);
-                    }
-                }
-               
             }
         }
-        
-    }
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        //키 습득
-
-        //콜라이더 함수와 getkeydown같이 놓으면 나중에 위험
-        //보물상자와 부딪히는 경우(보물상자 여는 경우)
-        if (collision.gameObject.transform.tag == "TreasureBox")
+            //콜라이더 함수와 getkeydown같이 놓으면 나중에 위험
+            //보물상자와 부딪히는 경우(보물상자 여는 경우)
+            if (collision.gameObject.transform.tag == "TreasureBox")
         {
             if (collision.gameObject.GetComponent<TreasureBox>().isOpen == false)
             {
                 CheckChest = true;
-                if (Input.GetKeyDown(KeyCode.A))
+                if (Input.GetKeyDown(KeyCode.X))
                 {
                     collision.gameObject.GetComponent<TreasureBox>().isOpen = true;
                 }
@@ -528,11 +585,12 @@ public class PlayerController : MonoBehaviour
         {
 
             CheckNPC = true;
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 if (CheckChest == false&&
                  GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking ==false)
                 {
+                    GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().TextShowingOnebyOne = true;
                     GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking = true;
                 }
             }
@@ -540,7 +598,7 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "PlayerSavePoint")
         {
             ContactingSavePoint = true;
-            if (Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 if (CheckChest == false && CheckNPC == false)
                 {
@@ -575,7 +633,7 @@ public class PlayerController : MonoBehaviour
 
     void ChangeWeapon()
     {
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.C))
         {
             GunShot = !GunShot;
         }
@@ -635,9 +693,9 @@ public class PlayerController : MonoBehaviour
 	{
 		if(Input.GetKeyDown(KeyCode.Tab))			// 맵 켜기
 		{
-			OnMinimap = !OnMinimap;
+			_Inven.Activated = !_Inven.Activated;
 
-			if(OnMinimap == true)
+			if (_Inven.Activated == true)
 			{
 				MinimapObject.SetActive(true);
 				OptionObject.SetActive(false);
@@ -645,14 +703,16 @@ public class PlayerController : MonoBehaviour
 			}
 			else
 			{
+				OptionObject.SetActive(false);
 				MinimapObject.SetActive(false);
+				_Inven.m_Inventory.SetActive(false);
 			}
 		}
 		if(Input.GetKeyDown(KeyCode.Escape))        // 옵션창
 		{
-			OnOption = !OnOption;
+			_Inven.Activated = !_Inven.Activated;
 
-			if (OnOption == true)
+			if (_Inven.Activated == true)
 			{
 				OptionObject.SetActive(true);
 				MinimapObject.SetActive(false);
@@ -661,6 +721,8 @@ public class PlayerController : MonoBehaviour
 			else
 			{
 				OptionObject.SetActive(false);
+				MinimapObject.SetActive(false);
+				_Inven.m_Inventory.SetActive(false);
 			}
 		}
 	}

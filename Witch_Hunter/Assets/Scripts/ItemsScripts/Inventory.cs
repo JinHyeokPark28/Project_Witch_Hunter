@@ -4,11 +4,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum Type1 
+{
+	Sword = 101,
+	Ammo = 201,
+	Armor = 301,
+	Use = 401,
+	Powder = 501
+}
 public class Inventory : MonoBehaviour
 {
-
 	#region Private Variable
-	private PlayerController _Player;						// 플레이어 스크립트 호출할 변수
+	private PlayerController _Player;                       // 플레이어 스크립트 호출할 변수
 
 	private ItemManager _ItemManager;                        // 아이템매니저 스크립트 호출할 변수
 
@@ -18,8 +25,6 @@ public class Inventory : MonoBehaviour
 
 	private List<Item> l_Items = new List<Item>();          // 슬롯에다가 넣어줄 아이템 리스트 선언.
 
-	private bool Activated;                                 // true 시 인벤토리 활성화
-
 	private bool EquipmentTabActivated;                     // true 일때 장비 창 탭 활성화
 
 	private bool CombinationTabActivated;                   // true 일때 조합 창 탭 활성화.
@@ -28,6 +33,8 @@ public class Inventory : MonoBehaviour
 	#endregion
 	#region Public Variable
 	public static Inventory instance = null;                // 인벤토리 싱글톤
+
+	public bool Activated = false;                          // true 시 인벤토리 활성화
 
 	public GameObject m_Inventory;                          // 인벤토리를 담아 놓을 게임오브젝트
 
@@ -84,6 +91,8 @@ public class Inventory : MonoBehaviour
 				m_Inventory.SetActive(false);
 				m_Equipment.SetActive(false);
 				m_Combination.SetActive(false);
+				_Player.MinimapObject.SetActive(false);
+				_Player.OptionObject.SetActive(false);
 			}
 		}
 	}
@@ -98,7 +107,7 @@ public class Inventory : MonoBehaviour
 	public void EquipmentButton()
 	{
 		selectedTab = SelectedTab.Equipment;
-		Debug.Log(selectedTab);
+
 		// 각각 탭 클릭했을 때 액티브 되는 불형 변수
 		EquipmentTabActivated = true;
 		CombinationTabActivated = false;
@@ -148,58 +157,62 @@ public class Inventory : MonoBehaviour
 	{
 		RemoveSlot();
 
-		switch(selectedTab)
+		switch (selectedTab)
 		{
-			case SelectedTab.Equipment:
-				for (int i = 0; i < _ItemManager.getItem.Count; i++)
+			case SelectedTab.Equipment:										// 장비창 버튼을 눌렀을 때
+				for (int i = 0; i < Slots.Length; i++)
 				{
-					if(item.ItemName == _ItemManager.getItem[i].ItemID)
+					if (Slots[i].getItem != null)                           // 인벤토리 내의 슬롯에 정보가 담겨져 있다면 아이템의 타입값을 검사한 후 활성화 시켜준다.
 					{
-						if(item.ItemType == "Sword" || item.ItemType == "Armor" || item.ItemType == "Ammo" || item.ItemType == "Use")
+						if(Slots[i].getItem.Type == "Sword" || Slots[i].getItem.Type == "Armor" || Slots[i].getItem.Type == "Ammo" || Slots[i].getItem.Type == "Use")
 						{
-							Slots[i].gameObject.SetActive(true);	
-							break;
+							Slots[i].gameObject.SetActive(true);
 						}
-						else if(item.ItemType == "Powder")
+						else if(Slots[i].getItem.Type == "Powder")
 						{
-							break;
+							Slots[i].gameObject.SetActive(false);
 						}
 					}
 				}
 				break;
-			case SelectedTab.Combination:
-				for (int i = 0; i < _ItemManager.getItem.Count; i++)
+			case SelectedTab.Combination:									// 조합창 버튼을 눌렀을 때
+				for (int i = 0; i < Slots.Length; i++)
 				{
-					if(item.ItemName == _ItemManager.getItem[i].ItemID)
+					if (Slots[i].getItem != null)
 					{
-						if(item.ItemType == "Use" || item.ItemType == "Powder")
+						if (Slots[i].getItem.Type == "Use" || Slots[i].getItem.Type == "Powder")
 						{
-
+							Slots[i].gameObject.SetActive(true);
+						}
+						else if(Slots[i].getItem.Type == "Sword" || Slots[i].getItem.Type == "Armor" || Slots[i].getItem.Type == "Ammo")
+						{
+							Slots[i].gameObject.SetActive(false);
 						}
 					}
 				}
 				break;
 		}
-		//if(EquipmentTabActivated == true)								// 장비창 버튼이 눌렸을 때
+
+		//if (EquipmentTabActivated == true)                              // 장비창 버튼이 눌렸을 때
 		//{
 		//	for (int i = 0; i < Slots.Length; i++)
 		//	{
-		//		if(Slots[i].getItem != null)							// 인벤토리 내의 슬롯에 정보가 담겨져 있다면 아이템의 타입값을 검사한 후 활성화 시켜준다.
+		//		if (Slots[i].getItem != null)                           // 인벤토리 내의 슬롯에 정보가 담겨져 있다면 아이템의 타입값을 검사한 후 활성화 시켜준다.
 		//		{
-		//			if(item.ItemType == "Sword" || item.ItemType == "Armor" || item.ItemType == "Ammo" || item.ItemType == "Use")
+		//			if (item.ItemType == "Sword" || item.ItemType == "Armor" || item.ItemType == "Ammo" || item.ItemType == "Use")
 		//			{
 		//				Slots[i].gameObject.SetActive(true);
 		//			}
-		//			else if(item.ItemType == "Powder")
+		//			else if (item.ItemType == "Powder")
 		//			{
 		//				Slots[i].gameObject.SetActive(false);
 		//			}
 		//		}
 		//	}
 		//}
-		//if(CombinationTabActivated == true)
+		//if (CombinationTabActivated == true)
 		//{
-		//	for(int i = 0; i < Slots.Length; i++)
+		//	for (int i = 0; i < Slots.Length; i++)
 		//	{
 		//		if (Slots[i].getItem != null)
 		//		{
@@ -207,7 +220,7 @@ public class Inventory : MonoBehaviour
 		//			{
 		//				Slots[i].gameObject.SetActive(true);
 		//			}
-		//			else if(item.ItemType == "Sword" || item.ItemType == "Armor" || item.ItemType == "Ammo")
+		//			else if (item.ItemType == "Sword" || item.ItemType == "Armor" || item.ItemType == "Ammo")
 		//			{
 		//				Slots[i].gameObject.SetActive(false);
 		//			}
@@ -215,6 +228,24 @@ public class Inventory : MonoBehaviour
 		//	}
 		//}
 
+	}
+	private void ItemNumbering()
+	{
+		for (int i = 0; i < Slots.Length; i++)
+		{
+			if (Slots[i].getItem.Count > 1) // 1개 이상있을때 검사해서 만약에 무기, 방어구, 총알이 아니라면 1개만 있게 만들고 물약과 파우더라면 개수를 늘려주기.
+			{
+				if (Slots[i].getItem.Type == "Sword" || Slots[i].getItem.Type == "Armor" || Slots[i].getItem.Type == "Ammo")
+				{
+					Slots[i].getItem.Count = 1;
+				}
+				else if (Slots[i].getItem.Type == "Use" || Slots[i].getItem.Type == "Powder")
+				{
+					if(Slots[i].getItem.Count >= 1)
+					Slots[i].getItem.Count += 1;
+				}
+			}
+		}
 	}
 	// 아이템을 확인해서 아이템을 인벤토리에 넣어준다.s
 	public void PutinInventory(int ItemID, int ItemCount = 1)
@@ -233,10 +264,12 @@ public class Inventory : MonoBehaviour
 					{
 						if (_ItemManager.getItem[i].ItemID == ItemID)           // 아이템 매니저안의 아이템아이디와 획득하려는 아이템 아이디가 같다면 슬롯에 넣어줍니다.
 						{
-							List<GetItem> _temp = new List<GetItem>(_ItemManager.getItem);
+							GetItem _temp = _ItemManager.getItem[i];
 							// 슬롯안에 아이템을 추가해줍니다. 
-							Slots[k].getItem = _temp[i];
-							Slots[k].AddItem(item);
+							Slots[k].getItem = _temp;
+							Slots[k].AddItem(Slots[k].getItem);
+							ItemNumbering();
+							Debug.Log("Slot.getitem : " + Slots[k].getItem.ItemID);
 							return;
 						}
 						else

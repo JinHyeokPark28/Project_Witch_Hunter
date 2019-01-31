@@ -22,7 +22,7 @@ public class InventorySlots : MonoBehaviour {
 		_Item = FindObjectOfType<Item>();
 		ItemImage.sprite = null;
 	}
-	public void AddItem(Item item)
+	public void AddItem(GetItem item)
 	{
 		ItemID.text = getItem.Name.ToString();
 		//_Item.gameObject.GetComponent<SpriteRenderer>().sprite = ItemImage.sprite;
@@ -30,7 +30,6 @@ public class InventorySlots : MonoBehaviour {
 			ItemCount.text = "x " + getItem.Count.ToString();
 		else
 			ItemCount.text = "";
-
 	}
 	public void RemoveSlot()
 	{

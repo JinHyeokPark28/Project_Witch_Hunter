@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
-	[SerializeField]
-	public GetItem getItem;
-
 	private ItemManager _ItemManager;
 	private Inventory _Inven;
 
@@ -20,7 +17,7 @@ public class Item : MonoBehaviour
 		_ItemManager = FindObjectOfType<ItemManager>();
 	}
 
-	public void OnTriggerEnter2D(Collider2D other)
+	private void OnTriggerEnter2D(Collider2D other)
 	{
 		if(other.transform.tag == "Player")
 		{
