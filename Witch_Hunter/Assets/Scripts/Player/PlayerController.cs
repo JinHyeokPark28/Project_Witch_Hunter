@@ -452,6 +452,7 @@ public class PlayerController : MonoBehaviour
             CanJump = false;
         }
     }
+    //마리오네트 칼은 밀려나는거&&데미지주는거 칼 스크립트에서 줘야함
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (HP > 0)
@@ -590,7 +591,7 @@ public class PlayerController : MonoBehaviour
                 if (CheckChest == false&&
                  GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking ==false)
                 {
-                    GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().TextShowingOnebyOne = true;
+                  //  GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().TextShowingOnebyOne = true;
                     GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking = true;
                 }
             }

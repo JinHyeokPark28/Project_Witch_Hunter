@@ -18,7 +18,8 @@ public class TalkingTextParser : MonoBehaviour {
     //캐릭터 대화 이미지 넣을 리스트
     public List<string> Option = new List<string>();
     public bool StartTalking;   //PlayerController에 의해 true되면 자식 오브젝트들 활성화
-    public bool TextShowingOnebyOne = false;
+  //  public bool ShowingOnce = false;
+    //public bool TextShowingOnebyOne = false;
     //클릭하면 자동 true,false면 전체 텍스트 다 보여준것
     #region 자식 오브젝트들
     private GameObject PlayerImage;
@@ -28,23 +29,23 @@ public class TalkingTextParser : MonoBehaviour {
     private GameObject PlayerName;
     private GameObject CharacterText;
     #endregion
-    IEnumerator ShowingTextSlowly()
-    {
-        while (TextShowingOnebyOne == true)
-        {
-            print("start");
-            for (int i = 0; i <= data[StartIndex][1].Length; i++)
-            {
-                print("for");
-                CharacterText.GetComponent<Text>().text = data[StartIndex][1].Substring(0, i);
-                if (i == data[StartIndex][1].Length)
-                {
-                    TextShowingOnebyOne = false;
-                }
-                yield return new WaitForSeconds(0.1f);                
-            }
-        }
-    }
+    //IEnumerator ShowingTextSlowly()
+    //{
+    //    while(true)
+    //    {
+    //        for (int i = 0; i <= data[StartIndex][1].Length; i++)
+    //        {
+    //            print("index" + StartIndex);//->2부터 들어감
+    //            CharacterText.GetComponent<Text>().text = data[StartIndex][1].Substring(0, i);
+    //            if (i == data[StartIndex][1].Length)
+    //            {
+    //                break;
+    //                //TextShowingOnebyOne = false;
+    //            }
+    //            yield return new WaitForSeconds(0.1f);
+    //        }
+    //    }
+    //}
     void Start () {
        
         if (StartIndex < 0)
@@ -85,11 +86,7 @@ public class TalkingTextParser : MonoBehaviour {
         {
             if (CharacterText.activeInHierarchy == true&&StartIndex<=TextHeightLength)
             {
-                if (TextShowingOnebyOne == false)
-                {
-                    CharacterText.GetComponent<Text>().text = data[StartIndex][1];
-                }
-              
+             CharacterText.GetComponent<Text>().text = data[StartIndex][1];
             }
             if (data[StartIndex][0] != "Player")
             {
@@ -121,7 +118,6 @@ public class TalkingTextParser : MonoBehaviour {
             {
                 CharacterImage.GetComponent<Image>().sprite = CharacterBigImage[0];
             }
-            
             if (PlayerImage.activeInHierarchy == false)
             {
                 PlayerImage.SetActive(true);
@@ -144,13 +140,17 @@ public class TalkingTextParser : MonoBehaviour {
             }
             if (CharacterText.activeInHierarchy == false)
             {
-                
                 CharacterText.SetActive(true);
+                //if (ShowingOnce == false)
+                //{
+                //    StartCoroutine(ShowingTextSlowly());
+                //    ShowingOnce = true;
+                //}
             }
         }
         else
         {
-            TextShowingOnebyOne = false;
+            //TextShowingOnebyOne = false;
             if (PlayerImage.activeInHierarchy == true)
             {
                 PlayerImage.SetActive(false);
@@ -184,18 +184,18 @@ public class TalkingTextParser : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Z) && StartTalking == true){
             if (Convert.ToBoolean(data[StartIndex][2]) != true)
             {
-                if (TextShowingOnebyOne == false)
-                {
-                    StartIndex++;
-                    TextShowingOnebyOne = true;
-                 StartCoroutine(ShowingTextSlowly());
-                }
-                else
-                //TextshowingOnebyone==true이면(글자 보여지고 있는 상태)
-                {
-                    //z.input받으면 전체 다 보여주기
-                    TextShowingOnebyOne = false;
-                }
+                StartIndex++;
+                //StartCoroutine(ShowingTextSlowly());
+                //if (TextShowingOnebyOne == false)
+                //{
+                //    TextShowingOnebyOne = true;
+                //}
+                //else
+                //TextshowingOnebyone == true이면(글자 보여지고 있는 상태)
+                //{
+                //    z.input받으면 전체 다 보여주기
+                //    TextShowingOnebyOne = false;
+                //}
             }
             else
             {

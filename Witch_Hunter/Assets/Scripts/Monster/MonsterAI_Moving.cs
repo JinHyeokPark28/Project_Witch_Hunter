@@ -23,7 +23,6 @@ public class MonsterAI_Moving : MonoBehaviour
     public int HP;  //몬스터 체력
     public int attack;  //몬스터 공격력,함정도 있음
     public int index;   //몬스터 인덱스
-    public bool _CheckMode;		// true면 공격
     public float NormalSpeed = 2f;      //정찰 모드 시 속도
     public float _AttackSpeed = 4f;      // 공격 속도(때릴 때 속도):근접,이동가능
     public float _CheckTime = 0;    //공격 쿨타임 재는 시간->원거리,고정에 쓰임
@@ -42,7 +41,6 @@ public class MonsterAI_Moving : MonoBehaviour
     //보다 작으면 isLeft=false로 전환
     private bool Hurt;   //플레이어에게 맞으면 잠시동안 스프라이트 깜빡이도록 함. 이때 Hurt==true이고 이 동안은 플레이어에게
                          //공격받아도 일시적으로 무적 상태이다
-    private bool StopChasing = false;   //씬 전환하는 부분(맵의 끝부분)에 도달했으면 더이상 플레이어 쫓지 안도록
     #region 자식 오브젝트
     private List<GameObject> Bodyparts = new List<GameObject>();
     public GameObject SearchArea;   //플레이어 탐색하는 자식오브젝트 ChasingArea담을 오브젝트
@@ -130,7 +128,6 @@ public class MonsterAI_Moving : MonoBehaviour
                 if (NowMonstate==_IsMonstate.ReconState)
                 {
                    
-
                     _Anim.SetBool("Walk", true);
                     _Anim.SetBool("Attack", false);
                     _Anim.SetBool("IsDead", false);
@@ -179,6 +176,10 @@ public class MonsterAI_Moving : MonoBehaviour
                     //Check();
                     _Anim.SetBool("Walk", false);
                     _Anim.SetBool("Attack", true);
+                    if (this.gameObject.name == "Marionnette")
+                    {
+                        _Anim.SetTrigger("Attack_Delay");
+                    }
                 }
                 #endregion
             }
@@ -228,17 +229,20 @@ public class MonsterAI_Moving : MonoBehaviour
     #region 플레이어 추적 함수(_isMonState==1)
     void Chasing()
     {
-        if (NowMonstate==_IsMonstate.ChasingState && isDead == false&&StopChasing==false)
+        if (NowMonstate==_IsMonstate.ChasingState && isDead == false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Player.transform.position.x < transform.position.x)
             {
                 //플레이어가 몬스터 왼편에 있을 때
+                print("player is on left");
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             else if (Player.transform.position.x > transform.position.x)
             {
+                print("player is on right");
+
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(0, 180, 0);
             }
@@ -249,11 +253,11 @@ public class MonsterAI_Moving : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.GetComponent<SceneChanger>() != null)
-        {
-            //만약 씬 전환하는 부분이 부딪혔다면 움직이지 말고 공격만 하기
-            StopChasing = true;
-        }
+        //if (col.gameObject.GetComponent<SceneChanger>() != null)
+        //{
+        //    //만약 씬 전환하는 부분이 부딪혔다면 움직이지 말고 공격만 하기
+        //    StopChasing = true;
+        //}
         if (((col.gameObject.transform.tag == "Sword")&&(Player.GetComponent<PlayerController>().NowState == PlayerController.PlayerState.Attack))
             || (col.gameObject.transform.tag == "Bullet"))        //칼이나 총알에 맞으면
         {
@@ -280,16 +284,12 @@ public class MonsterAI_Moving : MonoBehaviour
     }
     private void OnTriggerExit2D(Collider2D col)
     {
-        if (col.gameObject.GetComponent<SceneChanger>() != null)
-        {
-            //씬 전환하는 부분에서 빠져 나왔으면
-            StopChasing = false;
-        }
-        if (col.transform.tag == "Player")
-        {
-            _CheckMode = false;
-            // 공격 받았을 때 데미지 처리.
-        }
+        //if (col.gameObject.GetComponent<SceneChanger>() != null)
+        //{
+        //    //씬 전환하는 부분에서 빠져 나왔으면
+        //    StopChasing = false;
+        //}
+
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
