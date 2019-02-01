@@ -8,7 +8,7 @@ public class CameraBounds : MonoBehaviour {
     private PlayerFollower theCamera;
 	// Use this for initialization
 	void Start () {
-        bounds=GetComponent<BoxCollider2D>();
+        bounds=this.gameObject.GetComponent<BoxCollider2D>();
         theCamera = FindObjectOfType<PlayerFollower>();
 	}
 	

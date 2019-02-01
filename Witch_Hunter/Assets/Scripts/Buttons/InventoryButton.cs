@@ -24,5 +24,9 @@ public class InventoryButton : MonoBehaviour {
 	{
 		_inven.CombinationButton();
 	}
+	public void ChangeItems()
+	{
+		_inven.GetanItem();
+	}
 	#endregion
 }

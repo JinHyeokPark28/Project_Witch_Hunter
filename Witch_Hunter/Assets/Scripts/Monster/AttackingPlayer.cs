@@ -10,6 +10,7 @@ public class AttackingPlayer : MonoBehaviour {
     //몬스터 기본 스프라이트 형태:왼쪽 바라봄
     public GameObject ParentMonster;
     public float PosX;
+    public bool PExitFromAttArea = false;
     //현재 x좌표(상대좌표)
     // Use this for initialization
     void Start () {
@@ -35,20 +36,36 @@ public class AttackingPlayer : MonoBehaviour {
         //공격범위에 플레이어 진입 할 경우 정찰 범위 콜라이더 꺼놓음
         if (collision.gameObject.tag == "Player")
         {
+            PExitFromAttArea = false;
             ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = false;
-            ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate=MonsterAI_Moving._IsMonstate.AttackState;
+            if (ParentMonster.name == "Marionnette")
+            {
+                if(ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate!=MonsterAI_Moving._IsMonstate.AttackState)
+                {
+                    ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.AttackState;
+                }
+
+            }
+            else
+            {
+                ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.AttackState;
+            }
         }
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
+
             ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ChasingState;
             if (ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled == false)
             {
                 ParentMonster.GetComponent<MonsterAI_Moving>().SearchArea.GetComponent<BoxCollider2D>().enabled = true;
             }
-            //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
         }
+
+
+        //부모 오브젝트인 몬스터 오브젝트에게 플레이어 발견했다고 신호줌(공격모드=1)
     }
 }
+

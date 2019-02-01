@@ -10,7 +10,6 @@ public class Marionnette_Sword_Script : MonoBehaviour {
 	void Start () {
         Marionnette = this.gameObject.transform.parent.gameObject.transform.parent.gameObject;
         Player = GameObject.FindGameObjectWithTag("Player");
-        print("Mar:" + Marionnette);
 	}
 	
 	// Update is called once per frame
@@ -19,7 +18,9 @@ public class Marionnette_Sword_Script : MonoBehaviour {
 	}
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player"&&Marionnette.GetComponent<MonsterAI_Moving>().NowMonstate==MonsterAI_Moving._IsMonstate.AttackState)
+        //마리오네트가 공격상태일 때만 소드 데미지가 들어감
+        if (collision.gameObject.tag == "Player"&&
+            Marionnette.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")==true)
         {
             if (Player.GetComponent<PlayerController>().NowState != PlayerController.PlayerState.Hit)
             {
@@ -38,4 +39,5 @@ public class Marionnette_Sword_Script : MonoBehaviour {
             }
         }
     }
+  
 }

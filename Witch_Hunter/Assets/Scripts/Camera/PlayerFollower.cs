@@ -38,7 +38,6 @@ public class PlayerFollower : MonoBehaviour {
         {
             transform.position = new Vector3(transform.position.x, boundBox.bounds.min.y + GetComponent<Camera>().orthographicSize, transform.position.z);
         }
-       
     }
 }
        

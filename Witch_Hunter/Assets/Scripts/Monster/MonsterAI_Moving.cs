@@ -29,7 +29,7 @@ public class MonsterAI_Moving : MonoBehaviour
     public float _CheckDelay = 2;   //쿨타임 한계시간
     public bool isDead; //죽으면 true(죽으면 코인줌)->마녀 죽으면 다시 리젠 못함
     public int Stage_Location;  //몬스터 출현 스테이지 
-    public  enum _IsMonstate { ReconState =0,ChasingState,AttackState,DeadState};
+    public  enum _IsMonstate { DeadState,ReconState,ChasingState,AttackState};
     public _IsMonstate NowMonstate =_IsMonstate.ReconState;
               // 0 : 정찰 모드 , 1: 추격 모드, 2 : 공격 모드 3:죽음(IsDead==true)
                                                //고정형:0=경비모드,1:공격모드
@@ -167,24 +167,29 @@ public class MonsterAI_Moving : MonoBehaviour
                     //여기서 플레이어 방향 못잡음
                     _Anim.SetBool("Walk", true);
                     _Anim.SetBool("Attack", false);
+                    //원래 walk가 먼저였음
                     Chasing();
                 }
                 #endregion
                 #region 공격 모드
                 else if (NowMonstate==_IsMonstate.AttackState)  //공격 모드. 
                 {
-                    //Check();
-                    _Anim.SetBool("Walk", false);
-                    _Anim.SetBool("Attack", true);
                     if (this.gameObject.name == "Marionnette")
                     {
+                        _Anim.SetBool("Walk", false);
+                        _Anim.SetBool("Attack", true);
                         _Anim.SetTrigger("Attack_Delay");
+                    }
+                    else
+                    {
+                        _Anim.SetBool("Walk", false);
+                        _Anim.SetBool("Attack", true);
                     }
                 }
                 #endregion
             }
             #endregion
-        #region HP<=0이라면
+            #region HP<=0이라면
             else if (HP <= 0)
             {
                 NowMonstate = _IsMonstate.DeadState;
@@ -229,20 +234,18 @@ public class MonsterAI_Moving : MonoBehaviour
     #region 플레이어 추적 함수(_isMonState==1)
     void Chasing()
     {
-        if (NowMonstate==_IsMonstate.ChasingState && isDead == false)
+        if (NowMonstate==_IsMonstate.ChasingState && isDead == false
+            &&_Anim.GetCurrentAnimatorStateInfo(0).IsName("Delay")==false)
         {
             //쫓는 함수->movetowards로 하니까 갑자기 빨라짐
             if (Player.transform.position.x < transform.position.x)
             {
                 //플레이어가 몬스터 왼편에 있을 때
-                print("player is on left");
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             else if (Player.transform.position.x > transform.position.x)
             {
-                print("player is on right");
-
                 transform.Translate(Vector3.left * NormalSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(0, 180, 0);
             }

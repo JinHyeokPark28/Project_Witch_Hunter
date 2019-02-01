@@ -88,7 +88,11 @@ public class DetectingPlayer : MonoBehaviour {
             }
             else if (ParentMonster.GetComponent<MonsterAI_Moving>() != null)
             {
-                ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ChasingState;
+                if (ParentMonster.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("DELAY") == false)
+                {
+                    ParentMonster.GetComponent<MonsterAI_Moving>().NowMonstate = MonsterAI_Moving._IsMonstate.ChasingState;
+                }
+
             }
             PlayerExit = false;
         }

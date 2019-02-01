@@ -19,17 +19,27 @@ public class InventorySlots : MonoBehaviour {
 	private void Start()
 	{
 		_ItemManager = FindObjectOfType<ItemManager>();
-		_Item = FindObjectOfType<Item>();
-		ItemImage.sprite = null;
+		_Item = GetComponent<Item>();
 	}
 	public void AddItem(GetItem item)
 	{
 		ItemID.text = getItem.Name.ToString();
-		//_Item.gameObject.GetComponent<SpriteRenderer>().sprite = ItemImage.sprite;
+		ChangeSprite();
 		if (getItem.Count > 1)
 			ItemCount.text = "x " + getItem.Count.ToString();
 		else
 			ItemCount.text = "";
+	}
+	public void GetAnItem()
+	{
+		Inventory.instance.GetanItem();
+	}
+	public void ChangeSprite()
+	{
+		for (int i = 0; i < SlotList.Count; i++)
+		{
+			SlotList[i].ItemImage.sprite = Resources.Load("Assets/Resources/ItemIcon") as Sprite;
+		}
 	}
 	public void RemoveSlot()
 	{
@@ -39,7 +49,7 @@ public class InventorySlots : MonoBehaviour {
 			{
 				SlotList[i].ItemID.text = "";
 				SlotList[i].ItemCount.text = "";
-				SlotList[i].ItemImage = null;
+				SlotList[i].ItemImage.sprite = null;
 			}
 			else
 				return;

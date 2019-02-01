@@ -127,7 +127,6 @@ public class Inventory : MonoBehaviour
 	public void CombinationButton()
 	{
 		selectedTab = SelectedTab.Combination;
-		Debug.Log(selectedTab);
 		EquipmentTabActivated = false;
 		CombinationTabActivated = true;
 
@@ -173,6 +172,14 @@ public class Inventory : MonoBehaviour
 							Slots[i].gameObject.SetActive(false);
 						}
 					}
+					//if(Equipment.instance.Sword.text != null)
+					//{
+					//	Slots[i].gameObject.SetActive(false);
+					//}
+					//else if (Equipment.instance.Armor.text != null)
+					//{
+					//	Slots[i].gameObject.SetActive(false);
+					//}
 				}
 				break;
 			case SelectedTab.Combination:									// 조합창 버튼을 눌렀을 때
@@ -268,7 +275,6 @@ public class Inventory : MonoBehaviour
 							// 슬롯안에 아이템을 추가해줍니다. 
 							Slots[k].getItem = _temp;
 							Slots[k].AddItem(Slots[k].getItem);
-							ItemNumbering();
 							Debug.Log("Slot.getitem : " + Slots[k].getItem.ItemID);
 							return;
 						}
@@ -278,6 +284,29 @@ public class Inventory : MonoBehaviour
 				}
 			}
 		}
+	}
+	public void GetanItem()
+	{
+		for (int i = 0; i < Slots.Length; i++)
+		{
+			if (Slots[i].getItem.Type == "Sword" && Slots[i].getItem != null)
+			{
+				Equipment.instance.Sword.text = Slots[i].getItem.Name.ToString();
+				Equipment.instance.SwordImage.sprite = TreasureBox.instance.Item.GetComponent<SpriteRenderer>().sprite;
+				Equipment.instance.Attack.text = "Attack  : " + Slots[i].getItem.Stat.ToString();
+				Slots[i].getItem = null;
+
+			}
+			else if (Slots[i].getItem.Type == "Armor" && Slots[i].getItem != null)
+			{
+				Equipment.instance.Armor.text = Slots[i].getItem.Name.ToString();
+				Equipment.instance.ArmorImage.sprite = item.gameObject.GetComponent<SpriteRenderer>().sprite;
+				Equipment.instance.Defend.text = "Armor  : " + Slots[i].getItem.Stat.ToString();
+				Slots[i].getItem = null;
+			}
+			RemoveSlot();
+		}
+		return;
 	}
 	#endregion
 }
