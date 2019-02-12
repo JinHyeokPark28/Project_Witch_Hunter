@@ -17,8 +17,8 @@ public class TalkingTextParser : MonoBehaviour {
     public List<Sprite> CharacterBigImage = new List<Sprite>();
     //캐릭터 대화 이미지 넣을 리스트
     public List<string> Option = new List<string>();
+    public bool ShowingOnce = false;
     public bool StartTalking;   //PlayerController에 의해 true되면 자식 오브젝트들 활성화
-  //  public bool ShowingOnce = false;
     //public bool TextShowingOnebyOne = false;
     //클릭하면 자동 true,false면 전체 텍스트 다 보여준것
     #region 자식 오브젝트들
@@ -29,23 +29,23 @@ public class TalkingTextParser : MonoBehaviour {
     private GameObject PlayerName;
     private GameObject CharacterText;
     #endregion
-    //IEnumerator ShowingTextSlowly()
-    //{
-    //    while(true)
-    //    {
-    //        for (int i = 0; i <= data[StartIndex][1].Length; i++)
-    //        {
-    //            print("index" + StartIndex);//->2부터 들어감
-    //            CharacterText.GetComponent<Text>().text = data[StartIndex][1].Substring(0, i);
-    //            if (i == data[StartIndex][1].Length)
-    //            {
-    //                break;
-    //                //TextShowingOnebyOne = false;
-    //            }
-    //            yield return new WaitForSeconds(0.1f);
-    //        }
-    //    }
-    //}
+    IEnumerator ShowingTextSlowly()
+    {
+        while (true)
+        {
+            for (int i = 0; i <= data[StartIndex][1].Length; i++)
+            {
+                print("index" + StartIndex);//->2부터 들어감
+                CharacterText.GetComponent<Text>().text = data[StartIndex][1].Substring(0, i);
+                if (i == data[StartIndex][1].Length)
+                {
+                    print("stop");
+                    break;
+                }
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+    }
     void Start () {
        
         if (StartIndex < 0)
@@ -86,7 +86,10 @@ public class TalkingTextParser : MonoBehaviour {
         {
             if (CharacterText.activeInHierarchy == true&&StartIndex<=TextHeightLength)
             {
-             CharacterText.GetComponent<Text>().text = data[StartIndex][1];
+                if (ShowingOnce == false)
+                {
+                    CharacterText.GetComponent<Text>().text = data[StartIndex][1];
+                }
             }
             if (data[StartIndex][0] != "Player")
             {
@@ -108,10 +111,9 @@ public class TalkingTextParser : MonoBehaviour {
         ManagingChildrenObjs();
         UpdatingDialogState();
 	}
-    #region 대화창 오브젝트들 관리
+    #region 자식 오브젝트들 현재 활성화 상태 관리
     void ManagingChildrenObjs()
     {
-        #region 자식 오브젝트들 현재 활성화 상태 관리
         if (StartTalking == true)
         {
             if (data[StartIndex][0]== "WoundedSoldier")
@@ -141,11 +143,11 @@ public class TalkingTextParser : MonoBehaviour {
             if (CharacterText.activeInHierarchy == false)
             {
                 CharacterText.SetActive(true);
-                //if (ShowingOnce == false)
-                //{
-                //    StartCoroutine(ShowingTextSlowly());
-                //    ShowingOnce = true;
-                //}
+                if (ShowingOnce == false)
+                {
+                    StartCoroutine(ShowingTextSlowly());
+                    ShowingOnce = true;
+                }
             }
         }
         else
@@ -174,9 +176,9 @@ public class TalkingTextParser : MonoBehaviour {
             if (CharacterText.activeInHierarchy == true)
             {
                 CharacterText.SetActive(false);
+                ShowingOnce = true;
             }
         }
-        #endregion
     }
     #endregion
     void UpdatingDialogState()
@@ -184,6 +186,7 @@ public class TalkingTextParser : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Z) && StartTalking == true){
             if (Convert.ToBoolean(data[StartIndex][2]) != true)
             {
+                ShowingOnce = true;
                 StartIndex++;
                 //StartCoroutine(ShowingTextSlowly());
                 //if (TextShowingOnebyOne == false)

@@ -22,7 +22,8 @@ public class ItemManager : MonoBehaviour {
 	public static ItemManager instance = null;
 	// json 파일의 경로 설정.
 	// 경로를 가져올때 \ 대신에 역슬래쉬 / 를 사용한다.
-	private const string path = "C://Users/vnddn/Documents/Project_Witch_Hunter/Assets/Resource/ItemList.Json";
+	
+	private const string path = "C://Users/vnddn/Documents/Project_Witch_Hunter/Assets/Resources/ItemList.json";
 
 	// GetItem을 리스트로 선언한 뒤 동적할당
 	public List<GetItem> getItem = new List<GetItem>();

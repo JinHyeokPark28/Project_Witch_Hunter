@@ -108,12 +108,16 @@ public class MonsterAI_Moving : MonoBehaviour
         StartXPos = gameObject.transform.position.x;
         _Anim = GetComponent<Animator>();
         Bodyparts.Clear();
-        Bodyparts.Add(this.transform.Find("Head").gameObject);
-        Bodyparts.Add(this.transform.Find("Body").gameObject);
-        Bodyparts.Add(this.transform.Find("Right_Hand").gameObject);
-        Bodyparts.Add(this.transform.Find("Left_Hand").gameObject);
-        Bodyparts.Add(this.transform.Find("Left_Foot").gameObject);
-        Bodyparts.Add(this.transform.Find("Ringt_Foot").gameObject);
+        if (this.gameObject.name == "Marionnette")
+        {
+            Bodyparts.Add(this.transform.Find("Head").gameObject);
+            Bodyparts.Add(this.transform.Find("Body").gameObject);
+            Bodyparts.Add(this.transform.Find("Right_Hand").gameObject);
+            Bodyparts.Add(this.transform.Find("Left_Hand").gameObject);
+            Bodyparts.Add(this.transform.Find("Left_Foot").gameObject);
+            Bodyparts.Add(this.transform.Find("Ringt_Foot").gameObject);
+        }
+       
     }
 
     // Update is called once per frame

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+//비동기식 씬 로딩 
 public class SceneChanger : MonoBehaviour {
     public int NextSceneNumber;
     //플레이어가 다른 씬으로 넘어갈 때 시작 포인트잡아줘야 함
@@ -11,9 +14,59 @@ public class SceneChanger : MonoBehaviour {
     public bool CanGoback = true;   //보스 나오는 씬이면 false로 바꿔줌
     public bool reset = false;
     //로드하는 씬이 이 전단계인가 아님 다음 단계인가?
-	// Use this for0 initialization
-	void Start () {
-		
+    public bool IsCorroutineStart = false;
+    // Use this for0 initialization
+    private GameObject LoadingUI;
+    IEnumerator LoadingScene()
+    {
+        GameObject Background = LoadingUI.transform.Find("BlackBackground").gameObject;
+        GameObject LSlider = LoadingUI.transform.Find("LoadingSlider").gameObject;
+        LSlider.GetComponent<Slider>().value = 0;
+        yield return null;
+        AsyncOperation ao = SceneManager.LoadSceneAsync(NextSceneNumber);
+        float timer = 0f;
+        ao.allowSceneActivation = false;
+        
+        while (!ao.isDone)
+        {
+            if (Background.activeInHierarchy == false)
+            {
+                Background.SetActive(true);
+                //들어감
+            }
+            if (LSlider.activeInHierarchy == false)
+            {
+                LSlider.SetActive(true);
+                //들어감
+            }
+            yield return null;
+            timer = Time.deltaTime;
+            if (ao.progress >= 0.9f)
+            {
+                print("progress is over .9f");
+                LSlider.GetComponent<Slider>().value =1;
+                Background.SetActive(false);
+                LSlider.SetActive(false);
+                ao.allowSceneActivation = true;
+                //씬 이동뒤 슬라이더 값 다시 0으로 해야함!
+                IsCorroutineStart = false;
+                print("value:"+LSlider.GetComponent<Slider>().value);
+            }
+            else if(ao.progress<0.9f)
+            {
+                print("progress isnt over .9f");
+                LSlider.GetComponent<Slider>().value = ao.progress;
+                if (LSlider.GetComponent<Slider>().value >= ao.progress)
+                {
+                    timer = 0f;
+                }
+            }
+        }
+       // SceneManager.LoadScene(NextSceneNumber);
+
+    }
+    void Start () {
+        LoadingUI = GameObject.FindGameObjectWithTag("LoadingSceneUI");
 	}
 	
 	// Update is called once per frame
@@ -55,7 +108,12 @@ public class SceneChanger : MonoBehaviour {
                     //전환하려는 씬이 줄거리상 다음 단계의 씬이라면
                     collision.gameObject.GetComponent<PlayerController>().SceneStart = true;
                 }
-                SceneManager.LoadScene(NextSceneNumber);
+               
+                if (IsCorroutineStart == false)
+                {
+                    StartCoroutine(LoadingScene());
+                    IsCorroutineStart = true;
+                }
 
             }
         }

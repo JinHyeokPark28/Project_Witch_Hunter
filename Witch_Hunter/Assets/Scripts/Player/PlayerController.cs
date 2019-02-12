@@ -248,43 +248,43 @@ public class PlayerController : MonoBehaviour
     #region 플레이어 움직임
     void PlayerMove()
     {
-        if (transform.position.z != 0f)
+        if (GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking == false)
         {
-            transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-        }
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            // 스프라이트 애니메이션 넣기
-            _Anim.SetInteger("State", 2);
-            transform.Translate(Vector2.right * Speed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0, 180, 0);
-
-        }
-        else if (Input.GetKey(KeyCode.RightArrow))
-        {
-            _Anim.SetInteger("State", 2);
-            transform.Translate(Vector2.right * Speed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0, 0, 0);
-        }
-        //점프키
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            //대화창 안켜져있으면 점프
-            if (GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking == false)
+            if (Input.GetKey(KeyCode.LeftArrow))
             {
-                if (CanJump == true && Time.timeScale == 1)
-                {
-                    _Anim.SetInteger("State", 3);
-                    CanJump = false;
-                    RG.velocity = new Vector2(0, JumpSpeed);
-                    //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
-                }
-                else
-                {
-                }
+                // 스프라이트 애니메이션 넣기
+                _Anim.SetInteger("State", 2);
+                transform.Translate(Vector2.right * Speed * Time.deltaTime);
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+
             }
-            
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                _Anim.SetInteger("State", 2);
+                transform.Translate(Vector2.right * Speed * Time.deltaTime);
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
+            //점프키
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                //대화창 안켜져있으면 점프
+                if (GameObject.FindGameObjectWithTag("ConversationUI").GetComponent<TalkingTextParser>().StartTalking == false)
+                {
+                    if (CanJump == true && Time.timeScale == 1)
+                    {
+                        _Anim.SetInteger("State", 3);
+                        CanJump = false;
+                        RG.velocity = new Vector2(0, JumpSpeed);
+                        //GetComponent<Rigidbody2D>().velocity = new Vector2(0, JumpSpeed);
+                    }
+                    else
+                    {
+                    }
+                }
+
+            }
         }
+      
 
     }
     #endregion
@@ -515,6 +515,11 @@ public class PlayerController : MonoBehaviour
                 }
                
             }
+        }
+        //플레이어가 새로운 바운즈에 접근 할 때 카메라의 바운즈를 새로운 바운즈로 자동으로 변경해준다
+        if (collision.gameObject.tag == "Bounds")
+        {
+            Camera.main.GetComponent<PlayerFollower>().boundBox = collision.gameObject.GetComponent<BoxCollider2D>();
         }
         
     }

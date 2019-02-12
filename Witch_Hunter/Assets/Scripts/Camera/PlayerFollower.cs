@@ -14,30 +14,36 @@ public class PlayerFollower : MonoBehaviour {
     void Start () {
         Player = GameObject.FindGameObjectWithTag("Player");
         //씬 크기를 알려주는 바운드 박스의 콜라이더를 불러옴->씬 크기 알수있음
-        boundBox = GameObject.FindGameObjectWithTag("Bounds").GetComponent<BoxCollider2D>();
+       // boundBox = GameObject.FindGameObjectWithTag("Bounds").GetComponent<BoxCollider2D>();
         //현재 카메라 화면의 가로 길이 계산
         ScreenWidth = GetComponent<Camera>().orthographicSize / Screen.height * Screen.width;
     }
 
     // Update is called once per frame
     void LateUpdate() {
-        transform.position = new Vector3(Player.transform.position.x, Player.transform.position.y, transform.position.z);
-        if (transform.position.x+ ScreenWidth > boundBox.bounds.max.x)
+        //플레이어가 새로운 바운드에 접촉할 때바다 boundBox를 바꿔줌
+        if (boundBox != null)
         {
-            transform.position = new Vector3(boundBox.bounds.max.x -ScreenWidth, transform.position.y, transform.position.z);
+            transform.position = new Vector3(Player.transform.position.x, Player.transform.position.y, transform.position.z);
+            if (transform.position.x + ScreenWidth > boundBox.bounds.max.x)
+            {
+                transform.position = new Vector3(boundBox.bounds.max.x - ScreenWidth, transform.position.y, transform.position.z);
+            }
+            if (transform.position.x - ScreenWidth < boundBox.bounds.min.x)
+            {
+                transform.position = new Vector3(boundBox.bounds.min.x + ScreenWidth, transform.position.y, transform.position.z);
+            }
+            if (transform.position.y + GetComponent<Camera>().orthographicSize > boundBox.bounds.max.y)
+            {
+                transform.position = new Vector3(transform.position.x, boundBox.bounds.max.y - GetComponent<Camera>().orthographicSize, transform.position.z);
+            }
+            if (transform.position.y - GetComponent<Camera>().orthographicSize < boundBox.bounds.min.y)
+            {
+                transform.position = new Vector3(transform.position.x, boundBox.bounds.min.y + GetComponent<Camera>().orthographicSize, transform.position.z);
+            }
+
         }
-        if (transform.position.x - ScreenWidth < boundBox.bounds.min.x)
-        {
-            transform.position = new Vector3(boundBox.bounds.min.x + ScreenWidth, transform.position.y, transform.position.z);
-        }
-        if (transform.position.y + GetComponent<Camera>().orthographicSize > boundBox.bounds.max.y)
-        {
-            transform.position = new Vector3(transform.position.x, boundBox.bounds.max.y-GetComponent<Camera>().orthographicSize, transform.position.z);
-        }
-        if (transform.position.y - GetComponent<Camera>().orthographicSize < boundBox.bounds.min.y)
-        {
-            transform.position = new Vector3(transform.position.x, boundBox.bounds.min.y + GetComponent<Camera>().orthographicSize, transform.position.z);
-        }
+       
     }
 }
        

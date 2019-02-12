@@ -33,6 +33,7 @@ public class InventorySlots : MonoBehaviour {
 	public void GetAnItem()
 	{
 		Inventory.instance.GetanItem();
+		this.gameObject.SetActive(false);
 	}
 	public void ChangeSprite()
 	{

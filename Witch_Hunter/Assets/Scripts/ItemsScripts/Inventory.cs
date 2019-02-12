@@ -21,9 +21,9 @@ public class Inventory : MonoBehaviour
 
 	private Item item;                                      // 각 각 아이템이 가지고 있을 스크립트
 
-	private InventorySlots[] Slots;                         // 슬롯 배열처리
+	private List<InventorySlots> Slots = new List<InventorySlots>();                         // 슬롯 리스트 선언
 
-	private List<Item> l_Items = new List<Item>();          // 슬롯에다가 넣어줄 아이템 리스트 선언.
+	private List<Item> l_Items = new List<Item>();          // 슬롯아이템 리스트 선언.
 
 	private bool EquipmentTabActivated;                     // true 일때 장비 창 탭 활성화
 
@@ -64,10 +64,10 @@ public class Inventory : MonoBehaviour
 	{
 		selectedTab = SelectedTab.None;
 		instance = this;
-		Slots = Bags.GetComponentsInChildren<InventorySlots>();
 		_ItemManager = FindObjectOfType<ItemManager>();
 		_Player = FindObjectOfType<PlayerController>();
 		item = FindObjectOfType<Item>();
+		l_Items = new List<Item>();
 	}
 	private void Update()
 	{
@@ -145,13 +145,14 @@ public class Inventory : MonoBehaviour
 	// 인벤토리가 실행되면 자동적으로 빈 슬롯을 없애줄 함수
 	public void RemoveSlot()
 	{
-		for (int i = 0; i < Slots.Length; i++)
+		for (int i = 0; i < Slots.Count; i++)
 		{
 			Slots[i].RemoveSlot();
 			Slots[i].gameObject.SetActive(false);
 		}
 	}
 	// 각 버튼을 누르면 장비창에는 장비 관련된 아이템만, 조합창에는 조합관련된 아이템만 보이게 하기 위한 메소드
+	// 리스트 
 	public void ShowItems()
 	{
 		RemoveSlot();
@@ -159,31 +160,31 @@ public class Inventory : MonoBehaviour
 		switch (selectedTab)
 		{
 			case SelectedTab.Equipment:										// 장비창 버튼을 눌렀을 때
-				for (int i = 0; i < Slots.Length; i++)
+				for (int i = 0; i < Slots.Count; i++)
 				{
-					if (Slots[i].getItem != null)                           // 인벤토리 내의 슬롯에 정보가 담겨져 있다면 아이템의 타입값을 검사한 후 활성화 시켜준다.
+					if (Slots[i].getItem == null)                           // 인벤토리 내의 슬롯에 정보가 담겨져 있다면 아이템의 타입값을 검사한 후 활성화 시켜준다.
 					{
-						if(Slots[i].getItem.Type == "Sword" || Slots[i].getItem.Type == "Armor" || Slots[i].getItem.Type == "Ammo" || Slots[i].getItem.Type == "Use")
+						if (Slots[i].getItem.Type == "Sword" || Slots[i].getItem.Type == "Armor" || Slots[i].getItem.Type == "Ammo" || Slots[i].getItem.Type == "Use")
 						{
 							Slots[i].gameObject.SetActive(true);
 						}
-						else if(Slots[i].getItem.Type == "Powder")
+						else if (Slots[i].getItem.Type == "Powder")
 						{
 							Slots[i].gameObject.SetActive(false);
 						}
 					}
-					//if(Equipment.instance.Sword.text != null)
-					//{
-					//	Slots[i].gameObject.SetActive(false);
-					//}
-					//else if (Equipment.instance.Armor.text != null)
-					//{
-					//	Slots[i].gameObject.SetActive(false);
-					//}
+					if (Equipment.instance.Sword.text != null)
+					{
+						Slots[i].gameObject.SetActive(false);
+					}
+					else if (Equipment.instance.Armor.text != null)
+					{
+						Slots[i].gameObject.SetActive(false);
+					}
 				}
 				break;
 			case SelectedTab.Combination:									// 조합창 버튼을 눌렀을 때
-				for (int i = 0; i < Slots.Length; i++)
+				for (int i = 0; i < Slots.Count; i++)
 				{
 					if (Slots[i].getItem != null)
 					{
@@ -238,7 +239,7 @@ public class Inventory : MonoBehaviour
 	}
 	private void ItemNumbering()
 	{
-		for (int i = 0; i < Slots.Length; i++)
+		for (int i = 0; i < Slots.Count; i++)
 		{
 			if (Slots[i].getItem.Count > 1) // 1개 이상있을때 검사해서 만약에 무기, 방어구, 총알이 아니라면 1개만 있게 만들고 물약과 파우더라면 개수를 늘려주기.
 			{
@@ -255,54 +256,61 @@ public class Inventory : MonoBehaviour
 		}
 	}
 	// 아이템을 확인해서 아이템을 인벤토리에 넣어준다.s
-	public void PutinInventory(int ItemID, int ItemCount = 1)
+	public void PunInInventory(int ItemID, int ItemCount = 1)
 	{
-		// ItemManager가 가지고 있는 리스트의 길이를 검사합니다.
+		// itemmanager가 가지고 있는 리스트의 길이를 검사합니다.
 		for (int i = 0; i < _ItemManager.getItem.Count; i++)
 		{
-			// Item이 가지고 있는 ItemManager의 아이디와 아이템 매니저의 비교합니다.
+			// item이 가지고 있는 itemmanager의 아이디와 아이템 매니저의 비교합니다.
 			if (ItemID == _ItemManager.getItem[i].ItemID)
 			{
 #pragma warning disable CS0162 // 접근할 수 없는 코드가 있습니다.
-				for (int k = 0; k < Slots.Length; k++)      // 슬롯의 크기를 검사한다.
+				for (int k = 0; k < l_Items.Count; k++)      // 슬롯의 크기를 검사한다.
 #pragma warning restore CS0162 // 접근할 수 없는 코드가 있습니다.
 				{
-					if (Slots[k].getItem == null)
+					Debug.Log(item);
+					if(l_Items[k].getItem.ItemID == ItemID)
 					{
-						if (_ItemManager.getItem[i].ItemID == ItemID)           // 아이템 매니저안의 아이템아이디와 획득하려는 아이템 아이디가 같다면 슬롯에 넣어줍니다.
+						if (l_Items[k].ItemType == "Use" && l_Items[k].ItemType == "Powder")
 						{
-							GetItem _temp = _ItemManager.getItem[i];
-							// 슬롯안에 아이템을 추가해줍니다. 
-							Slots[k].getItem = _temp;
-							Slots[k].AddItem(Slots[k].getItem);
-							Debug.Log("Slot.getitem : " + Slots[k].getItem.ItemID);
-							return;
+							l_Items[k].ItemCount += ItemCount;
 						}
 						else
-							break;                             // 슬롯이 다 찼다면 다시 되돌아갑니다.
+						{
+							Slots[k].AddItem(l_Items[k].getItem);
+						}
+					//	if (_ItemManager.getItem[i].ItemID == itemid)           // 아이템 매니저안의 아이템아이디와 획득하려는 아이템 아이디가 같다면 슬롯에 넣어줍니다.
+					//	{
+					//		//GetItem _temp = _ItemManager.getItem[i];
+					//		//// 슬롯안에 아이템을 추가해줍니다. 
+					//		Slots[k] = l_Items
+					//		Slots[k].AddItem(Slots[k].getItem);
+					//		Debug.Log("slot.getitem : " + Slots[k].getItem.ItemID);
+					//		return;
+					//	}
+					//	else
+					//		break;                             // 슬롯이 다 찼다면 다시 되돌아갑니다.
 					}
+					Slots[k].AddItem(l_Items[k].getItem);
 				}
 			}
 		}
 	}
 	public void GetanItem()
 	{
-		for (int i = 0; i < Slots.Length; i++)
+		for (int i = 0; i < Slots.Count; i++)
 		{
 			if (Slots[i].getItem.Type == "Sword" && Slots[i].getItem != null)
 			{
 				Equipment.instance.Sword.text = Slots[i].getItem.Name.ToString();
-				Equipment.instance.SwordImage.sprite = TreasureBox.instance.Item.GetComponent<SpriteRenderer>().sprite;
+				Equipment.instance.SwordImage.sprite = item.GetComponent<SpriteRenderer>().sprite;
 				Equipment.instance.Attack.text = "Attack  : " + Slots[i].getItem.Stat.ToString();
-				Slots[i].getItem = null;
-
 			}
 			else if (Slots[i].getItem.Type == "Armor" && Slots[i].getItem != null)
 			{
 				Equipment.instance.Armor.text = Slots[i].getItem.Name.ToString();
 				Equipment.instance.ArmorImage.sprite = item.gameObject.GetComponent<SpriteRenderer>().sprite;
 				Equipment.instance.Defend.text = "Armor  : " + Slots[i].getItem.Stat.ToString();
-				Slots[i].getItem = null;
 			}
 			RemoveSlot();
 		}
