@@ -516,11 +516,7 @@ public class PlayerController : MonoBehaviour
                
             }
         }
-        //플레이어가 새로운 바운즈에 접근 할 때 카메라의 바운즈를 새로운 바운즈로 자동으로 변경해준다
-        if (collision.gameObject.tag == "Bounds")
-        {
-            Camera.main.GetComponent<PlayerFollower>().boundBox = collision.gameObject.GetComponent<BoxCollider2D>();
-        }
+        
         
     }
     private void OnTriggerStay2D(Collider2D collision)
@@ -612,6 +608,12 @@ public class PlayerController : MonoBehaviour
                     Save();
                 }
             }
+        }
+        //플레이어가 새로운 바운즈에 접근 할 때 카메라의 바운즈를 새로운 바운즈로 자동으로 변경해준다
+        if (collision.gameObject.tag == "Bounds")
+        {
+            if(collision.gameObject.GetComponent<BoxCollider2D>()!= Camera.main.GetComponent<PlayerFollower>().boundBox)
+            Camera.main.GetComponent<PlayerFollower>().boundBox = collision.gameObject.GetComponent<BoxCollider2D>();
         }
     }
     private void OnTriggerExit2D(Collider2D collision)
